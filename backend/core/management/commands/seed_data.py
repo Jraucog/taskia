@@ -90,7 +90,53 @@ class Command(BaseCommand):
             # h2 cumplido 4 de 6 días
             if i in [1, 2, 4, 6]:
                 HabitLog.objects.get_or_create(habit=h2, date=past_date, defaults={'value': 4.0, 'completed': True})
-            # h3 cumplido todos los días
-            HabitLog.objects.get_or_create(habit=h3, date=past_date, defaults={'value': 2.5, 'completed': True})
+        # 4. Crear Perfiles de Entrenadores Motivadores
+        from core.models import CoachProfile, UserCoachPreference
 
-        self.stdout.write(self.style.SUCCESS("[OK] Datos semilla cargados con exito para Taskia."))
+        c1, _ = CoachProfile.objects.get_or_create(
+            slug='david-goggins',
+            defaults={
+                'name': 'Sargento David (Cero Excusas)',
+                'tone': 'drill_sergeant',
+                'avatar_emoji': '🔥',
+                'bio': 'Mentalidad de acero militar. No hay lugar para la pereza ni para postergar.',
+                'morning_quote': '¡Levántate! El dolor de la disciplina pesa gramos, el remordimiento pesa toneladas.',
+                'midday_reminder': '¿Ya estás poniendo excusas? Agarra el cuaderno o cumple la serie AHORA.',
+                'evening_warning': '¡No te atrevas a tocar la almohada sin haber cumplido tu meta diaria!'
+            }
+        )
+
+        c2, _ = CoachProfile.objects.get_or_create(
+            slug='marco-aurelio',
+            defaults={
+                'name': 'Marco Aurelio (Estoico)',
+                'tone': 'stoic_mentor',
+                'avatar_emoji': '🏛️',
+                'bio': 'Sabiduría clásica. El obstáculo es el camino, la constancia es tu único deber.',
+                'morning_quote': 'Al amanecer, dite a ti mismo: Hoy debo hacer la obra de un ser humano.',
+                'midday_reminder': 'Concéntrate como un romano en cumplir la tarea presente con gravedad y amor.',
+                'evening_warning': 'Reflexiona sobre tu jornada: ¿Hiciste lo correcto con tus metas hoy?'
+            }
+        )
+
+        c3, _ = CoachProfile.objects.get_or_create(
+            slug='kobe-mamba',
+            defaults={
+                'name': 'Mamba Mentality (Alto Rendimiento)',
+                'tone': 'high_performance',
+                'avatar_emoji': '🐍',
+                'bio': 'Obsesión por el detalle y el trabajo implacable para alcanzar los 100M.',
+                'morning_quote': 'Los grandes no negocian consigo mismos. Despierta y ejecuta.',
+                'midday_reminder': 'Cada repetición y cada meta escrita te acerca al 1% élite.',
+                'evening_warning': 'Descansa solo cuando el trabajo esté terminado, no cuando estés cansado.'
+            }
+        )
+
+        # Asignar sargento por defecto
+        pref, _ = UserCoachPreference.objects.get_or_create(user=user)
+        pref.coach = c1
+        pref.notifications_enabled = True
+        pref.intensity_level = 3
+        pref.save()
+
+        self.stdout.write(self.style.SUCCESS("[OK] Datos semilla y Perfiles de Entrenador cargados con exito."))

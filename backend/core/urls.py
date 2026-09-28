@@ -2,13 +2,14 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
-    ProgramViewSet, HabitViewSet, sla_metrics_summary,
+    ProgramViewSet, HabitViewSet, CoachProfileViewSet, sla_metrics_summary,
     register_view, login_view, current_user_view
 )
 
 router = DefaultRouter()
 router.register(r'programs', ProgramViewSet, basename='program')
 router.register(r'habits', HabitViewSet, basename='habit')
+router.register(r'coaches', CoachProfileViewSet, basename='coach')
 
 urlpatterns = [
     # Auth endpoints

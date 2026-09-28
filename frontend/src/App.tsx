@@ -5,8 +5,10 @@ import {
   Layers, Play, RefreshCw,
   User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
   Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
-  ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle
+  ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle,
+  Bell, BellOff, ShieldAlert
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 const API_BASE = `http://${window.location.hostname}:8000/api`;
 
@@ -47,6 +49,19 @@ interface ProgramItem {
   target_value: number;
   unit: string;
   description: string;
+}
+
+interface CoachProfile {
+  id: number;
+  name: string;
+  slug: string;
+  tone: string;
+  tone_display: string;
+  avatar_emoji: string;
+  bio: string;
+  morning_quote: string;
+  midday_reminder: string;
+  evening_warning: string;
 }
 
 interface Program {
@@ -106,6 +121,23 @@ export default function App() {
   // Estado de colapsar / expandir bloques o categorías
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
 
+  // Estado para Coaches y Motivación
+  const [coaches, setCoaches] = useState<CoachProfile[]>([]);
+  const [showCoachModal, setShowCoachModal] = useState(false);
+  const [selectedCoachId, setSelectedCoachId] = useState<number | null>(null);
+
+  // Estado de Notificaciones Web/PWA
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
+  const [showNotificationBanner, setShowNotificationBanner] = useState(
+    typeof Notification !== 'undefined' && Notification.permission !== 'granted'
+  );
+
+  // Estado de Dynamic Island
+  const [islandExpanded, setIslandExpanded] = useState(false);
+  const [islandMessage, setIslandMessage] = useState<string | null>(null);
+
   // Estado para modal de 10 Metas Oficiales de Referencia y Pregunta de Control
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const [confirmingHabit, setConfirmingHabit] = useState<Habit | null>(null);
@@ -159,16 +191,26 @@ export default function App() {
     try {
       setLoading(true);
       const headers = getHeaders();
-      const [habitsRes, programsRes, metricsRes] = await Promise.all([
+      const [habitsRes, programsRes, metricsRes, coachesRes] = await Promise.all([
         axios.get(`${API_BASE}/habits/today/`, headers),
         axios.get(`${API_BASE}/programs/`, headers),
-        axios.get(`${API_BASE}/metrics/summary/`, headers)
+        axios.get(`${API_BASE}/metrics/summary/`, headers),
+        axios.get(`${API_BASE}/coaches/`, headers)
       ]);
       setHabits(habitsRes.data);
       setPrograms(programsRes.data);
       setMetrics(metricsRes.data);
+      setCoaches(coachesRes.data);
+
       if (metricsRes.data?.current_user) {
         setCurrentUser(metricsRes.data.current_user);
+        if (metricsRes.data.current_user.coach_preference?.coach) {
+          setSelectedCoachId(metricsRes.data.current_user.coach_preference.coach);
+        } else if (coachesRes.data.length > 0) {
+          setSelectedCoachId(coachesRes.data[0].id);
+        }
+      } else if (coachesRes.data.length > 0) {
+        setSelectedCoachId(coachesRes.data[0].id);
       }
     } catch (err) {
       console.error("Error al cargar datos:", err);
@@ -222,6 +264,64 @@ export default function App() {
     fetchData();
   };
 
+  const requestNotificationPermission = async () => {
+    if (typeof Notification === 'undefined') {
+      alert('Tu navegador no soporta Notificaciones Web nativas.');
+      return;
+    }
+    try {
+      const perm = await Notification.requestPermission();
+      setNotificationPermission(perm);
+      if (perm === 'granted') {
+        setShowNotificationBanner(false);
+        // Enviar notificación de bienvenida del entrenador
+        const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
+        const coachName = activeCoach ? activeCoach.name : 'Entrenador Taskia';
+        const msg = activeCoach ? activeCoach.morning_quote : '¡Notificaciones activadas! Ahora sí estás obligado a cumplir tu meta.';
+        
+        new Notification(`🔥 ${coachName} activado`, {
+          body: msg,
+          icon: '/pwa-icon.svg'
+        });
+
+        // Actualizar preferencia en el backend
+        await axios.post(`${API_BASE}/auth/me/`, {
+          notifications_enabled: true,
+          coach_id: selectedCoachId
+        }, getHeaders());
+      }
+    } catch (err) {
+      console.error("Error pidiendo permiso de notificación:", err);
+    }
+  };
+
+  const handleSelectCoach = async (coachId: number) => {
+    setSelectedCoachId(coachId);
+    try {
+      await axios.post(`${API_BASE}/auth/me/`, {
+        coach_id: coachId
+      }, getHeaders());
+      
+      const coach = coaches.find(c => c.id === coachId);
+      if (coach) {
+        setIslandMessage(`${coach.avatar_emoji} ${coach.name}: "${coach.midday_reminder}"`);
+        setIslandExpanded(true);
+        setTimeout(() => setIslandExpanded(false), 5000);
+      }
+      fetchData();
+    } catch (err) {
+      console.error("Error actualizando coach:", err);
+    }
+  };
+
+  const triggerCelebration = () => {
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
+
   const toggleHabit = async (habit: Habit) => {
     // Si es del reto Brian Tracy y no está completado aún, mostrar la pregunta de control primero
     if (getPlanNameFromHabit(habit).toLowerCase().includes('brian tracy') && !habit.today_log?.completed) {
@@ -230,7 +330,13 @@ export default function App() {
     }
 
     try {
-      await axios.post(`${API_BASE}/habits/${habit.id}/toggle_today/`, {}, getHeaders());
+      const res = await axios.post(`${API_BASE}/habits/${habit.id}/toggle_today/`, {}, getHeaders());
+      if (res.data.completed) {
+        triggerCelebration();
+        setIslandMessage(`¡Hábito cumplido! ${cleanTitle(habit.title)}`);
+        setIslandExpanded(true);
+        setTimeout(() => setIslandExpanded(false), 3500);
+      }
       fetchData();
     } catch (err) {
       console.error("Error al marcar hábito:", err);
@@ -241,6 +347,10 @@ export default function App() {
     if (!confirmingHabit) return;
     try {
       await axios.post(`${API_BASE}/habits/${confirmingHabit.id}/toggle_today/`, {}, getHeaders());
+      triggerCelebration();
+      setIslandMessage(`🔥 ¡Día de Brian Tracy desbloqueado! Racha sostenida.`);
+      setIslandExpanded(true);
+      setTimeout(() => setIslandExpanded(false), 4000);
       setConfirmingHabit(null);
       fetchData();
     } catch (err) {
@@ -341,12 +451,28 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
-            {restTimer !== null && (
-              <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] sm:text-xs px-2 py-0.5 rounded-lg font-mono font-bold animate-pulse">
-                <Timer className="w-3 h-3" />
-                <span>{restTimer}s</span>
-              </div>
-            )}
+            {/* Botón de Perfil de Entrenador Motivador */}
+            <button 
+              onClick={() => setShowCoachModal(true)}
+              className="flex items-center gap-1 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-800/80 text-indigo-300 text-xs px-2.5 py-1 rounded-xl transition"
+              title="Cambiar Entrenador / Tono del Motivador"
+            >
+              <span>{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
+              <span className="hidden sm:inline font-bold">Coach</span>
+            </button>
+
+            {/* Indicador de Notificaciones */}
+            <button 
+              onClick={requestNotificationPermission}
+              className={`p-1.5 rounded-xl border transition ${
+                notificationPermission === 'granted' 
+                  ? 'bg-emerald-950/50 border-emerald-800/50 text-emerald-400' 
+                  : 'bg-amber-950/50 border-amber-800/60 text-amber-400 animate-pulse'
+              }`}
+              title={notificationPermission === 'granted' ? 'Notificaciones Push activadas' : 'Activar Notificaciones de disciplina'}
+            >
+              {notificationPermission === 'granted' ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
+            </button>
 
             <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-xl text-xs">
               <User className="w-3.5 h-3.5 text-indigo-400" />
@@ -369,10 +495,99 @@ export default function App() {
             </button>
           </div>
         </div>
+
+        {/* ======================================================== */}
+        {/* DYNAMIC ISLAND INTERACTIVA (NOTIFICACIONES & ESTADO EN TIEMPO REAL) */}
+        {/* ======================================================== */}
+        <div className="max-w-xs mx-auto mt-2 flex justify-center">
+          <div 
+            onClick={() => setIslandExpanded(!islandExpanded)}
+            className={`bg-black/90 border border-slate-700/80 rounded-full transition-all duration-300 ease-out cursor-pointer shadow-xl flex items-center justify-between px-3.5 py-1.5 ${
+              islandExpanded 
+                ? 'w-full max-w-sm rounded-2xl py-3 px-4 bg-slate-900 border-indigo-500/60 shadow-indigo-500/20' 
+                : 'w-auto gap-2.5 hover:scale-105'
+            }`}
+          >
+            {/* Vista Compacta de Dynamic Island */}
+            {!islandExpanded ? (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-[11px] font-bold text-white flex items-center gap-1">
+                    {coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}
+                    <span className="text-amber-400 font-mono font-bold">
+                      {habits.filter(h => h.today_log?.completed).length}/{habits.length}
+                    </span>
+                  </span>
+                </div>
+
+                {restTimer !== null && (
+                  <div className="flex items-center gap-1 text-[11px] font-mono font-black text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                    <Timer className="w-3 h-3" />
+                    <span>{restTimer}s</span>
+                  </div>
+                )}
+
+                <span className="text-[10px] text-slate-400 font-medium">Island</span>
+              </>
+            ) : (
+              /* Vista Expandida de Dynamic Island */
+              <div className="w-full flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
+                    <span className="text-xs font-bold text-white">
+                      {coaches.find(c => c.id === selectedCoachId)?.name || 'Entrenador Taskia'}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-indigo-400 font-bold">En vivo</span>
+                </div>
+
+                <p className="text-xs text-slate-300 italic leading-relaxed">
+                  "{islandMessage || coaches.find(c => c.id === selectedCoachId)?.morning_quote || '¡Despierta! Hoy es el día para mover la aguja.'}"
+                </p>
+
+                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800">
+                  <span>Cumplimiento hoy:</span>
+                  <span className="font-bold text-amber-400">
+                    {habits.filter(h => h.today_log?.completed).length} de {habits.length} ({metrics?.today_compliance_percent || 0}%)
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-2xl mx-auto w-full px-3 sm:px-4 py-4 flex-1 flex flex-col gap-4">
+      <main className="max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 flex-1 flex flex-col gap-4">
+        
+        {/* Banner de Obligación / Activación de Notificaciones si están apagadas */}
+        {showNotificationBanner && (
+          <div className="bg-gradient-to-r from-amber-950/80 to-red-950/80 border border-amber-600/50 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-lg shadow-amber-950/30 animate-pulse">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-amber-500/20 text-amber-400 rounded-xl">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white">¡Activa las notificaciones de disciplina!</h4>
+                <p className="text-[11px] text-amber-200/80">
+                  La app te recordará tus hábitos y la regla de reinicio de Brian Tracy.
+                </p>
+              </div>
+            </div>
+
+            <button 
+              onClick={requestNotificationPermission}
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs py-2 px-3 rounded-xl shrink-0 shadow-md active:scale-95 transition"
+            >
+              Activar Ahora
+            </button>
+          </div>
+        )}
         
         {/* ======================================================== */}
         {/* PESTAÑA 1: MIS PLANES Y TAREAS (SISTEMA DE DRILL-DOWN / ENTRAR Y SALIR) */}
@@ -1043,6 +1258,71 @@ export default function App() {
                 <Check className="w-4 h-4" /> Sí, cumplido
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Selección y Configuración de Perfil de Entrenador */}
+      {showCoachModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+                  <Flame className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Tono del Motivador</h3>
+                  <p className="text-[11px] text-slate-400">Elige quién te exigirá cumplir tus hábitos</p>
+                </div>
+              </div>
+              <button onClick={() => setShowCoachModal(false)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
+            </div>
+
+            <div className="overflow-y-auto space-y-3 my-3 pr-1 flex-1">
+              {coaches.map(coach => {
+                const isSelected = coach.id === selectedCoachId;
+                return (
+                  <div 
+                    key={coach.id}
+                    onClick={() => handleSelectCoach(coach.id)}
+                    className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer ${
+                      isSelected 
+                        ? 'bg-indigo-950/60 border-indigo-500 shadow-md shadow-indigo-500/10' 
+                        : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{coach.avatar_emoji}</span>
+                        <div>
+                          <h4 className="text-xs font-bold text-white">{coach.name}</h4>
+                          <span className="text-[10px] text-indigo-400 font-medium">{coach.tone_display}</span>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <span className="text-[10px] bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Activo
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">{coach.bio}</p>
+
+                    <div className="mt-2.5 pt-2 border-t border-slate-800/80 text-[11px] text-amber-300/90 italic">
+                      "{coach.morning_quote}"
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button 
+              onClick={() => setShowCoachModal(false)}
+              className="mt-2 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition"
+            >
+              Confirmar Entrenador
+            </button>
           </div>
         </div>
       )}

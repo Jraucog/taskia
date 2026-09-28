@@ -1,12 +1,29 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Program, ProgramItem, ProgramEnrollment, Habit, HabitLog
+from .models import Program, ProgramItem, ProgramEnrollment, Habit, HabitLog, CoachProfile, UserCoachPreference
 import datetime
 
+class CoachProfileSerializer(serializers.ModelSerializer):
+    tone_display = serializers.CharField(source='get_tone_display', read_only=True)
+
+    class Meta:
+        model = CoachProfile
+        fields = ['id', 'name', 'slug', 'tone', 'tone_display', 'avatar_emoji', 'bio', 'morning_quote', 'midday_reminder', 'evening_warning']
+
+class UserCoachPreferenceSerializer(serializers.ModelSerializer):
+    coach_details = CoachProfileSerializer(source='coach', read_only=True)
+
+    class Meta:
+        model = UserCoachPreference
+        fields = ['id', 'user', 'coach', 'coach_details', 'notifications_enabled', 'intensity_level']
+        read_only_fields = ['user']
+
 class UserSerializer(serializers.ModelSerializer):
+    coach_preference = UserCoachPreferenceSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'coach_preference']
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=6)

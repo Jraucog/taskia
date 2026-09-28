@@ -6,11 +6,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
-from .models import Program, ProgramItem, ProgramEnrollment, Habit, HabitLog
+from .models import Program, ProgramItem, ProgramEnrollment, Habit, HabitLog, CoachProfile, UserCoachPreference
 from .serializers import (
     UserSerializer, RegisterSerializer,
     ProgramSerializer, ProgramInjectSerializer, HabitSerializer,
-    HabitLogSerializer, ProgramEnrollmentSerializer
+    HabitLogSerializer, ProgramEnrollmentSerializer,
+    CoachProfileSerializer, UserCoachPreferenceSerializer
 )
 import datetime
 
@@ -54,11 +55,29 @@ def login_view(request):
         })
     return Response({'error': 'Credenciales invalidas'}, status=status.HTTP_401_UNAUTHORIZED)
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def current_user_view(request):
     user = get_request_user(request)
+    pref, _ = UserCoachPreference.objects.get_or_create(user=user)
+    
+    if request.method == 'POST':
+        coach_id = request.data.get('coach_id')
+        if coach_id is not None:
+            coach = CoachProfile.objects.filter(id=coach_id).first()
+            pref.coach = coach
+        if 'notifications_enabled' in request.data:
+            pref.notifications_enabled = bool(request.data['notifications_enabled'])
+        if 'intensity_level' in request.data:
+            pref.intensity_level = int(request.data['intensity_level'])
+        pref.save()
+
     return Response(UserSerializer(user).data)
+
+class CoachProfileViewSet(viewsets.ModelViewSet):
+    queryset = CoachProfile.objects.all().order_by('id')
+    serializer_class = CoachProfileSerializer
+    permission_classes = [AllowAny]
 
 class ProgramViewSet(viewsets.ModelViewSet):
     queryset = Program.objects.all().order_by('-created_at')

@@ -87,3 +87,32 @@ class HabitLog(models.Model):
     @property
     def is_in_sla(self):
         return self.completed
+
+class CoachProfile(models.Model):
+    TONE_CHOICES = [
+        ('drill_sergeant', 'Sargento Estricto (Sin Excusas / Militar)'),
+        ('stoic_mentor', 'Mentor Estoico (Filosófico / Firme y Sabio)'),
+        ('high_performance', 'Entrenador Élite (Enfoque Resultados / Atleta)'),
+        ('empathetic_coach', 'Coach Comprensivo (Positivo / Hábito Sostenible)'),
+    ]
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    tone = models.CharField(max_length=50, choices=TONE_CHOICES, default='drill_sergeant')
+    avatar_emoji = models.CharField(max_length=10, default='🔥')
+    bio = models.TextField(blank=True)
+    morning_quote = models.CharField(max_length=255, default='¡Despierta! Hoy es el día para mover la aguja.')
+    midday_reminder = models.CharField(max_length=255, default='¿Ya avanzaste en tu acción prioritaria?')
+    evening_warning = models.CharField(max_length=255, default='El día casi termina. No te vayas a dormir debiendo tu hábito.')
+
+    def __str__(self):
+        return f"{self.avatar_emoji} {self.name} ({self.get_tone_display()})"
+
+class UserCoachPreference(models.Model):
+    user = models.OneToOneField(User, related_name='coach_preference', on_delete=models.CASCADE)
+    coach = models.ForeignKey(CoachProfile, related_name='users', on_delete=models.SET_NULL, null=True, blank=True)
+    notifications_enabled = models.BooleanField(default=False)
+    push_subscription = models.JSONField(default=dict, blank=True)
+    intensity_level = models.IntegerField(default=3, help_text="1: Suave, 2: Medio, 3: Implacable")
+
+    def __str__(self):
+        return f"Preferencia de {self.user.username}: {self.coach.name if self.coach else 'Por Defecto'}"
