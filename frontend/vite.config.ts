@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'pwa-icon.svg', 'icons.svg'],
+      includeAssets: ['favicon.svg', 'pwa-icon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Taskia — SLA & Habits',
         short_name: 'Taskia',
@@ -23,19 +23,32 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
+          {
             src: '/pwa-icon.svg',
             sizes: '192x192 512x512',
             type: 'image/svg+xml',
             purpose: 'any'
-          },
-          {
-            src: '/pwa-icon.svg',
-            sizes: '512x512',
-            type: 'image/svg+xml',
-            purpose: 'maskable'
           }
         ]
       },
+
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
         runtimeCaching: [

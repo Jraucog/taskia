@@ -577,29 +577,55 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans w-full max-w-full overflow-x-hidden safe-top safe-bottom pb-28 md:pb-12">
       {/* Top Header Responsivo - Minimalista y Sofisticado */}
-      <header className="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-4 py-2.5 w-full">
+      {/* Top Header Limpio y Minimalista (Sin saturación visual) */}
+      <header className="border-b border-slate-800/80 bg-slate-950/95 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-4 py-2.5 w-full">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-slate-800 border border-slate-700 p-1.5 rounded-xl shadow-sm">
+            <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-xl">
               <Flame className="w-4 h-4 text-amber-500" />
             </div>
             <div>
-              <span className="text-base font-black tracking-tight text-white">
+              <span className="text-sm font-black tracking-tight text-white">
                 TASKIA
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Botón de Perfil de Entrenador Motivador */}
+          {/* Dynamic Island Compacta en Barra Superior */}
+          <div 
+            onClick={() => setIslandExpanded(!islandExpanded)}
+            className="flex items-center gap-2 bg-slate-900/90 border border-slate-800/90 hover:border-slate-700 px-3 py-1 rounded-full cursor-pointer transition"
+            title="Toca para ver mensaje del Coach"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-[11px] font-mono text-slate-300 font-bold">
+              {habits.filter(h => h.today_log?.completed).length}/{habits.length}
+            </span>
+            {restTimer !== null && (
+              <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-400 bg-amber-950/50 px-1.5 py-0.5 rounded-full border border-amber-900/60">
+                <Timer className="w-2.5 h-2.5" />
+                <span>{restTimer}s</span>
+              </span>
+            )}
+            <span className="text-[11px]">{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {/* Botón de Perfil de Usuario y Coach */}
             <button 
               onClick={() => setShowCoachModal(true)}
-              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-xl transition"
-              title="Cambiar Entrenador / Tono del Motivador"
+              className="flex items-center gap-1.5 p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl transition"
+              title="Perfil & Entrenador"
             >
-              <span>{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
-              <span className="hidden sm:inline font-medium text-slate-300">Coach</span>
+              <User className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-[11px] font-medium text-slate-300 hidden sm:inline">
+                {currentUser?.username ? `@${currentUser.username}` : 'demo'}
+              </span>
             </button>
+
 
             {/* Indicador de Notificaciones */}
             <button 
@@ -607,28 +633,22 @@ export default function App() {
               className={`p-1.5 rounded-xl border transition ${
                 notificationPermission === 'granted' 
                   ? 'bg-slate-900 border-emerald-800/60 text-emerald-400' 
-                  : 'bg-slate-900 border-amber-800/60 text-amber-400 hover:bg-slate-800'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
               }`}
               title={notificationPermission === 'granted' ? 'Notificaciones activas' : 'Activar notificaciones'}
             >
               {notificationPermission === 'granted' ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
             </button>
 
-            <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-xl text-xs">
-              <User className="w-3.5 h-3.5 text-slate-400" />
-              <span className="text-slate-300 font-medium max-w-[80px] sm:max-w-none truncate">
-                {currentUser?.username ? `@${currentUser.username}` : 'demo'}
-              </span>
-              {authToken ? (
-                <button onClick={handleLogout} className="ml-1 text-slate-500 hover:text-red-400">
-                  <LogOut className="w-3 h-3" />
-                </button>
-              ) : (
-                <button onClick={() => { setShowAuthModal(true); setIsRegister(false); }} className="text-slate-300 hover:text-white font-semibold text-[11px]">
-                  Entrar
-                </button>
-              )}
-            </div>
+            {authToken ? (
+              <button onClick={handleLogout} className="p-1.5 text-slate-500 hover:text-red-400">
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button onClick={() => { setShowAuthModal(true); setIsRegister(false); }} className="text-slate-300 hover:text-white font-semibold text-[11px] px-2 py-1 bg-slate-900 border border-slate-800 rounded-xl">
+                Entrar
+              </button>
+            )}
 
             <button onClick={fetchData} className="p-1.5 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -636,107 +656,59 @@ export default function App() {
           </div>
         </div>
 
-        {/* ======================================================== */}
-        {/* DYNAMIC ISLAND INTERACTIVA (NOTIFICACIONES & ESTADO EN TIEMPO REAL) */}
-        {/* ======================================================== */}
-        <div className="max-w-xs mx-auto mt-2 flex justify-center">
-          <div 
-            onClick={() => setIslandExpanded(!islandExpanded)}
-            className={`bg-slate-900/90 border border-slate-800 rounded-full transition-all duration-300 ease-out cursor-pointer shadow-lg flex items-center justify-between px-3.5 py-1.5 ${
-              islandExpanded 
-                ? 'w-full max-w-sm rounded-2xl py-3 px-4 bg-slate-900 border-slate-700' 
-                : 'w-auto gap-2.5 hover:border-slate-700'
-            }`}
-          >
-            {/* Vista Compacta de Dynamic Island */}
-            {!islandExpanded ? (
-              <>
-                <div className="flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                  <span className="text-[11px] font-medium text-slate-200 flex items-center gap-1">
-                    {coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}
-                    <span className="text-slate-100 font-mono font-bold">
-                      {habits.filter(h => h.today_log?.completed).length}/{habits.length}
-                    </span>
-                  </span>
-                </div>
-
-                {restTimer !== null && (
-                  <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-900/40">
-                    <Timer className="w-3 h-3" />
-                    <span>{restTimer}s</span>
-                  </div>
-                )}
-
-                <span className="text-[10px] text-slate-500 font-mono">Island</span>
-              </>
-            ) : (
-              /* Vista Expandida de Dynamic Island */
-              <div className="w-full flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
-                    <span className="text-xs font-bold text-white">
-                      {coaches.find(c => c.id === selectedCoachId)?.name || 'Entrenador Taskia'}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono text-slate-400">En vivo</span>
-                </div>
-
-                <p className="text-xs text-slate-300 italic leading-relaxed">
-                  "{islandMessage || coaches.find(c => c.id === selectedCoachId)?.morning_quote || '¡Despierta! Hoy es el día para mover la aguja.'}"
-                </p>
-
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800">
-                  <span>Cumplimiento hoy:</span>
-                  <span className="font-bold text-slate-200">
-                    {habits.filter(h => h.today_log?.completed).length} de {habits.length} ({metrics?.today_compliance_percent || 0}%)
-                  </span>
-                </div>
+        {/* Vista Desplegada de la Dynamic Island (Si el usuario la toca) */}
+        {islandExpanded && (
+          <div className="max-w-md mx-auto mt-2 bg-slate-900 border border-slate-800 p-3 rounded-2xl shadow-xl transition-all">
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-base">{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
+                <span className="text-xs font-bold text-white">
+                  {coaches.find(c => c.id === selectedCoachId)?.name || 'Entrenador Taskia'}
+                </span>
               </div>
-            )}
+              <button onClick={() => setIslandExpanded(false)} className="text-slate-500 hover:text-white text-xs">✕</button>
+            </div>
+            <p className="text-xs text-slate-300 italic leading-relaxed">
+              "{islandMessage || coaches.find(c => c.id === selectedCoachId)?.morning_quote || '¡Despierta! Hoy es el día para mover la aguja.'}"
+            </p>
+            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 mt-2 border-t border-slate-800/80">
+              <span>Cumplimiento hoy:</span>
+              <span className="font-bold text-slate-200">
+                {habits.filter(h => h.today_log?.completed).length} de {habits.length} ({metrics?.today_compliance_percent || 0}%)
+              </span>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* ======================================================== */}
-        {/* BARRA DE CITA MOTIVACIONAL ROTATIVA (TEXTO COMPLETO Y LEGIBLE) */}
-        {/* ======================================================== */}
-        <div className="max-w-md mx-auto mt-2 px-1">
+        {/* Frase Motivacional en 1 sola línea sutil y limpia */}
+        <div className="max-w-2xl mx-auto mt-2 px-0.5">
           <div 
             onClick={changeQuote}
-            className="group bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl px-3.5 py-2.5 flex items-start justify-between gap-3 cursor-pointer transition active:scale-[0.99]"
-            title="Toca para cambiar la frase motivacional"
+            className="group bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 cursor-pointer transition"
+            title="Toca para rotar la frase"
           >
-            <div className="flex items-start gap-2.5 flex-1">
-              <span className="text-amber-500 text-xs shrink-0 mt-0.5">💬</span>
-              <div className="flex-1">
-                <p className="text-xs text-slate-200 italic font-medium leading-snug">
-                  "{motivationalQuotes[currentQuoteIndex].quote}"
-                </p>
-                <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1 flex items-center gap-1.5">
-                  <span>— {motivationalQuotes[currentQuoteIndex].author}</span>
-                  <span className="text-[9px] text-slate-600 font-normal lowercase">(toca para rotar)</span>
-                </p>
-              </div>
+            <div className="flex items-center gap-2 overflow-hidden flex-1">
+              <span className="text-amber-500 text-xs shrink-0">“</span>
+              <p className="text-[11px] text-slate-300 italic truncate font-medium flex-1">
+                {motivationalQuotes[currentQuoteIndex].quote}
+              </p>
+              <span className="text-[10px] text-slate-400 shrink-0 font-medium hidden sm:inline">
+                — {motivationalQuotes[currentQuoteIndex].author}
+              </span>
             </div>
-            <button className="text-slate-500 group-hover:text-slate-300 shrink-0 p-1">
-              <RefreshCw className="w-3 h-3 group-hover:rotate-180 transition-transform duration-500" />
-            </button>
+            <RefreshCw className="w-3 h-3 text-slate-400 group-hover:text-slate-200 shrink-0 group-hover:rotate-180 transition-transform duration-500" />
           </div>
         </div>
       </header>
 
-      {/* Alerta / Notificación Flotante Estilo Sistema (In-App Push Banner) */}
+      {/* Alerta Flotante Estilo Notificación de Sistema (In-App Push Banner) */}
       {activeAlert && (
         <div className="fixed top-3 left-3 right-3 z-50 max-w-md mx-auto animate-bounce-short">
-          <div className="bg-slate-900 border border-slate-700/80 text-white rounded-2xl p-3.5 shadow-2xl flex items-start gap-3 backdrop-blur-md">
-            <span className="text-2xl shrink-0">{activeAlert.emoji}</span>
+          <div className="bg-slate-900 border border-slate-700 text-white rounded-2xl p-3 shadow-2xl flex items-start gap-2.5 backdrop-blur-md">
+            <span className="text-xl shrink-0 mt-0.5">{activeAlert.emoji}</span>
             <div className="flex-1">
               <h4 className="text-xs font-bold text-white">{activeAlert.title}</h4>
-              <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">{activeAlert.body}</p>
+              <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">{activeAlert.body}</p>
             </div>
             <button onClick={() => setActiveAlert(null)} className="text-slate-500 hover:text-white text-xs p-1">✕</button>
           </div>
@@ -746,29 +718,26 @@ export default function App() {
       {/* Main Content Area */}
       <main className="max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 flex-1 flex flex-col gap-4">
         
-        {/* Banner de Activación de Notificaciones (Elegante y No Estridente) */}
+        {/* Banner de Notificaciones discreto */}
         {showNotificationBanner && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-md">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-slate-800 text-amber-400 rounded-xl">
-                <ShieldAlert className="w-4 h-4" />
-              </div>
+          <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
               <div>
-                <h4 className="text-xs font-bold text-slate-200">Activa las notificaciones de disciplina</h4>
-                <p className="text-[11px] text-slate-400">
-                  Oblígate a no romper la racha y recibir avisos de tu Coach.
-                </p>
+                <h4 className="text-xs font-semibold text-slate-200">Activa notificaciones de disciplina</h4>
+                <p className="text-[10px] text-slate-400">Recordatorios para proteger tu racha diaria.</p>
               </div>
             </div>
 
             <button 
               onClick={requestNotificationPermission}
-              className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs py-2 px-3 rounded-xl shrink-0 transition"
+              className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-semibold py-1.5 px-3 rounded-xl shrink-0 transition"
             >
               Activar
             </button>
           </div>
         )}
+
 
         
         {/* ======================================================== */}
