@@ -247,7 +247,32 @@ export default function App() {
   // Sistema de notificación/alerta en pantalla (In-App Coach Banners & Push Simulation)
   const [activeAlert, setActiveAlert] = useState<{ title: string; body: string; emoji: string } | null>(null);
 
+  const playNotificationTone = () => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+    } catch {
+      // AudioContext prevented by browser policy
+    }
+  };
+
   const showInAppNotification = (title: string, body: string, emoji = '🔥') => {
+    playNotificationTone();
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate([100, 50, 100]); } catch { /* ignore */ }
+    }
     setActiveAlert({ title, body, emoji });
     setTimeout(() => {
       setActiveAlert(null);
@@ -344,6 +369,21 @@ export default function App() {
     return () => clearInterval(interval);
   }, [restTimer]);
 
+  // Recordatorios periódicos del Coach (cada 45 minutos si quedan hábitos pendientes)
+  useEffect(() => {
+    const reminderInterval = setInterval(() => {
+      const pendingHabits = habits.filter(h => !h.today_log?.completed);
+      if (pendingHabits.length > 0) {
+        const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
+        const coachName = activeCoach ? activeCoach.name : 'Entrenador Taskia';
+        const msg = activeCoach?.midday_reminder || `Tienes ${pendingHabits.length} hábitos pendientes hoy. ¡No negocies con la flojera!`;
+        sendCoachNotification(`🔔 ${coachName}: Pendientes hoy`, msg, activeCoach?.avatar_emoji || '🔥');
+      }
+    }, 45 * 60 * 1000);
+
+    return () => clearInterval(reminderInterval);
+  }, [habits, coaches, selectedCoachId]);
+
   const toggleBlockCollapse = (blockKey: string) => {
     setCollapsedBlocks(prev => ({
       ...prev,
@@ -377,13 +417,43 @@ export default function App() {
     fetchData();
   };
 
+  const sendCoachNotification = (title: string, body: string, emoji = '🔥') => {
+    // 1. In-App alert con sonido y vibración
+    showInAppNotification(title, body, emoji);
+
+    // 2. Disparar notificación de sistema si los permisos están concedidos
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready.then((reg) => {
+          reg.showNotification(title, {
+            body,
+            icon: '/pwa-192x192.png',
+            badge: '/pwa-192x192.png'
+          });
+        }).catch(() => {
+          try {
+            new Notification(title, { body, icon: '/pwa-192x192.png' });
+          } catch (e) {
+            console.log("Fallback notification", e);
+          }
+        });
+      } else {
+        try {
+          new Notification(title, { body, icon: '/pwa-192x192.png' });
+        } catch (e) {
+          console.log("Direct notification", e);
+        }
+      }
+    }
+  };
+
   const requestNotificationPermission = async () => {
     const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
     const coachName = activeCoach ? activeCoach.name : 'Entrenador Taskia';
     const msg = activeCoach ? activeCoach.morning_quote : '¡Notificaciones activadas! Ahora sí estás obligado a cumplir tu meta.';
 
     if (typeof Notification === 'undefined') {
-      showInAppNotification(`🔥 ${coachName} activado`, msg, activeCoach?.avatar_emoji || '🔥');
+      sendCoachNotification(`🔥 ${coachName} activado`, msg, activeCoach?.avatar_emoji || '🔥');
       return;
     }
 
@@ -392,32 +462,7 @@ export default function App() {
       setNotificationPermission(perm);
       if (perm === 'granted') {
         setShowNotificationBanner(false);
-
-        // Disparar vía ServiceWorker si está disponible (estándar en PWA Android/iOS)
-        if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
-          navigator.serviceWorker.ready.then((reg) => {
-            reg.showNotification(`🔥 ${coachName} activado`, {
-              body: msg,
-              icon: '/pwa-icon.svg',
-              badge: '/pwa-icon.svg'
-            });
-          }).catch(() => {
-            try {
-              new Notification(`🔥 ${coachName} activado`, { body: msg, icon: '/pwa-icon.svg' });
-            } catch (e) {
-              console.log("Fallback notification", e);
-            }
-          });
-        } else {
-          try {
-            new Notification(`🔥 ${coachName} activado`, { body: msg, icon: '/pwa-icon.svg' });
-          } catch (e) {
-            console.log("Direct notification", e);
-          }
-        }
-
-        // Siempre mostrar también el aviso In-App para retroalimentación visual inmediata
-        showInAppNotification(`🔥 ${coachName} activado`, msg, activeCoach?.avatar_emoji || '🔥');
+        sendCoachNotification(`🔥 ${coachName} activado`, msg, activeCoach?.avatar_emoji || '🔥');
 
         // Actualizar preferencia en el backend
         await axios.post(`${API_BASE}/auth/me/`, {
@@ -425,12 +470,12 @@ export default function App() {
           coach_id: selectedCoachId
         }, getHeaders());
       } else {
-        // Si el usuario o el navegador restringe permisos (e.g. HTTP en vez de HTTPS), activar notificador In-App
-        showInAppNotification(`⚠️ Notificaciones en modo In-App`, 'Tu navegador requiere HTTPS para alertas de sistema. Activamos el modo disciplinario dentro de la app.', '🛡️');
+        // Modo In-App si el usuario o navegador lo bloquea
+        showInAppNotification(`⚠️ Notificaciones en modo In-App`, 'Activamos el sonido y alertas de disciplina dentro de la aplicación.', '🛡️');
       }
     } catch (err) {
       console.error("Error pidiendo permiso de notificación:", err);
-      showInAppNotification(`🔥 ${coachName} activado`, msg, activeCoach?.avatar_emoji || '🔥');
+      sendCoachNotification(`🔥 ${coachName} activado`, msg, activeCoach?.avatar_emoji || '🔥');
     }
   };
 
@@ -1586,12 +1631,29 @@ export default function App() {
               })}
             </div>
 
-            <button 
-              onClick={() => setShowCoachModal(false)}
-              className="mt-2 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition"
-            >
-              Confirmar Entrenador
-            </button>
+            <div className="flex items-center gap-2 mt-2">
+              <button 
+                onClick={() => {
+                  const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
+                  sendCoachNotification(
+                    `⚡ ${activeCoach?.name || 'Coach'}: Alerta de Prueba`,
+                    activeCoach?.midday_reminder || '¡Esta es una notificación de disciplina! Tu meta no se negocia.',
+                    activeCoach?.avatar_emoji || '🔥'
+                  );
+                }}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
+                title="Probar sonido y notificación ahora"
+              >
+                <Bell className="w-3.5 h-3.5 text-amber-400" /> Probar Alerta
+              </button>
+
+              <button 
+                onClick={() => setShowCoachModal(false)}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition"
+              >
+                Confirmar Entrenador
+              </button>
+            </div>
           </div>
         </div>
       )}
