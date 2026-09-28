@@ -6,7 +6,7 @@ import {
   User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
   Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
   ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle,
-  Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye
+  Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -118,6 +118,10 @@ export default function App() {
 
   // Estado de navegación tipo carpeta: entrar dentro de un plan
   const [selectedPlanName, setSelectedPlanName] = useState<string | null>(null);
+
+  // Modo de visualización en 'today': 'checklist' (resumen directo de lo que hay que hacer) o 'plans' (por programas)
+  const [todayViewMode, setTodayViewMode] = useState<'checklist' | 'plans'>('checklist');
+  const [todayFilter, setTodayFilter] = useState<'all' | 'pending' | 'completed'>('pending');
 
   // Estado de colapsar / expandir bloques o categorías
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
@@ -791,86 +795,295 @@ export default function App() {
         {activeTab === 'today' && (
           <div className="space-y-4">
             
-            {/* Si el usuario NO ha entrado dentro de un plan -> VISTA DE COLECCIÓN DE PLANES COLAPSABLES */}
+            {/* Si el usuario NO ha entrado dentro de un plan -> VISTA DE RESUMEN DIARIO O COLECCIÓN DE PLANES */}
             {!selectedPlanName && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
+              <div className="space-y-3.5">
+                {/* Cabecera con selector de modo: Resumen Directo vs Carpetas de Planes */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-slate-900/90 border border-slate-800 p-3 rounded-2xl shadow-sm">
                   <div>
-                    <h2 className="text-base font-bold text-white flex items-center gap-2">
-                      <Layers className="w-4 h-4 text-indigo-400" /> Mis Planes y Hábitos
+                    <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4 text-emerald-400" />
+                      {todayViewMode === 'checklist' ? 'Resumen de Hoy' : 'Mis Planes y Programas'}
                     </h2>
-                    <p className="text-xs text-slate-400">Toca un plan para entrar dentro y registrar cada tarea</p>
+                    <p className="text-xs text-slate-400">
+                      {todayViewMode === 'checklist' 
+                        ? `${habits.filter(h => !h.today_log?.completed).length} pendientes de ${habits.length} tareas totales`
+                        : 'Organizado por carpetas y disciplinas'}
+                    </p>
                   </div>
-                  <span className="text-[11px] font-mono bg-slate-900 text-slate-400 px-2 py-0.5 rounded-full border border-slate-800">
-                    {habits.length} tareas hoy
-                  </span>
+
+                  {/* Switcher entre Resumen Directo y Vista por Planes */}
+                  <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800/80 shrink-0 self-start sm:self-auto">
+                    <button
+                      onClick={() => setTodayViewMode('checklist')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                        todayViewMode === 'checklist'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <ListChecks className="w-3.5 h-3.5" />
+                      <span>Resumen Directo</span>
+                    </button>
+                    <button
+                      onClick={() => setTodayViewMode('plans')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                        todayViewMode === 'plans'
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>Por Planes ({planSummaryList.length})</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Lista de Tarjetas de Planes (Estilo Apps Nativas iOS/Android) */}
-                <div className="space-y-3">
-                  {planSummaryList.map(plan => {
-                    const isAllDone = plan.completedCount === plan.totalCount && plan.totalCount > 0;
-
-                    return (
-                      <div 
-                        key={plan.name}
-                        onClick={() => setSelectedPlanName(plan.name)}
-                        className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-[0.99] flex flex-col gap-3 ${
-                          isAllDone
-                            ? 'bg-slate-900/60 border-emerald-900/60 shadow-sm'
-                            : 'bg-slate-900/90 border-slate-800 hover:border-indigo-800/80 shadow-md'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2.5 rounded-xl ${
-                              isAllDone ? 'bg-emerald-950 text-emerald-400' : 'bg-indigo-950 text-indigo-400'
-                            }`}>
-                              {isAllDone ? <CheckSquare className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
-                            </div>
-                            <div>
-                              <h3 className="font-bold text-sm text-white line-clamp-1">{plan.name}</h3>
-                              <p className="text-xs text-slate-400 mt-0.5">
-                                {plan.completedCount} de {plan.totalCount} completadas hoy
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs font-black font-mono px-2 py-0.5 rounded-lg ${
-                              isAllDone ? 'bg-emerald-950 text-emerald-400' : 'bg-slate-950 text-amber-400'
-                            }`}>
-                              {plan.progressPercent}%
-                            </span>
-                            <ChevronRight className="w-4 h-4 text-slate-500" />
-                          </div>
-                        </div>
-
-                        {/* Barra de progreso interactiva */}
-                        <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              isAllDone ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-500 to-indigo-500'
-                            }`}
-                            style={{ width: `${plan.progressPercent}%` }}
-                          />
-                        </div>
+                {/* ======================================================== */}
+                {/* MODO 1: RESUMEN DE HOY (LISTA DE TAREAS Y ACCIÓN DIRECTA) */}
+                {/* ======================================================== */}
+                {todayViewMode === 'checklist' && (
+                  <div className="space-y-3">
+                    {/* Filtros de estado: Pendientes / Todo / Hecho */}
+                    <div className="flex items-center justify-between gap-2 px-1">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => setTodayFilter('pending')}
+                          className={`text-xs px-2.5 py-1 rounded-lg font-bold border transition ${
+                            todayFilter === 'pending'
+                              ? 'bg-amber-950/80 border-amber-500/80 text-amber-300'
+                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          Pendientes ({habits.filter(h => !h.today_log?.completed).length})
+                        </button>
+                        <button
+                          onClick={() => setTodayFilter('all')}
+                          className={`text-xs px-2.5 py-1 rounded-lg font-bold border transition ${
+                            todayFilter === 'all'
+                              ? 'bg-indigo-950/80 border-indigo-500/80 text-indigo-300'
+                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          Todos ({habits.length})
+                        </button>
+                        <button
+                          onClick={() => setTodayFilter('completed')}
+                          className={`text-xs px-2.5 py-1 rounded-lg font-bold border transition ${
+                            todayFilter === 'completed'
+                              ? 'bg-emerald-950/80 border-emerald-500/80 text-emerald-300'
+                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          Listos ({habits.filter(h => h.today_log?.completed).length})
+                        </button>
                       </div>
-                    );
-                  })}
 
-                  {planSummaryList.length === 0 && (
-                    <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-4">
-                      <p className="text-xs text-slate-400">No tienes planes activos todavía.</p>
-                      <button 
-                        onClick={() => setActiveTab('programs')}
-                        className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
-                      >
-                        Explorar Catálogo de Planes
-                      </button>
+                      <span className="text-[11px] font-mono text-slate-400 hidden sm:inline">
+                        {metrics?.today_compliance_percent || 0}% cumplimiento
+                      </span>
                     </div>
-                  )}
-                </div>
+
+                    {/* Lista directa de hábitos filtrados */}
+                    <div className="space-y-2.5">
+                      {habits
+                        .filter(h => {
+                          if (todayFilter === 'pending') return !h.today_log?.completed;
+                          if (todayFilter === 'completed') return !!h.today_log?.completed;
+                          return true;
+                        })
+                        .map((habit) => {
+                          const isCompleted = habit.today_log?.completed ?? false;
+                          const currentVal = habit.today_log?.value ?? 0;
+                          const targetVal = habit.target_value;
+                          const title = cleanTitle(habit.title);
+                          const planName = getPlanNameFromHabit(habit);
+
+                          return (
+                            <div
+                              key={habit.id}
+                              className={`p-3.5 rounded-2xl border transition-all duration-200 flex flex-col gap-2.5 ${
+                                isCompleted
+                                  ? 'bg-slate-900/40 border-emerald-900/40 opacity-75'
+                                  : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 shadow-sm'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                                  <button
+                                    onClick={() => toggleHabit(habit)}
+                                    className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition"
+                                    title={isCompleted ? 'Marcar incompleto' : 'Completar hábito'}
+                                  >
+                                    {isCompleted ? (
+                                      <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950" />
+                                    ) : (
+                                      <Circle className="w-5 h-5 text-slate-500 hover:text-white" />
+                                    )}
+                                  </button>
+
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-indigo-400 truncate max-w-[140px]">
+                                        {planName}
+                                      </span>
+                                      {habit.unit === 'series' && (
+                                        <span className="text-[10px] font-mono text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">
+                                          {currentVal}/{targetVal} {habit.unit}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <h3 className={`text-xs sm:text-sm font-bold mt-1 leading-snug ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                                      {title}
+                                    </h3>
+                                    {habit.description && (
+                                      <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
+                                        💡 {habit.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Acciones rápidas según tipo */}
+                                <div className="shrink-0 flex items-center gap-1.5">
+                                  {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
+                                    <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                                      <button
+                                        onClick={() => logSeriesStep(habit.id, -1)}
+                                        disabled={currentVal <= 0}
+                                        className="p-1 rounded-lg text-slate-400 hover:text-white disabled:opacity-30"
+                                      >
+                                        <Minus className="w-3 h-3" />
+                                      </button>
+                                      <span className="text-xs font-mono font-bold px-1 text-slate-200">
+                                        {currentVal}/{targetVal}
+                                      </span>
+                                      <button
+                                        onClick={() => logSeriesStep(habit.id, 1)}
+                                        className={`px-2 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition ${
+                                          isCompleted ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                                        }`}
+                                      >
+                                        <Plus className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={() => toggleHabit(habit)}
+                                      className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition active:scale-95 ${
+                                        isCompleted
+                                          ? 'bg-slate-800 text-emerald-400 border border-emerald-900/60'
+                                          : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
+                                      }`}
+                                    >
+                                      {isCompleted ? <Check className="w-3.5 h-3.5" /> : null}
+                                      <span>{isCompleted ? 'Listo' : 'Hacer'}</span>
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                      {habits.length === 0 && (
+                        <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-4">
+                          <p className="text-xs text-slate-400">No tienes hábitos cargados para hoy.</p>
+                          <button 
+                            onClick={() => setActiveTab('programs')}
+                            className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
+                          >
+                            Explorar Catálogo de Programas
+                          </button>
+                        </div>
+                      )}
+
+                      {habits.length > 0 && habits.filter(h => !h.today_log?.completed).length === 0 && todayFilter === 'pending' && (
+                        <div className="text-center py-8 bg-slate-900/60 border border-emerald-800/40 rounded-2xl p-4">
+                          <span className="text-2xl block mb-1">🎉</span>
+                          <h4 className="text-sm font-bold text-emerald-400">¡Todo completado por hoy!</h4>
+                          <p className="text-xs text-slate-400 mt-1">Has cumplido el 100% de tus objetivos del día. Disciplina pura.</p>
+                          <button
+                            onClick={() => setTodayFilter('all')}
+                            className="mt-3 text-xs text-slate-300 hover:text-white underline"
+                          >
+                            Ver todos los hábitos completados
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* ======================================================== */}
+                {/* MODO 2: POR PLANES (VISTA EN CARPETAS/PROGRAMAS) */}
+                {/* ======================================================== */}
+                {todayViewMode === 'plans' && (
+                  <div className="space-y-3">
+                    {planSummaryList.map(plan => {
+                      const isAllDone = plan.completedCount === plan.totalCount && plan.totalCount > 0;
+
+                      return (
+                        <div 
+                          key={plan.name}
+                          onClick={() => setSelectedPlanName(plan.name)}
+                          className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-[0.99] flex flex-col gap-3 ${
+                            isAllDone
+                              ? 'bg-slate-900/60 border-emerald-900/60 shadow-sm'
+                              : 'bg-slate-900/90 border-slate-800 hover:border-indigo-800/80 shadow-md'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2.5 rounded-xl ${
+                                isAllDone ? 'bg-emerald-950 text-emerald-400' : 'bg-indigo-950 text-indigo-400'
+                              }`}>
+                                {isAllDone ? <CheckSquare className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
+                              </div>
+                              <div>
+                                <h3 className="font-bold text-sm text-white line-clamp-1">{plan.name}</h3>
+                                <p className="text-xs text-slate-400 mt-0.5">
+                                  {plan.completedCount} de {plan.totalCount} completadas hoy
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs font-black font-mono px-2 py-0.5 rounded-lg ${
+                                isAllDone ? 'bg-emerald-950 text-emerald-400' : 'bg-slate-950 text-amber-400'
+                              }`}>
+                                {plan.progressPercent}%
+                              </span>
+                              <ChevronRight className="w-4 h-4 text-slate-500" />
+                            </div>
+                          </div>
+
+                          {/* Barra de progreso interactiva */}
+                          <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-300 ${
+                                isAllDone ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-500 to-indigo-500'
+                              }`}
+                              style={{ width: `${plan.progressPercent}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {planSummaryList.length === 0 && (
+                      <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-4">
+                        <p className="text-xs text-slate-400">No tienes planes activos todavía.</p>
+                        <button 
+                          onClick={() => setActiveTab('programs')}
+                          className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
+                        >
+                          Explorar Catálogo de Planes
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
