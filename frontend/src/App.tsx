@@ -448,13 +448,43 @@ export default function App() {
                   </span>
                 </div>
 
-                {/* Banner de Cabecera del Plan Activo */}
+                {/* Banner de Cabecera del Plan Activo con Estadísticas de Reto */}
                 <div className="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 border border-amber-800/50 px-2 py-0.5 rounded-full">
-                    Plan Activo
-                  </span>
-                  <h2 className="text-base font-bold text-white mt-1.5">{selectedPlanName}</h2>
-                  
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 border border-amber-800/50 px-2 py-0.5 rounded-full">
+                      Plan Activo
+                    </span>
+                    <span className="text-xs font-mono font-bold text-amber-400">
+                      {selectedPlanHabits.filter(h => h.today_log?.completed).length} / {selectedPlanHabits.length} días
+                    </span>
+                  </div>
+
+                  <h2 className="text-base font-bold text-white mt-1">{selectedPlanName}</h2>
+
+                  {/* Widgets de Métricas del Desafío (Llevo, Me Faltan, Avance) */}
+                  <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80">
+                    <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
+                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Días Llevo</span>
+                      <span className="text-base font-black text-emerald-400 font-mono">
+                        {selectedPlanHabits.filter(h => h.today_log?.completed).length}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
+                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Me Faltan</span>
+                      <span className="text-base font-black text-amber-400 font-mono">
+                        {selectedPlanHabits.length - selectedPlanHabits.filter(h => h.today_log?.completed).length}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
+                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Avance</span>
+                      <span className="text-base font-black text-indigo-400 font-mono">
+                        {selectedPlanHabits.length > 0 ? Math.round((selectedPlanHabits.filter(h => h.today_log?.completed).length / selectedPlanHabits.length) * 100) : 0}%
+                      </span>
+                    </div>
+                  </div>
+
                   {/* Barra de progreso del plan seleccionado */}
                   <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden mt-3">
                     <div 
@@ -464,6 +494,13 @@ export default function App() {
                       }}
                     />
                   </div>
+
+                  {/* Regla de reinicio si es el reto Brian Tracy */}
+                  {selectedPlanName.toLowerCase().includes('brian tracy') && (
+                    <p className="text-[11px] text-amber-300/80 bg-amber-950/40 p-2 rounded-xl border border-amber-900/40 mt-3 flex items-center gap-1.5">
+                      ⚠️ <strong>Regla del Reto:</strong> Si fallas un día, el compromiso es reiniciar el ciclo a 0/21.
+                    </p>
+                  )}
                 </div>
 
                 {/* Lista de Tareas / Ejercicios del Plan */}
