@@ -28,6 +28,9 @@ interface Habit {
   habit_type: 'boolean' | 'numeric';
   target_value: number;
   unit: string;
+  frequency_type?: string;
+  days_of_week?: string;
+  day_offset?: number | null;
   sla_target_percent: number;
   enrollment?: number | null;
   today_log?: {
@@ -265,6 +268,21 @@ export default function App() {
 
   // Modal para editar tarjeta individual del Vision Board
   const [editingCard, setEditingCard] = useState<VisionCard | null>(null);
+
+  // Modal para Crear o Editar Hábitos / Planes Manualmente
+  const [showHabitModal, setShowHabitModal] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [habitFormData, setHabitFormData] = useState({
+    planName: '',
+    title: '',
+    description: '',
+    habit_type: 'boolean' as 'boolean' | 'numeric',
+    target_value: 1,
+    unit: '',
+    frequency_type: 'daily',
+    days_of_week: '0,1,2,3,4,5,6',
+    sla_target_percent: 85
+  });
 
   // Sistema de notificación/alerta en pantalla (In-App Coach Banners & Push Simulation)
   const [activeAlert, setActiveAlert] = useState<{ title: string; body: string; emoji: string } | null>(null);
@@ -668,6 +686,104 @@ export default function App() {
     }
   };
 
+  // Controladores de Creación y Edición Manual de Hábitos y Planes
+  const openCreateHabitModal = (defaultPlanName?: string) => {
+    setEditingHabit(null);
+    setHabitFormData({
+      planName: defaultPlanName || (selectedPlanName || ''),
+      title: '',
+      description: '',
+      habit_type: 'boolean',
+      target_value: 1,
+      unit: '',
+      frequency_type: 'daily',
+      days_of_week: '0,1,2,3,4,5,6',
+      sla_target_percent: 85
+    });
+    setShowHabitModal(true);
+  };
+
+  const openEditHabitModal = (habit: Habit) => {
+    setEditingHabit(habit);
+    const planName = getPlanNameFromHabit(habit);
+    setHabitFormData({
+      planName: planName === 'Hábitos Personales' ? '' : planName,
+      title: cleanTitle(habit.title),
+      description: habit.description || '',
+      habit_type: habit.habit_type || 'boolean',
+      target_value: habit.target_value || 1,
+      unit: habit.unit || '',
+      frequency_type: habit.frequency_type || 'daily',
+      days_of_week: habit.days_of_week || '0,1,2,3,4,5,6',
+      sla_target_percent: habit.sla_target_percent || 85
+    });
+    setShowHabitModal(true);
+  };
+
+  const handleSaveHabit = async () => {
+    if (!habitFormData.title.trim()) {
+      alert("Por favor ingresa un título para la tarea o hábito.");
+      return;
+    }
+
+    const fullTitle = habitFormData.planName.trim()
+      ? `[${habitFormData.planName.trim()}] ${habitFormData.title.trim()}`
+      : habitFormData.title.trim();
+
+    const payload = {
+      title: fullTitle,
+      description: habitFormData.description.trim(),
+      habit_type: habitFormData.habit_type,
+      target_value: habitFormData.target_value,
+      unit: habitFormData.unit.trim(),
+      frequency_type: habitFormData.frequency_type,
+      days_of_week: habitFormData.days_of_week,
+      sla_target_percent: Number(habitFormData.sla_target_percent) || 85
+    };
+
+    try {
+      if (editingHabit) {
+        await axios.patch(`${API_BASE}/habits/${editingHabit.id}/`, payload, getHeaders());
+        setIslandMessage(`✏️ Hábito "${habitFormData.title}" actualizado con éxito.`);
+      } else {
+        await axios.post(`${API_BASE}/habits/`, payload, getHeaders());
+        setIslandMessage(`✨ Nuevo hábito "${habitFormData.title}" añadido al plan.`);
+        triggerCelebration();
+      }
+      setIslandExpanded(true);
+      setTimeout(() => setIslandExpanded(false), 3500);
+      setShowHabitModal(false);
+      setEditingHabit(null);
+      if (selectedDetailHabit && editingHabit && selectedDetailHabit.id === editingHabit.id) {
+        setSelectedDetailHabit(null);
+      }
+      fetchData();
+    } catch (err: any) {
+      console.error("Error guardando hábito:", err);
+      alert(`Error al guardar: ${err.response?.data ? JSON.stringify(err.response.data) : err.message}`);
+    }
+  };
+
+  const handleDeleteHabit = async (habitId: number, habitTitle: string) => {
+    if (!window.confirm(`¿Estás seguro de eliminar "${cleanTitle(habitTitle)}"?\nEsta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API_BASE}/habits/${habitId}/`, getHeaders());
+      setIslandMessage(`🗑️ Hábito eliminado.`);
+      setIslandExpanded(true);
+      setTimeout(() => setIslandExpanded(false), 3000);
+      if (selectedDetailHabit && selectedDetailHabit.id === habitId) {
+        setSelectedDetailHabit(null);
+      }
+      fetchData();
+    } catch (err: any) {
+      console.error("Error eliminando hábito:", err);
+      alert(`Error al eliminar: ${err.response?.data ? JSON.stringify(err.response.data) : err.message}`);
+    }
+  };
+
   // Helper para extraer nombre del plan o categoría a partir de títulos como "[Plan XYZ] Titulo"
   const getPlanNameFromHabit = (habit: Habit) => {
     const match = habit.title.match(/^\[(.*?)\]/);
@@ -1001,29 +1117,40 @@ export default function App() {
                     </p>
                   </div>
 
-                  {/* Switcher entre Resumen Directo y Vista por Planes */}
-                  <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800/80 shrink-0 self-start sm:self-auto">
+                  {/* Switcher entre Resumen Directo, Vista por Planes y Botón + Nuevo Hábito */}
+                  <div className="flex items-center gap-1.5 flex-wrap shrink-0 self-start sm:self-auto">
+                    <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800/80">
+                      <button
+                        onClick={() => setTodayViewMode('checklist')}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                          todayViewMode === 'checklist'
+                            ? 'bg-emerald-600 text-white shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        <ListChecks className="w-3.5 h-3.5" />
+                        <span>Resumen Directo</span>
+                      </button>
+                      <button
+                        onClick={() => setTodayViewMode('plans')}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                          todayViewMode === 'plans'
+                            ? 'bg-indigo-600 text-white shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Por Planes ({planSummaryList.length})</span>
+                      </button>
+                    </div>
+
                     <button
-                      onClick={() => setTodayViewMode('checklist')}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-                        todayViewMode === 'checklist'
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200'
-                      }`}
+                      onClick={() => openCreateHabitModal()}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                      title="Crear un nuevo hábito o plan manual"
                     >
-                      <ListChecks className="w-3.5 h-3.5" />
-                      <span>Resumen Directo</span>
-                    </button>
-                    <button
-                      onClick={() => setTodayViewMode('plans')}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-                        todayViewMode === 'plans'
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      <Layers className="w-3.5 h-3.5" />
-                      <span>Por Planes ({planSummaryList.length})</span>
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>+ Nuevo Hábito</span>
                     </button>
                   </div>
                 </div>
@@ -1542,6 +1669,17 @@ export default function App() {
                       </button>
                     </div>
                   )}
+                  {/* Botón para agregar tarea al plan actual */}
+                  <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                    <span className="text-xs text-slate-400">¿Quieres ajustar las tareas de este plan?</span>
+                    <button
+                      onClick={() => openCreateHabitModal(selectedPlanName)}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>+ Agregar Tarea al Plan</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Lista de Tareas / Ejercicios del Plan */}
@@ -1601,13 +1739,36 @@ export default function App() {
                             )}
 
                             <div className="flex items-center justify-between mb-3 bg-slate-900/60 p-2 rounded-xl border border-slate-800/60 text-xs">
-                              <span className="text-[11px] text-slate-400">¿Cómo ejecutar este hábito con técnica perfecta?</span>
                               <button
                                 onClick={() => setSelectedDetailHabit(habit)}
                                 className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition"
                               >
-                                <Info className="w-3.5 h-3.5" /> Ver Guía de Ejecución
+                                <Info className="w-3.5 h-3.5" /> Guía de Ejecución
                               </button>
+
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEditHabitModal(habit);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1 text-[11px]"
+                                  title="Editar meta o detalles de esta tarea"
+                                >
+                                  <Edit3 className="w-3 h-3 text-indigo-400" />
+                                  <span className="hidden sm:inline">Editar</span>
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteHabit(habit.id, habit.title);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-red-950/60 text-slate-400 hover:text-red-400 transition"
+                                  title="Eliminar esta tarea del plan"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
                             </div>
 
                             {/* Controles de Registro */}
@@ -2911,8 +3072,37 @@ export default function App() {
               )}
             </div>
 
+            {/* Acciones de Gestión (Editar / Eliminar Hábito) */}
+            <div className="pt-2 flex items-center justify-between border-t border-slate-800/60 mb-2">
+              <span className="text-[11px] text-slate-400">Administración de la tarea:</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const habit = selectedDetailHabit;
+                    setSelectedDetailHabit(null);
+                    openEditHabitModal(habit);
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 font-semibold text-xs flex items-center gap-1.5 transition"
+                  title="Editar parámetros, metas o textos de esta tarea"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Editar Tarea</span>
+                </button>
+                <button
+                  onClick={() => {
+                    handleDeleteHabit(selectedDetailHabit.id, selectedDetailHabit.title);
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-red-950/70 text-red-400 hover:text-red-300 font-semibold text-xs flex items-center gap-1.5 transition"
+                  title="Eliminar esta tarea"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Eliminar</span>
+                </button>
+              </div>
+            </div>
+
             {/* Acciones de Ejecución de la Tarea en el Modal */}
-            <div className="pt-3 border-t border-slate-800 flex items-center gap-2">
+            <div className="pt-2 border-t border-slate-800 flex items-center gap-2">
               {selectedDetailHabit.unit === 'series' || selectedDetailHabit.habit_type === 'numeric' ? (
                 <div className="flex items-center justify-between w-full gap-2">
                   <button
@@ -2949,6 +3139,242 @@ export default function App() {
                   </span>
                 </button>
               )}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 4: CREAR / EDITAR MANUALMENTE HÁBITOS Y PLANES   */}
+      {/* ======================================================== */}
+      {showHabitModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-3.5 max-h-[92vh] overflow-y-auto">
+            {/* Header del Modal */}
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                {editingHabit ? <Edit3 className="w-4 h-4 text-indigo-400" /> : <Plus className="w-4 h-4 text-emerald-400" />}
+                {editingHabit ? 'Editar Hábito / Tarea' : 'Crear Nuevo Hábito o Plan'}
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowHabitModal(false);
+                  setEditingHabit(null);
+                }} 
+                className="text-slate-400 hover:text-white text-sm p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Selector de Plan o Categoría */}
+            <div>
+              <label className="text-[11px] font-bold text-slate-300 block mb-1">
+                Carpeta / Plan al que Pertenece
+              </label>
+              <input
+                type="text"
+                list="existing-plans"
+                value={habitFormData.planName}
+                onChange={(e) => setHabitFormData({ ...habitFormData, planName: e.target.value })}
+                placeholder="ej. Rehabilitación Aquiles, Brian Tracy 10 Metas, Hábitos Personales..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+              />
+              <datalist id="existing-plans">
+                {planSummaryList.map(p => (
+                  <option key={p.name} value={p.name} />
+                ))}
+              </datalist>
+              <p className="text-[10px] text-slate-500 mt-1">
+                Escribe un nombre nuevo para crear un nuevo plan, o selecciona uno existente para agruparlo.
+              </p>
+            </div>
+
+            {/* Título de la Tarea / Hábito */}
+            <div>
+              <label className="text-[11px] font-bold text-slate-300 block mb-1">
+                Nombre de la Tarea / Hábito *
+              </label>
+              <input
+                type="text"
+                value={habitFormData.title}
+                onChange={(e) => setHabitFormData({ ...habitFormData, title: e.target.value })}
+                placeholder="ej. Sentadillas con TRX, Escribir 10 Metas 3P, Respiración 4-7-8..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            {/* Descripción / Indicaciones Técnicas */}
+            <div>
+              <label className="text-[11px] font-bold text-slate-300 block mb-1">
+                Descripción o Indicación Técnica
+              </label>
+              <textarea
+                value={habitFormData.description}
+                onChange={(e) => setHabitFormData({ ...habitFormData, description: e.target.value })}
+                placeholder="ej. 3 series de 10 reps controladas en 3-4 segundos de bajada..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 h-20"
+              />
+            </div>
+
+            {/* Tipo de Registro (Booleano vs Numérico) */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[11px] font-bold text-slate-300 block mb-1">
+                  Tipo de Registro
+                </label>
+                <select
+                  value={habitFormData.habit_type}
+                  onChange={(e) => setHabitFormData({ ...habitFormData, habit_type: e.target.value as any })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
+                >
+                  <option value="boolean">Check Sí / No</option>
+                  <option value="numeric">Numérico / Series / Minutos</option>
+                </select>
+              </div>
+
+              {habitFormData.habit_type === 'numeric' ? (
+                <div className="grid grid-cols-2 gap-1.5">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Meta</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={habitFormData.target_value}
+                      onChange={(e) => setHabitFormData({ ...habitFormData, target_value: Number(e.target.value) || 1 })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Unidad</label>
+                    <input
+                      type="text"
+                      value={habitFormData.unit}
+                      onChange={(e) => setHabitFormData({ ...habitFormData, unit: e.target.value })}
+                      placeholder="series, min, vasos"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-[11px] font-bold text-slate-300 block mb-1">Frecuencia</label>
+                  <select
+                    value={habitFormData.frequency_type}
+                    onChange={(e) => setHabitFormData({ ...habitFormData, frequency_type: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
+                  >
+                    <option value="daily">Todos los días</option>
+                    <option value="specific_days">Días específicos</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {/* Selector de Días de la Semana */}
+            <div>
+              <label className="text-[11px] font-bold text-slate-300 block mb-1.5">
+                Días Programados de la Semana
+              </label>
+              <div className="flex items-center justify-between gap-1">
+                {[
+                  { id: '0', label: 'L' },
+                  { id: '1', label: 'M' },
+                  { id: '2', label: 'X' },
+                  { id: '3', label: 'J' },
+                  { id: '4', label: 'V' },
+                  { id: '5', label: 'S' },
+                  { id: '6', label: 'D' }
+                ].map(day => {
+                  const currentDays = habitFormData.days_of_week ? habitFormData.days_of_week.split(',').map(s => s.trim()) : [];
+                  const isSelected = currentDays.includes(day.id);
+
+                  return (
+                    <button
+                      key={day.id}
+                      type="button"
+                      onClick={() => {
+                        let updated: string[];
+                        if (isSelected) {
+                          updated = currentDays.filter(d => d !== day.id);
+                        } else {
+                          updated = [...currentDays, day.id].sort();
+                        }
+                        setHabitFormData({
+                          ...habitFormData,
+                          days_of_week: updated.join(','),
+                          frequency_type: updated.length === 7 ? 'daily' : 'specific_days'
+                        });
+                      }}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'bg-slate-950 border border-slate-800 text-slate-500 hover:text-slate-300'
+                      }`}
+                    >
+                      {day.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Target SLA Percent */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[11px] font-bold text-slate-300">
+                  Exigencia SLA de Cumplimiento ({habitFormData.sla_target_percent}%)
+                </label>
+                <span className="text-[10px] text-amber-400 font-mono">
+                  {habitFormData.sla_target_percent >= 85 ? '⭐ Alta Disciplina' : 'Balanceado'}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="50"
+                max="100"
+                step="5"
+                value={habitFormData.sla_target_percent}
+                onChange={(e) => setHabitFormData({ ...habitFormData, sla_target_percent: Number(e.target.value) })}
+                className="w-full accent-indigo-500"
+              />
+            </div>
+
+            {/* Botones de Guardar / Cancelar */}
+            <div className="flex items-center justify-between pt-3 border-t border-slate-800 mt-1">
+              {editingHabit ? (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteHabit(editingHabit.id, editingHabit.title)}
+                  className="text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1 p-2"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Eliminar
+                </button>
+              ) : (
+                <div />
+              )}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowHabitModal(false);
+                    setEditingHabit(null);
+                  }}
+                  className="px-3 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveHabit}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition active:scale-95 flex items-center gap-1.5"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{editingHabit ? 'Guardar Cambios' : 'Crear Tarea'}</span>
+                </button>
+              </div>
             </div>
 
           </div>
