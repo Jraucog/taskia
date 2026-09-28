@@ -132,6 +132,40 @@ class Command(BaseCommand):
             }
         )
 
+        # 5. Programas adicionales de plantilla para el catálogo
+        p_miracle, _ = Program.objects.get_or_create(
+            title='Mañanas Milagrosas & Enfoque Profundo (SAVERS)',
+            defaults={
+                'description': 'Estructura matutina de alto impacto: Silencio, Afirmaciones, Visualización, Ejercicio, Lectura y Escritura.',
+                'category': 'Desarrollo Personal',
+                'duration_days': 30
+            }
+        )
+        miracle_items = [
+            {'title': 'Silencio y Meditación (10 min)', 'habit_type': 'numeric', 'target_value': 10.0, 'unit': 'min', 'day_offset': 0, 'description': 'Respiración consciente o meditación guiada'},
+            {'title': 'Visualización de Metas 100M', 'habit_type': 'boolean', 'target_value': 1.0, 'unit': '', 'day_offset': 0, 'description': '5 minutos viendo tu Vision Board y objetivos'},
+            {'title': 'Lectura de Crecimiento (páginas)', 'habit_type': 'numeric', 'target_value': 10.0, 'unit': 'págs', 'day_offset': 0, 'description': 'Libro de negocios, disciplina o filosofía'},
+            {'title': 'Escritura & Journaling Diario', 'habit_type': 'boolean', 'target_value': 1.0, 'unit': '', 'day_offset': 0, 'description': '10 metas diarias de Brian Tracy a mano'}
+        ]
+        for it in miracle_items:
+            ProgramItem.objects.get_or_create(program=p_miracle, title=it['title'], defaults=it)
+
+        p_detox, _ = Program.objects.get_or_create(
+            title='Desintoxicación Dopamina & Productividad',
+            defaults={
+                'description': 'Reset neurocognitivo para recuperar foco, eliminar procrastinación en redes y producir software de calidad.',
+                'category': 'Foco & Disciplina',
+                'duration_days': 14
+            }
+        )
+        detox_items = [
+            {'title': 'Cero Redes Sociales antes de las 12:00', 'habit_type': 'boolean', 'target_value': 1.0, 'unit': '', 'day_offset': 0, 'description': 'Protege tus mañanas de la distracción'},
+            {'title': 'Bloque Deep Work Software / MVP (horas)', 'habit_type': 'numeric', 'target_value': 2.0, 'unit': 'hrs', 'day_offset': 0, 'description': 'Programación pura sin interrupciones'},
+            {'title': 'Caminar 8.000 pasos en naturaleza / sol', 'habit_type': 'numeric', 'target_value': 8000.0, 'unit': 'pasos', 'day_offset': 0, 'description': 'Regulación del cortisol y claridad mental'}
+        ]
+        for it in detox_items:
+            ProgramItem.objects.get_or_create(program=p_detox, title=it['title'], defaults=it)
+
         # Asignar sargento por defecto
         pref, _ = UserCoachPreference.objects.get_or_create(user=user)
         pref.coach = c1
@@ -139,4 +173,5 @@ class Command(BaseCommand):
         pref.intensity_level = 3
         pref.save()
 
-        self.stdout.write(self.style.SUCCESS("[OK] Datos semilla y Perfiles de Entrenador cargados con exito."))
+        self.stdout.write(self.style.SUCCESS("[OK] Datos semilla, Plantillas de Catalogo y Coaches cargados con exito."))
+

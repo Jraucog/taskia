@@ -6,7 +6,7 @@ import {
   User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
   Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
   ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle,
-  Bell, BellOff, ShieldAlert
+  Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -18,6 +18,7 @@ interface DayHistory {
   completed: boolean;
   value: number;
 }
+
 
 interface Habit {
   id: number;
@@ -113,7 +114,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   
   // Navegación principal
-  const [activeTab, setActiveTab] = useState<'today' | 'calendar' | 'programs' | 'inject'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'calendar' | 'programs' | 'vision' | 'inject'>('today');
 
   // Estado de navegación tipo carpeta: entrar dentro de un plan
   const [selectedPlanName, setSelectedPlanName] = useState<string | null>(null);
@@ -125,6 +126,25 @@ export default function App() {
   const [coaches, setCoaches] = useState<CoachProfile[]>([]);
   const [showCoachModal, setShowCoachModal] = useState(false);
   const [selectedCoachId, setSelectedCoachId] = useState<number | null>(null);
+
+  // Frases motivacionales dinámicas (Tony Robbins, Brian Tracy, Seneca, Kobe, Goggins, etc.)
+  const motivationalQuotes = [
+    { quote: "Si haces lo que siempre has hecho, obtendrás lo que siempre has conseguido.", author: "Tony Robbins" },
+    { quote: "El éxito no es un accidente, es el resultado directo de la disciplina diaria.", author: "Brian Tracy" },
+    { quote: "No es que tengamos poco tiempo, sino que perdemos mucho.", author: "Séneca" },
+    { quote: "El momento en que te rindes es el momento en que dejas que otra persona gane.", author: "Kobe Bryant" },
+    { quote: "No te detengas cuando estés cansado. Detente cuando hayas terminado.", author: "David Goggins" },
+    { quote: "Tú no te elevas al nivel de tus metas, caes al nivel de tus sistemas.", author: "James Clear" },
+    { quote: "La acción es el antídoto fundamental para la desesperanza y la duda.", author: "Tony Robbins" },
+    { quote: "Escribe tus metas a diario y reprogramarás tu subconsciente para triunfar.", author: "Brian Tracy" },
+    { quote: "Exígete mucho a ti mismo y espera poco de los demás. Así te ahorrarás disgustos.", author: "Confucio" },
+    { quote: "Dedicación ve lo que la mayoría no ve. Compromiso hace lo que la mayoría no hace.", author: "Kobe Bryant" }
+  ];
+  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(() => Math.floor(Math.random() * motivationalQuotes.length));
+
+  const changeQuote = () => {
+    setCurrentQuoteIndex(prev => (prev + 1) % motivationalQuotes.length);
+  };
 
   // Estado de Notificaciones Web/PWA
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
@@ -143,6 +163,87 @@ export default function App() {
   const [confirmingHabit, setConfirmingHabit] = useState<Habit | null>(null);
   const [restTimer, setRestTimer] = useState<number | null>(null);
 
+  // Modal para inspeccionar plantilla en el Catálogo antes de inscribir
+  const [previewProgram, setPreviewProgram] = useState<Program | null>(null);
+
+  // Vision Board y Grill-Me Interactivo
+  interface VisionCard {
+    id: string;
+    category: string;
+    emoji: string;
+    title: string;
+    why: string;
+    deadline: string;
+    progress: number;
+    color: string;
+  }
+
+  const defaultVisionCards: VisionCard[] = [
+    {
+      id: "v-1",
+      category: "Salud y Tren Inferior",
+      emoji: "🦵",
+      title: "Rehabilitación Aquiles & Peso 85 kg con Fuerza TRX",
+      why: "Tener la agilidad de jugar fútbol sin dolor ni recaídas y tono muscular de alto rendimiento.",
+      deadline: "28/02/2027",
+      progress: 65,
+      color: "from-emerald-950/60 to-emerald-900/20 border-emerald-500/40"
+    },
+    {
+      id: "v-2",
+      category: "Software & Negocios",
+      emoji: "💻",
+      title: "MVP de Software Lanzado & Camino a 100M Anuales",
+      why: "Construir libertad financiera e independencia operativa con usuarios recurrentes de pago.",
+      deadline: "31/05/2027",
+      progress: 40,
+      color: "from-indigo-950/60 to-indigo-900/20 border-indigo-500/40"
+    },
+    {
+      id: "v-3",
+      category: "Música y Creación",
+      emoji: "🎵",
+      title: "Primer Single Oficial Masterizado & Publicado",
+      why: "Expresar mi identidad creativa y producir un sonido auténtico con beat estructurado.",
+      deadline: "30/04/2027",
+      progress: 30,
+      color: "from-amber-950/60 to-amber-900/20 border-amber-500/40"
+    },
+    {
+      id: "v-4",
+      category: "Hogar y Entorno",
+      emoji: "🏡",
+      title: "Termopaneles Instalados en Toda la Casa",
+      why: "Confort térmico total, aislamiento acústico y eficiencia energética en mi hogar.",
+      deadline: "31/03/2027",
+      progress: 50,
+      color: "from-purple-950/60 to-purple-900/20 border-purple-500/40"
+    }
+  ];
+
+  const [visionCards, setVisionCards] = useState<VisionCard[]>(() => {
+    const saved = localStorage.getItem('taskia_vision_cards');
+    return saved ? JSON.parse(saved) : defaultVisionCards;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('taskia_vision_cards', JSON.stringify(visionCards));
+  }, [visionCards]);
+
+  // Grill-Me Wizard State dentro de la App
+  const [showGrillMeModal, setShowGrillMeModal] = useState(false);
+  const [grillStep, setGrillStep] = useState(0);
+  const [grillAnswers, setGrillAnswers] = useState({
+    area: 'Cuerpo & Salud',
+    goal: '',
+    why: '',
+    deadline: '',
+    commitment: '90%'
+  });
+
+  // Modal para editar tarjeta individual del Vision Board
+  const [editingCard, setEditingCard] = useState<VisionCard | null>(null);
+
   const brianTracy10Goals = [
     { id: 1, text: "Yo peso 91 kg con energía y constancia diaria para el 31 de octubre de 2026.", date: "31/10/2026", cat: "Físico" },
     { id: 2, text: "Yo cumplo mi rutina de 3 entrenamientos semanales más 1 partido de fútbol cada semana.", date: "Semanal", cat: "Deporte" },
@@ -155,6 +256,7 @@ export default function App() {
     { id: 9, text: "Yo lanzo mi primer single oficial terminado y masterizado en plataformas para el 30 de abril de 2027.", date: "30/04/2027", cat: "Música" },
     { id: 10, text: "Yo genero mis primeros clientes de pago monetizando mi software para el 31 de mayo de 2027 (camino a los 100M anuales).", date: "31/05/2027", cat: "Negocios" },
   ];
+
 
   const [jsonPayload, setJsonPayload] = useState(JSON.stringify({
     title: "Plan de Movilidad y Cadena Posterior",
@@ -560,7 +662,34 @@ export default function App() {
             )}
           </div>
         </div>
+
+        {/* ======================================================== */}
+        {/* BARRA DE CITA MOTIVACIONAL ROTATIVA (TONY ROBBINS, BRIAN TRACY, ETC.) */}
+        {/* ======================================================== */}
+        <div className="max-w-md mx-auto mt-2 px-1">
+          <div 
+            onClick={changeQuote}
+            className="group bg-gradient-to-r from-indigo-950/60 via-slate-900/80 to-amber-950/60 border border-slate-800/80 hover:border-indigo-500/50 rounded-2xl px-3 py-2 flex items-center justify-between gap-2 cursor-pointer transition shadow-sm hover:shadow-indigo-500/10 active:scale-[0.98]"
+            title="Toca para cambiar la frase motivacional"
+          >
+            <div className="flex items-center gap-2 overflow-hidden">
+              <span className="text-amber-400 text-xs shrink-0">💡</span>
+              <div className="overflow-hidden">
+                <p className="text-[11px] text-slate-200 italic truncate font-medium">
+                  "{motivationalQuotes[currentQuoteIndex].quote}"
+                </p>
+                <p className="text-[9px] text-amber-400 font-bold uppercase tracking-wider">
+                  — {motivationalQuotes[currentQuoteIndex].author}
+                </p>
+              </div>
+            </div>
+            <button className="text-slate-500 group-hover:text-indigo-400 shrink-0 p-1">
+              <RefreshCw className="w-3 h-3 group-hover:rotate-180 transition-transform duration-500" />
+            </button>
+          </div>
+        </div>
       </header>
+
 
       {/* Main Content Area */}
       <main className="max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 flex-1 flex flex-col gap-4">
@@ -961,20 +1090,25 @@ export default function App() {
         )}
 
         {/* ======================================================== */}
-        {/* PESTAÑA 3: CATÁLOGO DE PLANES */}
+        {/* PESTAÑA 3: CATÁLOGO DE PLANES Y PLANTILLAS */}
         {/* ======================================================== */}
         {activeTab === 'programs' && (
           <div className="space-y-4">
-            <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-indigo-400" /> Catálogo de Programas
-              </h2>
-              <p className="text-xs text-slate-400">Inscríbete para cargar los ejercicios a tu día a día</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-indigo-400" /> Catálogo de Programas
+                </h2>
+                <p className="text-xs text-slate-400">Explora o previsualiza plantillas antes de activarlas</p>
+              </div>
+              <span className="text-[10px] font-mono bg-indigo-950 text-indigo-300 border border-indigo-800/60 px-2 py-0.5 rounded-full">
+                {programs.length} disponibles
+              </span>
             </div>
 
             <div className="space-y-3">
               {programs.map((program) => (
-                <div key={program.id} className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
+                <div key={program.id} className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between hover:border-slate-700 transition">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800/50">
@@ -988,30 +1122,44 @@ export default function App() {
                     {/* Botón para colapsar / expandir lista de ejercicios */}
                     <button 
                       onClick={() => toggleBlockCollapse(`prog_${program.id}`)}
-                      className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 mb-2"
+                      className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 mb-3"
                     >
-                      {collapsedBlocks[`prog_${program.id}`] ? 'Ocultar ejercicios' : `Ver ${program.items?.length || 0} ejercicios incluidos`}
+                      {collapsedBlocks[`prog_${program.id}`] ? 'Ocultar desglose' : `Ver ${program.items?.length || 0} hábitos/ítems incluidos`}
                       {collapsedBlocks[`prog_${program.id}`] ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                     </button>
 
                     {collapsedBlocks[`prog_${program.id}`] && (
-                      <div className="space-y-1 mb-3 max-h-48 overflow-y-auto">
-                        {program.items?.map(it => (
-                          <div key={it.id} className="text-[11px] bg-slate-950/60 p-2 rounded-lg text-slate-300 flex justify-between">
-                            <span>{it.title}</span>
-                            <span className="text-slate-400 font-mono">{it.target_value} {it.unit}</span>
+                      <div className="space-y-1.5 mb-3 max-h-52 overflow-y-auto pr-1">
+                        {program.items?.map((it, idx) => (
+                          <div key={it.id || idx} className="text-[11px] bg-slate-950/80 border border-slate-800/60 p-2.5 rounded-xl text-slate-300 flex items-start justify-between gap-2">
+                            <div>
+                              <p className="font-medium text-white">{it.title}</p>
+                              {it.description && <p className="text-[10px] text-slate-400 mt-0.5">{it.description}</p>}
+                            </div>
+                            <span className="text-[10px] text-amber-400 font-mono font-bold shrink-0 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                              {it.target_value} {it.unit}
+                            </span>
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  <button 
-                    onClick={() => handleEnroll(program.id)}
-                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md active:scale-95"
-                  >
-                    <Play className="w-3.5 h-3.5 fill-white" /> Activar este Plan
-                  </button>
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
+                    <button 
+                      onClick={() => setPreviewProgram(program)}
+                      className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-indigo-400" /> Ver Plantilla
+                    </button>
+
+                    <button 
+                      onClick={() => handleEnroll(program.id)}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-white" /> Inscribirme
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1019,7 +1167,94 @@ export default function App() {
         )}
 
         {/* ======================================================== */}
-        {/* PESTAÑA 4: INYECCIÓN API */}
+        {/* PESTAÑA 4: VISION BOARD Y GRILL-ME INTERACTIVO */}
+        {/* ======================================================== */}
+        {activeTab === 'vision' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-amber-400" /> Mi Vision Board Personal
+                </h2>
+                <p className="text-xs text-slate-400">Metas maestras, horizonte temporal y por qué lo haces</p>
+              </div>
+
+              <button 
+                onClick={() => {
+                  setGrillStep(0);
+                  setGrillAnswers({ area: 'Cuerpo & Salud', goal: '', why: '', deadline: '', commitment: '90%' });
+                  setShowGrillMeModal(true);
+                }}
+                className="bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex items-center gap-1.5"
+              >
+                <Sparkles className="w-3.5 h-3.5" /> Grill Me
+              </button>
+            </div>
+
+            {/* Banner explicativo del Vision Board */}
+            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-3 flex items-start gap-2.5">
+              <span className="text-base">🎯</span>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                El Vision Board conecta tus hábitos diarios con tus metas trascendentales de vida. Toca cualquier tarjeta para editarla o usa el botón <strong>"Grill Me"</strong> para que el asistente te entreviste y formule una nueva meta precisa con la fórmula 3P.
+              </p>
+            </div>
+
+            {/* Cuadrícula o lista de Tarjetas del Vision Board */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {visionCards.map((card) => (
+                <div 
+                  key={card.id} 
+                  className={`bg-gradient-to-b ${card.color} p-4 rounded-2xl border flex flex-col justify-between shadow-lg relative group transition hover:border-slate-500/50`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-2xl">{card.emoji}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-mono text-slate-400 bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800">
+                          📅 {card.deadline}
+                        </span>
+                        <button 
+                          onClick={() => setEditingCard(card)}
+                          className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition"
+                          title="Editar Meta"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <span className="text-[9px] uppercase font-bold tracking-wider text-amber-400">
+                      {card.category}
+                    </span>
+                    <h3 className="font-bold text-sm text-white mt-0.5 leading-snug">
+                      {card.title}
+                    </h3>
+
+                    <p className="text-[11px] text-slate-300/90 mt-2 bg-slate-950/40 p-2 rounded-xl border border-slate-800/40 leading-relaxed italic">
+                      "{card.why}"
+                    </p>
+                  </div>
+
+                  <div className="mt-3 pt-2.5 border-t border-slate-800/60">
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+                      <span>Progreso estimado:</span>
+                      <span className="font-mono font-bold text-white">{card.progress}%</span>
+                    </div>
+                    <div className="w-full bg-slate-950/80 h-1.5 rounded-full overflow-hidden border border-slate-800">
+                      <div 
+                        className="bg-gradient-to-r from-amber-400 to-indigo-500 h-full rounded-full transition-all duration-500"
+                        style={{ width: `${card.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* PESTAÑA 5: INYECCIÓN API */}
         {/* ======================================================== */}
         {activeTab === 'inject' && (
           <div className="space-y-3">
@@ -1055,7 +1290,7 @@ export default function App() {
         <div className="max-w-md mx-auto flex items-center justify-around">
           <button 
             onClick={() => { setActiveTab('today'); setSelectedPlanName(null); }}
-            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
               activeTab === 'today' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -1065,17 +1300,27 @@ export default function App() {
 
           <button 
             onClick={() => setActiveTab('calendar')}
-            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
               activeTab === 'calendar' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <Calendar className="w-5 h-5" />
-            <span className="text-[10px]">SLA Semanal</span>
+            <span className="text-[10px]">SLA</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('vision')}
+            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
+              activeTab === 'vision' ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Compass className="w-5 h-5" />
+            <span className="text-[10px]">Vision Board</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('programs')}
-            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
               activeTab === 'programs' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -1085,7 +1330,7 @@ export default function App() {
 
           <button 
             onClick={() => setActiveTab('inject')}
-            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
               activeTab === 'inject' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -1094,6 +1339,7 @@ export default function App() {
           </button>
         </div>
       </nav>
+
 
       {/* Auth Modal */}
       {showAuthModal && (
@@ -1326,6 +1572,335 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* ======================================================== */}
+      {/* MODAL 1: PREVISUALIZAR PLANTILLA DEL CATÁLOGO */}
+      {/* ======================================================== */}
+      {previewProgram && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+                  <Eye className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800/50">
+                    {previewProgram.category}
+                  </span>
+                  <h3 className="text-sm font-bold text-white mt-1">{previewProgram.title}</h3>
+                </div>
+              </div>
+              <button onClick={() => setPreviewProgram(null)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
+            </div>
+
+            <p className="text-xs text-slate-300 my-3 leading-relaxed bg-slate-950/60 p-3 rounded-2xl border border-slate-800/60">
+              {previewProgram.description}
+            </p>
+
+            <div className="flex items-center justify-between text-xs text-slate-400 mb-2 px-1">
+              <span className="font-semibold text-white">Estructura de la Plantilla ({previewProgram.items?.length || 0} ítems):</span>
+              <span className="font-mono text-amber-400 font-bold">{previewProgram.duration_days} días</span>
+            </div>
+
+            <div className="overflow-y-auto space-y-2 pr-1 flex-1 mb-3">
+              {previewProgram.items?.map((it, idx) => (
+                <div key={it.id || idx} className="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-slate-800 text-slate-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-white">{it.title}</p>
+                      {it.description && <p className="text-[11px] text-slate-400 mt-0.5">{it.description}</p>}
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-mono text-indigo-300 bg-indigo-950/80 border border-indigo-900 px-2 py-0.5 rounded-lg shrink-0">
+                    {it.target_value} {it.unit}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+              <button 
+                onClick={() => setPreviewProgram(null)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
+              >
+                Cerrar Previa
+              </button>
+              <button 
+                onClick={() => {
+                  const pId = previewProgram.id;
+                  setPreviewProgram(null);
+                  handleEnroll(pId);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5"
+              >
+                <Play className="w-3.5 h-3.5 fill-white" /> Cargar & Usar Esta Plantilla
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 2: ASISTENTE "GRILL ME" PARA DESCUBRIR METAS 3P */}
+      {/* ======================================================== */}
+      {showGrillMeModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-4">
+            
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-800/50">
+                    Grill Me Wizard • Paso {grillStep + 1} de 4
+                  </span>
+                  <h3 className="text-sm font-bold text-white mt-1">Descubridor de Metas 3P</h3>
+                </div>
+              </div>
+              <button onClick={() => setShowGrillMeModal(false)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
+            </div>
+
+            {/* Paso 0: Área de Vida */}
+            {grillStep === 0 && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-300 font-medium">
+                  1. ¿En qué dimensión de tu vida sientes que necesitas dar un salto cuántico y no puedes postergar más?
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Cuerpo & Salud", icon: "🦵" },
+                    { label: "Software & Negocio", icon: "💻" },
+                    { label: "Música & Arte", icon: "🎵" },
+                    { label: "Hogar & Entorno", icon: "🏡" }
+                  ].map(item => (
+                    <button
+                      key={item.label}
+                      onClick={() => setGrillAnswers({ ...grillAnswers, area: item.label })}
+                      className={`p-3 rounded-2xl border text-left flex items-center gap-2 transition ${
+                        grillAnswers.area === item.label
+                          ? 'bg-amber-950/60 border-amber-500 text-white font-bold'
+                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                      }`}
+                    >
+                      <span className="text-xl">{item.icon}</span>
+                      <span className="text-xs">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Paso 1: Redacción en Fórmula 3P */}
+            {grillStep === 1 && (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-white font-medium mb-1">
+                    2. Define tu meta en Fórmula 3P (Presente, Positivo, Personal):
+                  </p>
+                  <p className="text-[11px] text-amber-300/80 italic">
+                    Ejemplo: "Yo peso 85 kg con tono muscular atlético..." o "Yo consigo mis primeros 10 clientes de pago..."
+                  </p>
+                </div>
+                <textarea
+                  value={grillAnswers.goal}
+                  onChange={(e) => setGrillAnswers({ ...grillAnswers, goal: e.target.value })}
+                  placeholder="Yo ..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80 h-24"
+                />
+              </div>
+            )}
+
+            {/* Paso 2: Por qué es innegociable */}
+            {grillStep === 2 && (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-white font-medium mb-1">
+                    3. ¿Por qué esto es vital para ti? ¿Qué pasa si NO lo cumples?
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    La motivación superficial se agota en 3 días. El motivo profundo te hace levantar a las 6 AM sin dudar.
+                  </p>
+                </div>
+                <textarea
+                  value={grillAnswers.why}
+                  onChange={(e) => setGrillAnswers({ ...grillAnswers, why: e.target.value })}
+                  placeholder="Porque quiero libertad total, jugar al fútbol sin dolor y estar orgulloso de mi disciplina..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80 h-24"
+                />
+              </div>
+            )}
+
+            {/* Paso 3: Fecha Límite */}
+            {grillStep === 3 && (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-white font-medium mb-1">
+                    4. ¿Cuál es tu fecha límite de entrega exacta?
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    Una meta sin fecha es solo un deseo que el cerebro pospone indefinidamente.
+                  </p>
+                </div>
+                <input
+                  type="text"
+                  value={grillAnswers.deadline}
+                  onChange={(e) => setGrillAnswers({ ...grillAnswers, deadline: e.target.value })}
+                  placeholder="ej. 31/05/2027 o 15/12/2026"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80"
+                />
+              </div>
+            )}
+
+            {/* Botones de navegación del Wizard */}
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+              {grillStep > 0 && (
+                <button
+                  onClick={() => setGrillStep(prev => prev - 1)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
+                >
+                  Atrás
+                </button>
+              )}
+
+              {grillStep < 3 ? (
+                <button
+                  onClick={() => setGrillStep(prev => prev + 1)}
+                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition"
+                >
+                  Siguiente Pregunta →
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    const newCard: VisionCard = {
+                      id: `v-${Date.now()}`,
+                      category: grillAnswers.area,
+                      emoji: grillAnswers.area.includes('Salud') ? '🦵' : grillAnswers.area.includes('Software') ? '💻' : grillAnswers.area.includes('Música') ? '🎵' : '🏡',
+                      title: grillAnswers.goal.trim() || 'Meta sin título',
+                      why: grillAnswers.why.trim() || 'Compromiso de disciplina y excelencia',
+                      deadline: grillAnswers.deadline.trim() || 'Pronto',
+                      progress: 10,
+                      color: grillAnswers.area.includes('Salud') 
+                        ? 'from-emerald-950/60 to-emerald-900/20 border-emerald-500/40' 
+                        : grillAnswers.area.includes('Software')
+                        ? 'from-indigo-950/60 to-indigo-900/20 border-indigo-500/40'
+                        : 'from-amber-950/60 to-amber-900/20 border-amber-500/40'
+                    };
+                    setVisionCards(prev => [newCard, ...prev]);
+                    setShowGrillMeModal(false);
+                    setActiveTab('vision');
+                    triggerCelebration();
+                    setIslandMessage(`🎯 Nueva meta 3P añadida a tu Vision Board`);
+                    setIslandExpanded(true);
+                    setTimeout(() => setIslandExpanded(false), 4000);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-slate-950 font-black text-xs shadow-lg transition"
+                >
+                  ✨ Guardar en mi Vision Board
+                </button>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 3: EDITAR TARJETA DEL VISION BOARD */}
+      {/* ======================================================== */}
+      {editingCard && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-indigo-400" /> Editar Meta del Vision Board
+              </h3>
+              <button onClick={() => setEditingCard(null)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
+            </div>
+
+            <div>
+              <label className="text-[11px] text-slate-400 block mb-1">Título de la Meta (Fórmula 3P)</label>
+              <textarea
+                value={editingCard.title}
+                onChange={(e) => setEditingCard({ ...editingCard, title: e.target.value })}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none h-16"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] text-slate-400 block mb-1">El "Por Qué" (Motivo Profundo)</label>
+              <textarea
+                value={editingCard.why}
+                onChange={(e) => setEditingCard({ ...editingCard, why: e.target.value })}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none h-16"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[11px] text-slate-400 block mb-1">Fecha Límite</label>
+                <input
+                  type="text"
+                  value={editingCard.deadline}
+                  onChange={(e) => setEditingCard({ ...editingCard, deadline: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-slate-400 block mb-1">Progreso ({editingCard.progress}%)</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={editingCard.progress}
+                  onChange={(e) => setEditingCard({ ...editingCard, progress: Number(e.target.value) })}
+                  className="w-full accent-indigo-500 mt-2"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-slate-800 mt-1">
+              <button
+                onClick={() => {
+                  setVisionCards(prev => prev.filter(c => c.id !== editingCard.id));
+                  setEditingCard(null);
+                }}
+                className="text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1 p-2"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Eliminar
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setEditingCard(null)}
+                  className="px-3 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    setVisionCards(prev => prev.map(c => c.id === editingCard.id ? editingCard : c));
+                    setEditingCard(null);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition"
+                >
+                  Guardar Cambios
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
