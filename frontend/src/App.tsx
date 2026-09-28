@@ -125,6 +125,9 @@ export default function App() {
   // Agrupar visualmente por plan/programa dentro del Resumen de Hoy
   const [groupByPlan, setGroupByPlan] = useState<boolean>(true);
 
+  // Filtro de categorías para el Catálogo de Programas
+  const [selectedCatalogCategory, setSelectedCatalogCategory] = useState<string>('all');
+
   // Estado de colapsar / expandir bloques o categorías
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
 
@@ -832,23 +835,28 @@ export default function App() {
           </div>
         )}
 
-        {/* Frase Motivacional en 1 sola línea sutil y limpia */}
+        {/* Frase Motivacional Destacada y Completa (Sin recortar) */}
         <div className="max-w-2xl mx-auto mt-2 px-0.5">
           <div 
             onClick={changeQuote}
-            className="group bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 cursor-pointer transition"
-            title="Toca para rotar la frase"
+            className="group bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 hover:border-slate-700 border border-slate-800 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-3 cursor-pointer transition shadow-sm"
+            title="Toca para rotar la frase motivacional"
           >
-            <div className="flex items-center gap-2 overflow-hidden flex-1">
-              <span className="text-amber-500 text-xs shrink-0">“</span>
-              <p className="text-[11px] text-slate-300 italic truncate font-medium flex-1">
-                {motivationalQuotes[currentQuoteIndex].quote}
-              </p>
-              <span className="text-[10px] text-slate-400 shrink-0 font-medium hidden sm:inline">
-                — {motivationalQuotes[currentQuoteIndex].author}
-              </span>
+            <div className="flex items-start gap-2.5 flex-1 min-w-0">
+              <span className="text-amber-400 text-base font-serif font-black leading-none shrink-0 mt-0.5">“</span>
+              <div className="flex-1">
+                <p className="text-xs text-slate-200 italic font-medium leading-relaxed">
+                  {motivationalQuotes[currentQuoteIndex].quote}
+                </p>
+                <span className="text-[10px] text-amber-400/90 font-semibold block mt-1 tracking-wide">
+                  — {motivationalQuotes[currentQuoteIndex].author}
+                </span>
+              </div>
             </div>
-            <RefreshCw className="w-3 h-3 text-slate-400 group-hover:text-slate-200 shrink-0 group-hover:rotate-180 transition-transform duration-500" />
+            <div className="flex flex-col items-center gap-1 shrink-0 pl-1 border-l border-slate-800">
+              <RefreshCw className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-400 group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-[9px] text-slate-500 font-mono hidden sm:inline">rotar</span>
+            </div>
           </div>
         </div>
       </header>
@@ -1549,8 +1557,18 @@ export default function App() {
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-indigo-400" /> Matriz Semanal de SLA
                 </h2>
-                <p className="text-xs text-slate-400">Rendimiento día por día en los últimos 7 días</p>
+                <p className="text-xs text-slate-400">¿Para qué sirve? Mide tu nivel de acuerdo de servicio personal</p>
               </div>
+            </div>
+
+            {/* Explicación Pedagógica del SLA */}
+            <div className="bg-gradient-to-r from-indigo-950/40 via-slate-900 to-indigo-950/30 border border-indigo-900/40 p-3.5 rounded-2xl">
+              <h3 className="text-xs font-bold text-indigo-300 flex items-center gap-1.5 mb-1">
+                🛡️ ¿Qué es tu SLA (Service Level Agreement)?
+              </h3>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                El SLA no te pide perfección irreal del 100% todos los días; define un <strong>piso mínimo de cumplimiento (ej. 85%)</strong>. Si mantienes tus hábitos en verde dentro de la semana, tu sistema es sostenible y previene recaídas o abandono.
+              </p>
             </div>
 
             {/* Tarjeta Métricas Resumen */}
@@ -1641,8 +1659,31 @@ export default function App() {
               </span>
             </div>
 
+            {/* Barra de Filtros por Categoría */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+              {['all', 'Respiración', 'Fuerza & Fisioterapia', 'Disciplina & Mentalidad', 'Fitness & Salud', 'Desarrollo Personal', 'Foco & Disciplina'].map((cat) => {
+                const isSelected = selectedCatalogCategory === cat;
+                const label = cat === 'all' ? 'Todas' : cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCatalogCategory(cat)}
+                    className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition border ${
+                      isSelected
+                        ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                    }`}
+                  >
+                    {cat === 'Respiración' ? '🫁 ' : ''}{label}
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="space-y-3">
-              {programs.map((program) => (
+              {programs
+                .filter(p => selectedCatalogCategory === 'all' || p.category.toLowerCase().includes(selectedCatalogCategory.toLowerCase()))
+                .map((program) => (
                 <div key={program.id} className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between hover:border-slate-700 transition">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
