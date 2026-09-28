@@ -49,3 +49,23 @@ html, body {
   transition: transform 0.12s ease-out;
 }
 
+/* Guias visuales de respiracion ritmica */
+@keyframes breatheScale {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  50% { transform: scale(1.18); opacity: 1; filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.6)); }
+  100% { transform: scale(0.85); opacity: 0.7; }
+}
+
+@keyframes breatheRipple {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.animate-breathe-circle {
+  animation: breatheScale 8s ease-in-out infinite;
+}
+
+.animate-breathe-ripple {
+  animation: breatheRipple 4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+

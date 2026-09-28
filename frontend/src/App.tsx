@@ -6,7 +6,8 @@ import {
   User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
   Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
   ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle,
-  Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks
+  Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks,
+  Wind, Pause
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -172,6 +173,14 @@ export default function App() {
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const [confirmingHabit, setConfirmingHabit] = useState<Habit | null>(null);
   const [restTimer, setRestTimer] = useState<number | null>(null);
+
+  // Guía Visual Interactiva de Respiración Táctica (Box, 4-7-8, Suspiro Fisiológico, Coherencia)
+  const [activeBreathingHabit, setActiveBreathingHabit] = useState<Habit | null>(null);
+  const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale' | 'hold_empty'>('inhale');
+  const [breathingSecondsLeft, setBreathingSecondsLeft] = useState(4);
+  const [breathingTotalSeconds, setBreathingTotalSeconds] = useState(180); // 3 minutos por sesión
+  const [breathingIsRunning, setBreathingIsRunning] = useState(false);
+  const [breathingCompletedRounds, setBreathingCompletedRounds] = useState(0);
 
   // Modal para inspeccionar plantilla en el Catálogo antes de inscribir
   const [previewProgram, setPreviewProgram] = useState<Program | null>(null);
@@ -379,6 +388,60 @@ export default function App() {
     return () => clearInterval(interval);
   }, [restTimer]);
 
+  // Loop de Respiración Táctica (Box Breathing: 4s Inhala, 4s Retiene, 4s Exhala, 4s Retiene vacío)
+  useEffect(() => {
+    if (!activeBreathingHabit || !breathingIsRunning) return;
+
+    const interval = setInterval(() => {
+      setBreathingTotalSeconds((total) => {
+        if (total <= 1) {
+          // Completado
+          setBreathingIsRunning(false);
+          toggleHabit(activeBreathingHabit);
+          setIslandMessage("✨ Sesión de Respiración completada con éxito. Sistema nervioso regulado.");
+          setIslandExpanded(true);
+          setTimeout(() => setIslandExpanded(false), 4500);
+          return 0;
+        }
+        return total - 1;
+      });
+
+      setBreathingSecondsLeft((sec) => {
+        if (sec <= 1) {
+          // Transición de fase
+          // Box Breathing standard: Inhale 4s -> Hold 4s -> Exhale 4s -> Hold Empty 4s
+          const isPhysiologicalSigh = activeBreathingHabit.title.toLowerCase().includes('suspiro') || activeBreathingHabit.title.toLowerCase().includes('fisiol');
+          const is478 = activeBreathingHabit.title.includes('4-7-8');
+
+          if (is478) {
+            if (breathingPhase === 'inhale') { setBreathingPhase('hold'); return 7; }
+            if (breathingPhase === 'hold') { setBreathingPhase('exhale'); return 8; }
+            setBreathingPhase('inhale');
+            setBreathingCompletedRounds(r => r + 1);
+            return 4;
+          } else if (isPhysiologicalSigh) {
+            if (breathingPhase === 'inhale') { setBreathingPhase('hold'); return 1; }
+            if (breathingPhase === 'hold') { setBreathingPhase('exhale'); return 6; }
+            setBreathingPhase('inhale');
+            setBreathingCompletedRounds(r => r + 1);
+            return 3;
+          } else {
+            // Box Breathing 4-4-4-4
+            if (breathingPhase === 'inhale') { setBreathingPhase('hold'); return 4; }
+            if (breathingPhase === 'hold') { setBreathingPhase('exhale'); return 4; }
+            if (breathingPhase === 'exhale') { setBreathingPhase('hold_empty'); return 4; }
+            setBreathingPhase('inhale');
+            setBreathingCompletedRounds(r => r + 1);
+            return 4;
+          }
+        }
+        return sec - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeBreathingHabit, breathingIsRunning, breathingPhase]);
+
   // Recordatorios periódicos del Coach (cada 45 minutos si quedan hábitos pendientes)
   useEffect(() => {
     const reminderInterval = setInterval(() => {
@@ -536,6 +599,17 @@ export default function App() {
     } catch (err) {
       console.error("Error al marcar hábito:", err);
     }
+  };
+
+  const startBreathingSession = (habit: Habit) => {
+    setActiveBreathingHabit(habit);
+    setBreathingPhase('inhale');
+    setBreathingSecondsLeft(4);
+    // Configurar duración según target_value si es numérico (ej. 3 min)
+    const minutes = (habit.habit_type === 'numeric' && habit.target_value > 0) ? habit.target_value : 3;
+    setBreathingTotalSeconds(Math.round(minutes * 60));
+    setBreathingCompletedRounds(0);
+    setBreathingIsRunning(true);
   };
 
   const confirmBrianTracyCheck = async () => {
@@ -1101,6 +1175,18 @@ export default function App() {
 
                                           {/* Controles de registro rápido */}
                                           <div className="shrink-0 flex items-center gap-1.5">
+                                            {/* Botón de Guía Visual Interactiva de Respiración si corresponde */}
+                                            {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
+                                              <button
+                                                onClick={() => startBreathingSession(habit)}
+                                                className="bg-indigo-950/90 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                                title="Iniciar Guía Visual Rítmica Interactiva"
+                                              >
+                                                <Wind className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                                                <span>Guiar</span>
+                                              </button>
+                                            )}
+
                                             {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
                                               <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
                                                 <button
@@ -1209,6 +1295,18 @@ export default function App() {
 
                                   {/* Acciones rápidas según tipo */}
                                   <div className="shrink-0 flex items-center gap-1.5">
+                                    {/* Botón de Guía Visual Interactiva de Respiración si corresponde */}
+                                    {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
+                                      <button
+                                        onClick={() => startBreathingSession(habit)}
+                                        className="bg-indigo-950/90 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                        title="Iniciar Guía Visual Rítmica Interactiva"
+                                      >
+                                        <Wind className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                                        <span>Guiar</span>
+                                      </button>
+                                    )}
+
                                     {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
                                       <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
                                         <button
@@ -1522,20 +1620,30 @@ export default function App() {
                                 </div>
                               </div>
                             ) : (
-                              /* Botón Toggle Booleano */
-                              <div className="flex justify-end">
-                                <button 
-                                  onClick={() => toggleHabit(habit)}
-                                  className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 ${
-                                    isCompleted 
-                                      ? 'bg-emerald-600 text-white' 
-                                      : 'bg-indigo-600 text-white hover:bg-indigo-500'
-                                  }`}
+                              <div className="flex items-center justify-end gap-2">
+                              {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
+                                <button
+                                  onClick={() => startBreathingSession(habit)}
+                                  className="bg-indigo-950 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                  title="Iniciar Guía Visual Rítmica Interactiva"
                                 >
-                                  {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
-                                  <span>{isCompleted ? 'Completado' : 'Marcar como Hecho'}</span>
+                                  <Wind className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                                  <span>Iniciar Guía Rítmica</span>
                                 </button>
-                              </div>
+                              )}
+
+                              <button 
+                                onClick={() => toggleHabit(habit)}
+                                className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 ${
+                                  isCompleted 
+                                    ? 'bg-emerald-600 text-white' 
+                                    : 'bg-indigo-600 text-white hover:bg-indigo-500'
+                                }`}
+                              >
+                                {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                                <span>{isCompleted ? 'Completado' : 'Marcar como Hecho'}</span>
+                              </button>
+                            </div>
                             )}
                           </div>
                         )}
@@ -2494,6 +2602,115 @@ export default function App() {
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+      {/* ======================================================== */}
+      {/* MODAL / ENTRENADOR VISUAL INTERACTIVO DE RESPIRACIÓN    */}
+      {/* ======================================================== */}
+      {activeBreathingHabit && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+            {/* Botón cerrar */}
+            <button
+              onClick={() => {
+                setActiveBreathingHabit(null);
+                setBreathingIsRunning(false);
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800/60 transition"
+            >
+              ✕
+            </button>
+
+            {/* Cabecera y Técnica */}
+            <div className="mb-4">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400 bg-indigo-950/80 px-2.5 py-1 rounded-full border border-indigo-800/50">
+                Guía Visual Rítmica
+              </span>
+              <h3 className="text-base font-bold text-white mt-2">
+                {cleanTitle(activeBreathingHabit.title)}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1 max-w-xs">
+                Sigue la expansión de la esfera. Inhala profundamente por la nariz y exhala por la boca.
+              </p>
+            </div>
+
+            {/* Orbe Visual de Respiración con Animaciones de Escala y Resplandor */}
+            <div className="my-6 relative flex items-center justify-center w-56 h-56">
+              {/* Círculo de onda expansiva */}
+              <div 
+                className={`absolute inset-0 rounded-full border-2 border-indigo-500/30 transition-all duration-1000 ${
+                  breathingIsRunning && breathingPhase === 'inhale' ? 'animate-breathe-ripple scale-125 opacity-70' : 'scale-90 opacity-20'
+                }`} 
+              />
+              
+              {/* Esfera central interactiva */}
+              <div 
+                className={`w-36 h-36 rounded-full flex flex-col items-center justify-center shadow-2xl transition-all duration-1000 ease-in-out ${
+                  breathingPhase === 'inhale'
+                    ? 'scale-125 bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-800 shadow-indigo-500/50'
+                    : breathingPhase === 'hold'
+                    ? 'scale-125 bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 shadow-amber-500/50'
+                    : breathingPhase === 'exhale'
+                    ? 'scale-90 bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 shadow-teal-500/40'
+                    : 'scale-85 bg-gradient-to-br from-slate-800 via-slate-850 to-slate-900 shadow-slate-700/30 border border-slate-700'
+                }`}
+              >
+                <span className="text-xs font-black uppercase tracking-wider text-white">
+                  {breathingPhase === 'inhale' && 'Inhala'}
+                  {breathingPhase === 'hold' && 'Retén'}
+                  {breathingPhase === 'exhale' && 'Exhala'}
+                  {breathingPhase === 'hold_empty' && 'Pausa'}
+                </span>
+                <span className="text-3xl font-black font-mono text-white mt-0.5">
+                  {breathingSecondsLeft}s
+                </span>
+              </div>
+            </div>
+
+            {/* Progreso de la sesión y rondas */}
+            <div className="w-full bg-slate-950 p-3 rounded-2xl border border-slate-800/80 mb-5 flex items-center justify-between text-xs">
+              <div className="text-left">
+                <span className="text-[10px] text-slate-400 block uppercase font-bold">Tiempo restante</span>
+                <span className="font-mono font-bold text-white">
+                  {Math.floor(breathingTotalSeconds / 60)}:{(breathingTotalSeconds % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-slate-400 block uppercase font-bold">Ciclos completados</span>
+                <span className="font-mono font-bold text-indigo-400">
+                  {breathingCompletedRounds} rondas
+                </span>
+              </div>
+            </div>
+
+            {/* Controles del Entrenador */}
+            <div className="flex items-center gap-2 w-full">
+              <button
+                onClick={() => setBreathingIsRunning(!breathingIsRunning)}
+                className={`flex-1 font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md active:scale-95 ${
+                  breathingIsRunning
+                    ? 'bg-amber-600 hover:bg-amber-500 text-white'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
+                }`}
+              >
+                {breathingIsRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white" />}
+                <span>{breathingIsRunning ? 'Pausar Guía' : 'Reanudar Guía'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  toggleHabit(activeBreathingHabit);
+                  setActiveBreathingHabit(null);
+                  setBreathingIsRunning(false);
+                }}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition flex items-center gap-1.5 shadow-md active:scale-95 shrink-0"
+                title="Marcar como cumplido ahora"
+              >
+                <Check className="w-4 h-4" />
+                <span>Listo</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
