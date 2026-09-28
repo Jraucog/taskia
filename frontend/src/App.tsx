@@ -5,7 +5,7 @@ import {
   Layers, Play, RefreshCw,
   User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
   Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
-  ArrowLeft, CheckSquare, Sparkles
+  ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle
 } from 'lucide-react';
 
 const API_BASE = `http://${window.location.hostname}:8000/api`;
@@ -106,8 +106,23 @@ export default function App() {
   // Estado de colapsar / expandir bloques o categorías
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
 
-  // Temporizador de descanso
+  // Estado para modal de 10 Metas Oficiales de Referencia y Pregunta de Control
+  const [showGoalsModal, setShowGoalsModal] = useState(false);
+  const [confirmingHabit, setConfirmingHabit] = useState<Habit | null>(null);
   const [restTimer, setRestTimer] = useState<number | null>(null);
+
+  const brianTracy10Goals = [
+    { id: 1, text: "Yo peso 91 kg con energía y constancia diaria para el 31 de octubre de 2026.", date: "31/10/2026", cat: "Físico" },
+    { id: 2, text: "Yo cumplo mi rutina de 3 entrenamientos semanales más 1 partido de fútbol cada semana.", date: "Semanal", cat: "Deporte" },
+    { id: 3, text: "Yo camino un mínimo de 8.000 pasos diarios durante mi jornada laboral de lunes a viernes.", date: "Lunes a Viernes", cat: "Salud" },
+    { id: 4, text: "Yo tengo completamente cotizado, medido y seleccionado el proveedor de termopaneles para mi casa para el 15 de noviembre de 2026.", date: "15/11/2026", cat: "Hogar" },
+    { id: 5, text: "Yo produzco y tengo lista la maqueta (beat y estructura) del primer track de mi proyecto musical para el 30 de noviembre de 2026.", date: "30/11/2026", cat: "Música" },
+    { id: 6, text: "Yo defino y termino el prototipo funcional (MVP) de mi proyecto de desarrollo de software para el 15 de diciembre de 2026.", date: "15/12/2026", cat: "Software" },
+    { id: 7, text: "Yo peso 85 kg con excelente tono muscular y resistencia para el 28 de febrero de 2027.", date: "28/02/2027", cat: "Físico" },
+    { id: 8, text: "Yo tengo instalados y funcionando los termopaneles en toda mi casa para el 31 de marzo de 2027.", date: "31/03/2027", cat: "Hogar" },
+    { id: 9, text: "Yo lanzo mi primer single oficial terminado y masterizado en plataformas para el 30 de abril de 2027.", date: "30/04/2027", cat: "Música" },
+    { id: 10, text: "Yo genero mis primeros clientes de pago monetizando mi software para el 31 de mayo de 2027 (camino a los 100M anuales).", date: "31/05/2027", cat: "Negocios" },
+  ];
 
   const [jsonPayload, setJsonPayload] = useState(JSON.stringify({
     title: "Plan de Movilidad y Cadena Posterior",
@@ -207,12 +222,29 @@ export default function App() {
     fetchData();
   };
 
-  const toggleHabit = async (habitId: number) => {
+  const toggleHabit = async (habit: Habit) => {
+    // Si es del reto Brian Tracy y no está completado aún, mostrar la pregunta de control primero
+    if (getPlanNameFromHabit(habit).toLowerCase().includes('brian tracy') && !habit.today_log?.completed) {
+      setConfirmingHabit(habit);
+      return;
+    }
+
     try {
-      await axios.post(`${API_BASE}/habits/${habitId}/toggle_today/`, {}, getHeaders());
+      await axios.post(`${API_BASE}/habits/${habit.id}/toggle_today/`, {}, getHeaders());
       fetchData();
     } catch (err) {
       console.error("Error al marcar hábito:", err);
+    }
+  };
+
+  const confirmBrianTracyCheck = async () => {
+    if (!confirmingHabit) return;
+    try {
+      await axios.post(`${API_BASE}/habits/${confirmingHabit.id}/toggle_today/`, {}, getHeaders());
+      setConfirmingHabit(null);
+      fetchData();
+    } catch (err) {
+      console.error("Error al confirmar día:", err);
     }
   };
 
@@ -495,11 +527,21 @@ export default function App() {
                     />
                   </div>
 
-                  {/* Regla de reinicio si es el reto Brian Tracy */}
+                  {/* Regla de reinicio si es el reto Brian Tracy y botón para ver las 10 metas */}
                   {selectedPlanName.toLowerCase().includes('brian tracy') && (
-                    <p className="text-[11px] text-amber-300/80 bg-amber-950/40 p-2 rounded-xl border border-amber-900/40 mt-3 flex items-center gap-1.5">
-                      ⚠️ <strong>Regla del Reto:</strong> Si fallas un día, el compromiso es reiniciar el ciclo a 0/21.
-                    </p>
+                    <div className="mt-3 space-y-2">
+                      <p className="text-[11px] text-amber-300/80 bg-amber-950/40 p-2 rounded-xl border border-amber-900/40 flex items-center gap-1.5">
+                        ⚠️ <strong>Regla del Reto:</strong> Se escriben a mano sin mirar el día anterior. Si fallas un día, el ciclo vuelve a 0/21.
+                      </p>
+
+                      <button 
+                        onClick={() => setShowGoalsModal(true)}
+                        className="w-full bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold text-xs py-2 px-3 rounded-xl border border-amber-500/30 flex items-center justify-center gap-2 transition shadow-sm"
+                      >
+                        <BookOpen className="w-4 h-4 text-amber-400" />
+                        <span>Ver Mis 10 Metas Oficiales de Referencia (Fórmula 3P)</span>
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -595,7 +637,7 @@ export default function App() {
                               /* Botón Toggle Booleano */
                               <div className="flex justify-end">
                                 <button 
-                                  onClick={() => toggleHabit(habit.id)}
+                                  onClick={() => toggleHabit(habit)}
                                   className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 ${
                                     isCompleted 
                                       ? 'bg-emerald-600 text-white' 
@@ -908,6 +950,97 @@ export default function App() {
                 className="text-[11px] text-slate-400 hover:text-indigo-400"
               >
                 {isRegister ? '¿Ya tienes cuenta? Ingresa' : '¿No tienes cuenta? Regístrate'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de 10 Metas Oficiales de Referencia */}
+      {showGoalsModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">10 Metas Oficiales (Fórmula 3P)</h3>
+                  <p className="text-[11px] text-slate-400">Referencia del Cuaderno de Brian Tracy</p>
+                </div>
+              </div>
+              <button onClick={() => setShowGoalsModal(false)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
+            </div>
+
+            <div className="text-[11px] text-amber-300/80 bg-amber-950/30 p-2.5 rounded-xl border border-amber-900/30 my-3">
+              💡 <em>Recuerda: Cada mañana debes redactarlas en tu cuaderno físico a mano y de memoria, sin mirar las anotaciones anteriores.</em>
+            </div>
+
+            <div className="overflow-y-auto space-y-2.5 pr-1 flex-1">
+              {brianTracy10Goals.map(goal => (
+                <div key={goal.id} className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80 flex items-start gap-2.5">
+                  <span className="w-5 h-5 shrink-0 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold flex items-center justify-center mt-0.5">
+                    {goal.id}
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-xs text-white leading-relaxed font-medium">{goal.text}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">
+                        📅 {goal.date}
+                      </span>
+                      <span className="text-[10px] bg-indigo-950 text-indigo-300 px-2 py-0.5 rounded">
+                        {goal.cat}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => setShowGoalsModal(false)}
+              className="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition"
+            >
+              Cerrar y Volver al Tablero
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal / Pregunta de Control Diaria para Brian Tracy */}
+      {confirmingHabit && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-sm w-full shadow-2xl text-center flex flex-col gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 mx-auto flex items-center justify-center border border-amber-500/20">
+              <HelpCircle className="w-6 h-6" />
+            </div>
+
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-800/50">
+                Pregunta de Control Diaria
+              </span>
+              <h3 className="text-sm font-bold text-white mt-2">
+                {cleanTitle(confirmingHabit.title)}
+              </h3>
+              <p className="text-xs text-slate-300 mt-3 p-3 bg-slate-950 rounded-2xl border border-slate-800 font-medium leading-relaxed">
+                "¿Hiciste hoy la acción prioritaria para mover tu meta más importante?"
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <button 
+                onClick={() => setConfirmingHabit(null)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
+              >
+                Aún no
+              </button>
+              
+              <button 
+                onClick={confirmBrianTracyCheck}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5"
+              >
+                <Check className="w-4 h-4" /> Sí, cumplido
               </button>
             </div>
           </div>
