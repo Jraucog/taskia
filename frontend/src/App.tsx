@@ -4,7 +4,8 @@ import {
   CheckCircle2, Circle, Flame, Zap, 
   Layers, Play, RefreshCw,
   User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
-  Timer, Check, Plus, Minus
+  Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
+  ArrowLeft, CheckSquare, Sparkles
 } from 'lucide-react';
 
 const API_BASE = `http://${window.location.hostname}:8000/api`;
@@ -24,6 +25,7 @@ interface Habit {
   target_value: number;
   unit: string;
   sla_target_percent: number;
+  enrollment?: number | null;
   today_log?: {
     completed: boolean;
     value: number;
@@ -70,6 +72,14 @@ interface MetricsSummary {
   at_risk_habits: number;
 }
 
+interface ProgramGroup {
+  name: string;
+  habits: Habit[];
+  completedCount: number;
+  totalCount: number;
+  progressPercent: number;
+}
+
 export default function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('taskia_token'));
@@ -87,10 +97,16 @@ export default function App() {
   const [metrics, setMetrics] = useState<MetricsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Navegación principal intuitiva
-  const [viewMode, setViewMode] = useState<'workout' | 'habits' | 'calendar' | 'programs' | 'inject'>('workout');
+  // Navegación principal
+  const [activeTab, setActiveTab] = useState<'today' | 'calendar' | 'programs' | 'inject'>('today');
 
-  // Temporizador de descanso para entrenar
+  // Estado de navegación tipo carpeta: entrar dentro de un plan
+  const [selectedPlanName, setSelectedPlanName] = useState<string | null>(null);
+
+  // Estado de colapsar / expandir bloques o categorías
+  const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
+
+  // Temporizador de descanso
   const [restTimer, setRestTimer] = useState<number | null>(null);
 
   const [jsonPayload, setJsonPayload] = useState(JSON.stringify({
@@ -150,7 +166,6 @@ export default function App() {
     fetchData();
   }, [authToken]);
 
-  // Countdown para el temporizador de descanso
   useEffect(() => {
     if (restTimer === null || restTimer <= 0) return;
     const interval = setInterval(() => {
@@ -158,6 +173,13 @@ export default function App() {
     }, 1000);
     return () => clearInterval(interval);
   }, [restTimer]);
+
+  const toggleBlockCollapse = (blockKey: string) => {
+    setCollapsedBlocks(prev => ({
+      ...prev,
+      [blockKey]: !prev[blockKey]
+    }));
+  };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,7 +207,6 @@ export default function App() {
     fetchData();
   };
 
-  // Toggle rápido o incremento de series
   const toggleHabit = async (habitId: number) => {
     try {
       await axios.post(`${API_BASE}/habits/${habitId}/toggle_today/`, {}, getHeaders());
@@ -199,7 +220,6 @@ export default function App() {
     try {
       await axios.post(`${API_BASE}/habits/${habitId}/toggle_today/`, { step: stepDelta }, getHeaders());
       if (stepDelta > 0) {
-        // Lanzar temporizador de descanso de 45 segundos
         setRestTimer(45);
       }
       fetchData();
@@ -213,7 +233,8 @@ export default function App() {
       const res = await axios.post(`${API_BASE}/programs/${programId}/enroll/`, {}, getHeaders());
       alert(res.data.message || "¡Programa inscrito correctamente!");
       fetchData();
-      setViewMode('workout');
+      setActiveTab('today');
+      setSelectedPlanName(null);
     } catch (err) {
       console.error("Error al inscribir programa:", err);
       alert("Error al inscribirse en el programa.");
@@ -233,445 +254,394 @@ export default function App() {
     }
   };
 
-  // Separar y limpiar tareas:
-  // 1. Tareas de Entrenamiento (TRX, series, ejercicios)
-  // 2. Hábitos Diarios Personales (agua, lectura, etc.)
+  // Helper para extraer nombre del plan o categoría a partir de títulos como "[Plan XYZ] Titulo"
+  const getPlanNameFromHabit = (habit: Habit) => {
+    const match = habit.title.match(/^\[(.*?)\]/);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+    return "Hábitos Personales";
+  };
+
   const cleanTitle = (rawTitle: string) => {
     return rawTitle.replace(/^\[.*?\]\s*/, '');
   };
 
-  const workoutHabits = habits.filter(h => 
-    h.unit === 'series' || 
-    h.title.toLowerCase().includes('trx') || 
-    h.title.toLowerCase().includes('squat') ||
-    h.title.toLowerCase().includes('talón') ||
-    h.title.toLowerCase().includes('dorsiflexión') ||
-    h.title.toLowerCase().includes('cardio') ||
-    h.title.toLowerCase().includes('fuerza')
-  );
+  // Agrupar hábitos por Plan/Colección
+  const planGroups: Record<string, Habit[]> = {};
+  habits.forEach(h => {
+    const planName = getPlanNameFromHabit(h);
+    if (!planGroups[planName]) {
+      planGroups[planName] = [];
+    }
+    planGroups[planName].push(h);
+  });
 
-  const dailyHabits = habits.filter(h => !workoutHabits.includes(h));
+  const planSummaryList: ProgramGroup[] = Object.keys(planGroups).map(name => {
+    const list = planGroups[name];
+    const completed = list.filter(h => h.today_log?.completed).length;
+    return {
+      name,
+      habits: list,
+      totalCount: list.length,
+      completedCount: completed,
+      progressPercent: list.length > 0 ? Math.round((completed / list.length) * 100) : 0
+    };
+  });
 
-  const workoutCompletedCount = workoutHabits.filter(h => h.today_log?.completed).length;
-  const workoutProgressPercent = workoutHabits.length > 0 
-    ? Math.round((workoutCompletedCount / workoutHabits.length) * 100) 
-    : 0;
+  // Hábitos a mostrar cuando se entra dentro de un plan
+  const selectedPlanHabits = selectedPlanName ? (planGroups[selectedPlanName] || []) : [];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-24 md:pb-10">
-      {/* Top Navbar */}
-      <header className="border-b border-slate-800 bg-slate-900/70 backdrop-blur-md sticky top-0 z-40 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="bg-gradient-to-tr from-amber-500 to-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
-              <Flame className="w-5 h-5 text-white" />
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans w-full max-w-full overflow-x-hidden safe-top safe-bottom pb-28 md:pb-12">
+      {/* Top Header Responsivo */}
+      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-4 py-3 w-full">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-tr from-amber-500 to-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-500/20">
+              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-lg font-black tracking-tight bg-gradient-to-r from-amber-400 via-indigo-300 to-white bg-clip-text text-transparent">
-                  TASKIA
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-widest bg-indigo-950 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-800/80">
-                  TRAIN & SLA
-                </span>
-              </div>
+              <span className="text-base sm:text-lg font-black tracking-tight bg-gradient-to-r from-amber-400 to-indigo-300 bg-clip-text text-transparent">
+                TASKIA
+              </span>
             </div>
           </div>
 
-          {/* User profile & actions */}
           <div className="flex items-center gap-2">
             {restTimer !== null && (
-              <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-2.5 py-1 rounded-xl animate-pulse font-mono font-bold">
-                <Timer className="w-3.5 h-3.5" />
-                <span>Descanso: {restTimer}s</span>
+              <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] sm:text-xs px-2 py-0.5 rounded-lg font-mono font-bold animate-pulse">
+                <Timer className="w-3 h-3" />
+                <span>{restTimer}s</span>
               </div>
             )}
 
-            <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl text-xs">
+            <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-xl text-xs">
               <User className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="text-slate-300 font-medium">
-                {currentUser?.username ? `@${currentUser.username}` : 'demo_user'}
+              <span className="text-slate-300 font-medium max-w-[80px] sm:max-w-none truncate">
+                {currentUser?.username ? `@${currentUser.username}` : 'demo'}
               </span>
               {authToken ? (
-                <button 
-                  onClick={handleLogout}
-                  title="Cerrar Sesión" 
-                  className="ml-1 text-slate-500 hover:text-red-400 transition"
-                >
+                <button onClick={handleLogout} className="ml-1 text-slate-500 hover:text-red-400">
                   <LogOut className="w-3 h-3" />
                 </button>
               ) : (
-                <button 
-                  onClick={() => { setShowAuthModal(true); setIsRegister(false); }}
-                  className="ml-1 text-indigo-400 hover:text-indigo-300 font-semibold text-xs"
-                >
+                <button onClick={() => { setShowAuthModal(true); setIsRegister(false); }} className="text-indigo-400 font-semibold text-[11px]">
                   Entrar
                 </button>
               )}
             </div>
 
-            <button 
-              onClick={fetchData} 
-              className="p-1.5 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition"
-              title="Recargar datos"
-            >
+            <button onClick={fetchData} className="p-1.5 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="max-w-4xl mx-auto w-full p-4 flex-1 flex flex-col gap-5">
+      {/* Main Content Area */}
+      <main className="max-w-2xl mx-auto w-full px-3 sm:px-4 py-4 flex-1 flex flex-col gap-4">
         
-        {/* Intuitiva Barra de Navegación por Pestañas */}
-        <div className="bg-slate-900/90 border border-slate-800 p-1.5 rounded-2xl flex items-center justify-between gap-1 shadow-md">
-          <button 
-            onClick={() => setViewMode('workout')}
-            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${
-              viewMode === 'workout' 
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-          >
-            <Dumbbell className="w-4 h-4" /> 
-            <span>Entrenamiento</span>
-            {workoutHabits.length > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${viewMode === 'workout' ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-slate-300'}`}>
-                {workoutCompletedCount}/{workoutHabits.length}
-              </span>
-            )}
-          </button>
-
-          <button 
-            onClick={() => setViewMode('habits')}
-            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${
-              viewMode === 'habits' 
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-          >
-            <CheckCircle2 className="w-4 h-4" /> 
-            <span>Mis Hábitos</span>
-            {dailyHabits.length > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${viewMode === 'habits' ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-slate-300'}`}>
-                {dailyHabits.filter(h => h.today_log?.completed).length}/{dailyHabits.length}
-              </span>
-            )}
-          </button>
-
-          <button 
-            onClick={() => setViewMode('calendar')}
-            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${
-              viewMode === 'calendar' 
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-          >
-            <Calendar className="w-4 h-4" /> 
-            <span>Semana & SLA</span>
-          </button>
-
-          <button 
-            onClick={() => setViewMode('programs')}
-            className={`py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition ${
-              viewMode === 'programs' 
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-            title="Catálogo de Programas e Inyección"
-          >
-            <Layers className="w-4 h-4" />
-            <span className="hidden sm:inline">Planes</span>
-          </button>
-        </div>
-
         {/* ======================================================== */}
-        {/* VISTA 1: MODO ENTRENAMIENTO GUIADO (SUPER INTUITIVO) */}
+        {/* PESTAÑA 1: MIS PLANES Y TAREAS (SISTEMA DE DRILL-DOWN / ENTRAR Y SALIR) */}
         {/* ======================================================== */}
-        {viewMode === 'workout' && (
+        {activeTab === 'today' && (
           <div className="space-y-4">
-            {/* Header del Workout con Progreso */}
-            <div className="bg-gradient-to-r from-slate-900 to-indigo-950/40 border border-slate-800 p-4 rounded-2xl">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 border border-amber-800/50 px-2 py-0.5 rounded-full">
-                    Sesión del Día
+            
+            {/* Si el usuario NO ha entrado dentro de un plan -> VISTA DE COLECCIÓN DE PLANES COLAPSABLES */}
+            {!selectedPlanName && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base font-bold text-white flex items-center gap-2">
+                      <Layers className="w-4 h-4 text-indigo-400" /> Mis Planes y Hábitos
+                    </h2>
+                    <p className="text-xs text-slate-400">Toca un plan para entrar dentro y registrar cada tarea</p>
+                  </div>
+                  <span className="text-[11px] font-mono bg-slate-900 text-slate-400 px-2 py-0.5 rounded-full border border-slate-800">
+                    {habits.length} tareas hoy
                   </span>
-                  <h2 className="text-base font-bold text-white mt-1">Fuerza Tren Inferior y Prevención Aquiles (TRX)</h2>
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl font-black text-amber-400">{workoutProgressPercent}%</div>
-                  <div className="text-[11px] text-slate-400">completado</div>
-                </div>
-              </div>
 
-              {/* Barra de progreso visual */}
-              <div className="w-full bg-slate-800/80 h-2.5 rounded-full overflow-hidden">
-                <div 
-                  className="bg-gradient-to-r from-amber-500 to-indigo-500 h-full rounded-full transition-all duration-300"
-                  style={{ width: `${workoutProgressPercent}%` }}
-                />
-              </div>
+                {/* Lista de Tarjetas de Planes (Estilo Apps Nativas iOS/Android) */}
+                <div className="space-y-3">
+                  {planSummaryList.map(plan => {
+                    const isAllDone = plan.completedCount === plan.totalCount && plan.totalCount > 0;
 
-              {workoutProgressPercent === 100 && (
-                <div className="mt-3 p-2 bg-emerald-950/60 border border-emerald-800/80 rounded-xl text-center text-xs font-bold text-emerald-300 flex items-center justify-center gap-2">
-                  <Check className="w-4 h-4" /> ¡Excelente! Has completado todos los ejercicios de la sesión de hoy.
-                </div>
-              )}
-            </div>
+                    return (
+                      <div 
+                        key={plan.name}
+                        onClick={() => setSelectedPlanName(plan.name)}
+                        className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-[0.99] flex flex-col gap-3 ${
+                          isAllDone
+                            ? 'bg-slate-900/60 border-emerald-900/60 shadow-sm'
+                            : 'bg-slate-900/90 border-slate-800 hover:border-indigo-800/80 shadow-md'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2.5 rounded-xl ${
+                              isAllDone ? 'bg-emerald-950 text-emerald-400' : 'bg-indigo-950 text-indigo-400'
+                            }`}>
+                              {isAllDone ? <CheckSquare className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-sm text-white line-clamp-1">{plan.name}</h3>
+                              <p className="text-xs text-slate-400 mt-0.5">
+                                {plan.completedCount} de {plan.totalCount} completadas hoy
+                              </p>
+                            </div>
+                          </div>
 
-            {/* Lista de Ejercicios como Tareas Claras e Interactivas */}
-            <div className="space-y-3">
-              {workoutHabits.map((habit, idx) => {
-                const currentSeries = habit.today_log?.value ?? 0;
-                const targetSeries = habit.target_value;
-                const isCompleted = habit.today_log?.completed ?? false;
-                const title = cleanTitle(habit.title);
-
-                return (
-                  <div 
-                    key={habit.id}
-                    className={`border rounded-2xl p-4 transition-all duration-200 ${
-                      isCompleted 
-                        ? 'bg-slate-900/50 border-emerald-900/50' 
-                        : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 shadow-sm'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                            isCompleted ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300'
-                          }`}>
-                            {idx + 1}
-                          </span>
-                          <h3 className={`font-bold text-sm ${isCompleted ? 'text-slate-300 line-through' : 'text-white'}`}>
-                            {title}
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs font-black font-mono px-2 py-0.5 rounded-lg ${
+                              isAllDone ? 'bg-emerald-950 text-emerald-400' : 'bg-slate-950 text-amber-400'
+                            }`}>
+                              {plan.progressPercent}%
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-slate-500" />
+                          </div>
                         </div>
 
-                        {habit.description && (
-                          <p className="text-xs text-slate-400 mt-1.5 ml-7 leading-relaxed bg-slate-950/40 p-2 rounded-xl border border-slate-800/50">
-                            💡 {habit.description}
-                          </p>
-                        )}
+                        {/* Barra de progreso interactiva */}
+                        <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              isAllDone ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-500 to-indigo-500'
+                            }`}
+                            style={{ width: `${plan.progressPercent}%` }}
+                          />
+                        </div>
                       </div>
+                    );
+                  })}
 
-                      {/* SLA badge */}
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                        habit.compliance_summary.meets_sla 
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' 
-                          : 'bg-amber-950 text-amber-400 border border-amber-800/60'
-                      }`}>
-                        SLA {habit.compliance_summary.rate_percent}%
-                      </span>
+                  {planSummaryList.length === 0 && (
+                    <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-4">
+                      <p className="text-xs text-slate-400">No tienes planes activos todavía.</p>
+                      <button 
+                        onClick={() => setActiveTab('programs')}
+                        className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
+                      >
+                        Explorar Catálogo de Planes
+                      </button>
                     </div>
-
-                    {/* Botones de control de Series (Marcar 1/3, 2/3, 3/3) */}
-                    <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-400 font-medium">Series completadas:</span>
-                        <span className="text-xs font-black font-mono px-2 py-0.5 bg-slate-950 border border-slate-800 rounded-lg text-amber-400">
-                          {currentSeries} / {targetSeries} {habit.unit}
-                        </span>
-                      </div>
-
-                      {/* Contador con botones +/- rápidos */}
-                      <div className="flex items-center gap-1.5">
-                        <button 
-                          onClick={() => logSeriesStep(habit.id, -1)}
-                          disabled={currentSeries <= 0}
-                          className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white disabled:opacity-40 transition"
-                          title="Restar 1 serie"
-                        >
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-
-                        <button 
-                          onClick={() => logSeriesStep(habit.id, 1)}
-                          className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition ${
-                            isCompleted 
-                              ? 'bg-emerald-600 hover:bg-emerald-500 text-white' 
-                              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20'
-                          }`}
-                        >
-                          {isCompleted ? (
-                            <>
-                              <Check className="w-3.5 h-3.5" /> Lista
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="w-3.5 h-3.5" /> Marcar Serie
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {workoutHabits.length === 0 && (
-                <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl">
-                  <Dumbbell className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-                  <p className="text-xs text-slate-400">No hay ejercicios de entrenamiento activos.</p>
-                  <button 
-                    onClick={() => setViewMode('programs')}
-                    className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
-                  >
-                    Activar Plan TRX Aquiles
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ======================================================== */}
-        {/* VISTA 2: MIS HÁBITOS DIARIOS GENERALES (CHECKLIST RÁPIDO) */}
-        {/* ======================================================== */}
-        {viewMode === 'habits' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-white">Hábitos Personales del Día</h2>
-                <p className="text-xs text-slate-400">Rutinas fuera del entrenamiento para sostener tus hábitos saludables</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {dailyHabits.map((habit) => {
-                const isCompleted = habit.today_log?.completed ?? false;
-                const meetsSla = habit.compliance_summary.meets_sla;
-
-                return (
-                  <div 
-                    key={habit.id}
-                    onClick={() => toggleHabit(habit.id)}
-                    className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between ${
-                      isCompleted 
-                        ? 'bg-slate-900/60 border-indigo-900/50' 
-                        : 'bg-slate-900/90 border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl transition ${
-                        isCompleted ? 'text-indigo-400 bg-indigo-950' : 'text-slate-500 bg-slate-800'
-                      }`}>
-                        {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
-                      </div>
-
-                      <div>
-                        <h3 className={`font-semibold text-sm ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
-                          {cleanTitle(habit.title)}
-                        </h3>
-                        {habit.description && (
-                          <p className="text-xs text-slate-400 mt-0.5">{habit.description}</p>
-                        )}
-                        {habit.unit && (
-                          <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded mt-1 inline-block">
-                            Meta: {habit.target_value} {habit.unit}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        meetsSla 
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' 
-                          : 'bg-amber-950 text-amber-400 border border-amber-800/60'
-                      }`}>
-                        {meetsSla ? '✓ En SLA' : '⚠ En Riesgo'} ({habit.compliance_summary.rate_percent}%)
-                      </span>
-                      <div className="text-[10px] text-slate-500 mt-1">
-                        {habit.compliance_summary.completed_last_7_days}/7 días completados
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {dailyHabits.length === 0 && (
-                <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl">
-                  <p className="text-xs text-slate-400">Todos tus hábitos actuales son parte de tus entrenamientos.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ======================================================== */}
-        {/* VISTA 3: MATRIZ SEMANAL & MONITOREO DE SLA (CALENDARIO) */}
-        {/* ======================================================== */}
-        {viewMode === 'calendar' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-white">Cumplimiento Semanal & SLA</h2>
-                <p className="text-xs text-slate-400">Supervisa de un vistazo qué días cumpliste cada tarea en los últimos 7 días</p>
-              </div>
-            </div>
-
-            {/* Tarjeta de Resumen Global */}
-            {metrics && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cumplimiento Hoy</span>
-                  <div className="text-xl font-bold text-white mt-1">{metrics.completed_today} / {metrics.total_active_habits}</div>
-                  <div className="text-xs text-indigo-400 font-medium">{metrics.today_compliance_percent}%</div>
-                </div>
-
-                <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Salud SLA 7 Días</span>
-                  <div className="text-xl font-bold text-emerald-400 mt-1">{metrics.habits_meeting_sla_percent}%</div>
-                  <div className="text-xs text-slate-400">{metrics.healthy_habits} hábitos en meta</div>
-                </div>
-
-                <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">En Riesgo</span>
-                  <div className="text-xl font-bold text-amber-400 mt-1">{metrics.at_risk_habits}</div>
-                  <div className="text-xs text-slate-400">Bajo umbral mínimo</div>
-                </div>
-
-                <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Programas</span>
-                  <div className="text-xl font-bold text-white mt-1">{programs.length}</div>
-                  <div className="text-xs text-violet-400">Activos en catálogo</div>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Matriz Heatmap / Días de la Semana */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 overflow-x-auto shadow-sm">
-              <table className="w-full text-left text-xs">
+            {/* Si el usuario ENTRÓ dentro de un plan -> VISTA INTERNA DETALLADA CON OPCIÓN DE VOLVER */}
+            {selectedPlanName && (
+              <div className="space-y-4">
+                {/* Botón de Volver / Breadcrumb móvil */}
+                <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                  <button 
+                    onClick={() => setSelectedPlanName(null)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 active:scale-95 transition"
+                  >
+                    <ArrowLeft className="w-4 h-4" /> Volver a Mis Planes
+                  </button>
+
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    {selectedPlanHabits.filter(h => h.today_log?.completed).length} / {selectedPlanHabits.length} listos
+                  </span>
+                </div>
+
+                {/* Banner de Cabecera del Plan Activo */}
+                <div className="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 border border-amber-800/50 px-2 py-0.5 rounded-full">
+                    Plan Activo
+                  </span>
+                  <h2 className="text-base font-bold text-white mt-1.5">{selectedPlanName}</h2>
+                  
+                  {/* Barra de progreso del plan seleccionado */}
+                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden mt-3">
+                    <div 
+                      className="bg-gradient-to-r from-amber-500 to-indigo-500 h-full rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${selectedPlanHabits.length > 0 ? (selectedPlanHabits.filter(h => h.today_log?.completed).length / selectedPlanHabits.length) * 100 : 0}%` 
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Lista de Tareas / Ejercicios del Plan */}
+                <div className="space-y-3">
+                  {selectedPlanHabits.map((habit, idx) => {
+                    const isCompleted = habit.today_log?.completed ?? false;
+                    const currentVal = habit.today_log?.value ?? 0;
+                    const targetVal = habit.target_value;
+                    const title = cleanTitle(habit.title);
+                    const isCollapsed = !!collapsedBlocks[`habit_${habit.id}`];
+
+                    return (
+                      <div 
+                        key={habit.id}
+                        className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                          isCompleted 
+                            ? 'bg-slate-900/50 border-emerald-900/50' 
+                            : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 shadow-sm'
+                        }`}
+                      >
+                        {/* Cabecera del Ejercicio (Tocable para colapsar/expandir) */}
+                        <div 
+                          onClick={() => toggleBlockCollapse(`habit_${habit.id}`)}
+                          className="p-3.5 flex items-center justify-between gap-3 cursor-pointer select-none"
+                        >
+                          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                            <span className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                              isCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-300'
+                            }`}>
+                              {idx + 1}
+                            </span>
+                            <h3 className={`font-bold text-xs sm:text-sm truncate ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                              {title}
+                            </h3>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              habit.compliance_summary.meets_sla 
+                                ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' 
+                                : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+                            }`}>
+                              SLA {habit.compliance_summary.rate_percent}%
+                            </span>
+                            {isCollapsed ? <ChevronRight className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
+                          </div>
+                        </div>
+
+                        {/* Contenido Desplegable (Detalles y Controles) */}
+                        {!isCollapsed && (
+                          <div className="px-3.5 pb-3.5 pt-1 border-t border-slate-800/60 bg-slate-950/30">
+                            {habit.description && (
+                              <p className="text-xs text-slate-400 leading-relaxed bg-slate-950/60 p-2 rounded-xl border border-slate-800/60 mb-3">
+                                💡 {habit.description}
+                              </p>
+                            )}
+
+                            {/* Controles de Registro */}
+                            {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-slate-400">Progreso:</span>
+                                  <span className="text-xs font-black font-mono px-2 py-0.5 bg-slate-950 border border-slate-800 rounded-lg text-amber-400">
+                                    {currentVal} / {targetVal} {habit.unit}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5">
+                                  <button 
+                                    onClick={() => logSeriesStep(habit.id, -1)}
+                                    disabled={currentVal <= 0}
+                                    className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white disabled:opacity-40"
+                                    title="Restar 1"
+                                  >
+                                    <Minus className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  <button 
+                                    onClick={() => logSeriesStep(habit.id, 1)}
+                                    className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition ${
+                                      isCompleted 
+                                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white' 
+                                        : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20'
+                                    }`}
+                                  >
+                                    {isCompleted ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                                    <span>{isCompleted ? 'Listo' : '+ Serie'}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              /* Botón Toggle Booleano */
+                              <div className="flex justify-end">
+                                <button 
+                                  onClick={() => toggleHabit(habit.id)}
+                                  className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 ${
+                                    isCompleted 
+                                      ? 'bg-emerald-600 text-white' 
+                                      : 'bg-indigo-600 text-white hover:bg-indigo-500'
+                                  }`}
+                                >
+                                  {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                                  <span>{isCompleted ? 'Completado' : 'Marcar como Hecho'}</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* PESTAÑA 2: MATRIZ SEMANAL & SLA */}
+        {/* ======================================================== */}
+        {activeTab === 'calendar' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-indigo-400" /> Matriz Semanal de SLA
+                </h2>
+                <p className="text-xs text-slate-400">Rendimiento día por día en los últimos 7 días</p>
+              </div>
+            </div>
+
+            {/* Tarjeta Métricas Resumen */}
+            {metrics && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold">Cumplimiento Hoy</span>
+                  <div className="text-lg font-black text-white mt-0.5">{metrics.completed_today} / {metrics.total_active_habits}</div>
+                  <span className="text-[11px] text-indigo-400 font-semibold">{metrics.today_compliance_percent}%</span>
+                </div>
+
+                <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold">Salud Global SLA</span>
+                  <div className="text-lg font-black text-emerald-400 mt-0.5">{metrics.habits_meeting_sla_percent}%</div>
+                  <span className="text-[11px] text-slate-400">{metrics.healthy_habits} en meta</span>
+                </div>
+              </div>
+            )}
+
+            {/* Tabla Colapsable de Cumplimiento */}
+            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 overflow-x-auto shadow-sm">
+              <table className="w-full text-left text-xs min-w-[280px]">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-400">
-                    <th className="pb-3 font-semibold">Hábito / Tarea</th>
-                    <th className="pb-3 text-center font-semibold">Historial (7 Días)</th>
-                    <th className="pb-3 text-right font-semibold">SLA</th>
+                    <th className="pb-2 font-semibold">Tarea</th>
+                    <th className="pb-2 text-center font-semibold">7 Días</th>
+                    <th className="pb-2 text-right font-semibold">SLA</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {habits.map((habit) => (
-                    <tr key={habit.id} className="hover:bg-slate-800/30">
-                      <td className="py-3 pr-2">
-                        <div className="font-semibold text-white max-w-[200px] truncate">{cleanTitle(habit.title)}</div>
-                        <div className="text-[10px] text-slate-400">Meta: {habit.target_value} {habit.unit}</div>
+                    <tr key={habit.id} className="hover:bg-slate-800/20">
+                      <td className="py-2.5 pr-2">
+                        <div className="font-semibold text-white max-w-[130px] sm:max-w-[200px] truncate">
+                          {cleanTitle(habit.title)}
+                        </div>
                       </td>
 
-                      <td className="py-3 px-2">
-                        <div className="flex items-center justify-center gap-1.5">
+                      <td className="py-2.5 px-1 text-center">
+                        <div className="flex items-center justify-center gap-1">
                           {habit.compliance_summary.history?.map((h, i) => (
                             <div 
                               key={i} 
-                              className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold ${
+                              className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold ${
                                 h.completed 
                                   ? 'bg-emerald-500 text-slate-950 font-black' 
                                   : 'bg-slate-800 text-slate-500'
                               }`}
-                              title={`${h.date}: ${h.completed ? 'Cumplido' : 'No cumplido'}`}
+                              title={`${h.date}: ${h.completed ? 'Cumplido' : 'Pendiente'}`}
                             >
                               {h.day_name.slice(0, 1)}
                             </div>
@@ -679,11 +649,11 @@ export default function App() {
                         </div>
                       </td>
 
-                      <td className="py-3 pl-2 text-right">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      <td className="py-2.5 pl-2 text-right">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                           habit.compliance_summary.meets_sla 
-                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' 
-                            : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+                            ? 'bg-emerald-950 text-emerald-400' 
+                            : 'bg-amber-950 text-amber-400'
                         }`}>
                           {habit.compliance_summary.rate_percent}%
                         </span>
@@ -697,145 +667,210 @@ export default function App() {
         )}
 
         {/* ======================================================== */}
-        {/* VISTA 4: PROGRAMAS & SIMULADOR DE INYECCIÓN API */}
+        {/* PESTAÑA 3: CATÁLOGO DE PLANES */}
         {/* ======================================================== */}
-        {viewMode === 'programs' && (
-          <div className="space-y-6">
+        {activeTab === 'programs' && (
+          <div className="space-y-4">
             <div>
-              <h2 className="text-base font-bold text-white">Catálogo de Programas</h2>
-              <p className="text-xs text-slate-400">Planes estructurados inyectados por API</p>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-indigo-400" /> Catálogo de Programas
+              </h2>
+              <p className="text-xs text-slate-400">Inscríbete para cargar los ejercicios a tu día a día</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-3">
               {programs.map((program) => (
-                <div key={program.id} className="bg-slate-900/70 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
+                <div key={program.id} className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800/50">
                         {program.category}
                       </span>
                       <span className="text-xs text-slate-400 font-mono">{program.duration_days} días</span>
                     </div>
-                    <h3 className="font-bold text-sm text-white mb-1">{program.title}</h3>
-                    <p className="text-xs text-slate-400 mb-3">{program.description}</p>
+                    <h3 className="font-bold text-sm text-white">{program.title}</h3>
+                    <p className="text-xs text-slate-400 mt-1 mb-3">{program.description}</p>
                     
-                    <span className="text-xs font-semibold text-slate-300">Ejercicios ({program.items?.length || 0}):</span>
-                    <div className="space-y-1 mt-1 max-h-32 overflow-y-auto pr-1">
-                      {program.items?.map(it => (
-                        <div key={it.id} className="text-[11px] bg-slate-950/60 p-1.5 rounded-lg text-slate-300 flex justify-between">
-                          <span>{it.title}</span>
-                          <span className="text-slate-400 font-mono">{it.target_value} {it.unit}</span>
-                        </div>
-                      ))}
-                    </div>
+                    {/* Botón para colapsar / expandir lista de ejercicios */}
+                    <button 
+                      onClick={() => toggleBlockCollapse(`prog_${program.id}`)}
+                      className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 mb-2"
+                    >
+                      {collapsedBlocks[`prog_${program.id}`] ? 'Ocultar ejercicios' : `Ver ${program.items?.length || 0} ejercicios incluidos`}
+                      {collapsedBlocks[`prog_${program.id}`] ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                    </button>
+
+                    {collapsedBlocks[`prog_${program.id}`] && (
+                      <div className="space-y-1 mb-3 max-h-48 overflow-y-auto">
+                        {program.items?.map(it => (
+                          <div key={it.id} className="text-[11px] bg-slate-950/60 p-2 rounded-lg text-slate-300 flex justify-between">
+                            <span>{it.title}</span>
+                            <span className="text-slate-400 font-mono">{it.target_value} {it.unit}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <button 
                     onClick={() => handleEnroll(program.id)}
-                    className="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md active:scale-95"
                   >
-                    <Play className="w-3.5 h-3.5 fill-white" /> Activar este Programa
+                    <Play className="w-3.5 h-3.5 fill-white" /> Activar este Plan
                   </button>
                 </div>
               ))}
             </div>
+          </div>
+        )}
 
-            {/* Simulador API */}
-            <div className="border-t border-slate-800 pt-5">
-              <h3 className="text-sm font-bold text-white mb-1">Inyector de Programas (API Simulator)</h3>
-              <p className="text-xs text-slate-400 mb-3">Envía un JSON con un nuevo plan al endpoint <code className="bg-slate-800 px-1 py-0.5 rounded text-indigo-300 font-mono">POST /api/programs/inject/</code></p>
-              
-              <textarea 
-                value={jsonPayload}
-                onChange={(e) => setJsonPayload(e.target.value)}
-                className="w-full h-48 bg-slate-950 font-mono text-xs text-emerald-400 p-3 rounded-xl border border-slate-800 focus:border-indigo-500 focus:outline-none"
-              />
+        {/* ======================================================== */}
+        {/* PESTAÑA 4: INYECCIÓN API */}
+        {/* ======================================================== */}
+        {activeTab === 'inject' && (
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Zap className="w-4 h-4 text-emerald-400" /> Inyector de Programas (API)
+              </h2>
+              <p className="text-xs text-slate-400">Inyecta planes estructurados al backend vía JSON</p>
+            </div>
 
-              <div className="flex items-center justify-between mt-2">
-                <button 
-                  onClick={handleInjectProgram}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 transition"
-                >
-                  <Zap className="w-3.5 h-3.5" /> Inyectar Programa al Backend
-                </button>
-                {injectStatus && <span className="text-xs text-indigo-400">{injectStatus}</span>}
-              </div>
+            <textarea 
+              value={jsonPayload}
+              onChange={(e) => setJsonPayload(e.target.value)}
+              className="w-full h-44 bg-slate-950 font-mono text-xs text-emerald-400 p-3 rounded-xl border border-slate-800 focus:outline-none"
+            />
+
+            <div className="flex items-center justify-between">
+              <button 
+                onClick={handleInjectProgram}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5"
+              >
+                <Zap className="w-3.5 h-3.5" /> Inyectar Programa
+              </button>
+              {injectStatus && <span className="text-xs text-indigo-400">{injectStatus}</span>}
             </div>
           </div>
         )}
 
       </main>
 
+      {/* Bottom Navigation Bar Fija para Móviles (Estilo App Nativa) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-2 py-2 safe-bottom">
+        <div className="max-w-md mx-auto flex items-center justify-around">
+          <button 
+            onClick={() => { setActiveTab('today'); setSelectedPlanName(null); }}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+              activeTab === 'today' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Dumbbell className="w-5 h-5" />
+            <span className="text-[10px]">Mis Planes</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('calendar')}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+              activeTab === 'calendar' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Calendar className="w-5 h-5" />
+            <span className="text-[10px]">SLA Semanal</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('programs')}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+              activeTab === 'programs' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Layers className="w-5 h-5" />
+            <span className="text-[10px]">Catálogo</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('inject')}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+              activeTab === 'inject' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Zap className="w-5 h-5" />
+            <span className="text-[10px]">API</span>
+          </button>
+        </div>
+      </nav>
+
       {/* Auth Modal */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 max-w-xs w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
                 {isRegister ? <UserPlus className="w-4 h-4 text-indigo-400" /> : <LogIn className="w-4 h-4 text-indigo-400" />}
-                {isRegister ? 'Crear Cuenta en Taskia' : 'Iniciar Sesión'}
+                {isRegister ? 'Crear Cuenta' : 'Iniciar Sesión'}
               </h3>
-              <button onClick={() => setShowAuthModal(false)} className="text-slate-500 hover:text-white text-sm">✕</button>
+              <button onClick={() => setShowAuthModal(false)} className="text-slate-500 hover:text-white text-xs">✕</button>
             </div>
 
             {authError && (
-              <div className="bg-red-950/60 border border-red-800/80 text-red-300 text-xs p-2.5 rounded-lg mb-4">
+              <div className="bg-red-950/60 border border-red-800/80 text-red-300 text-xs p-2 rounded-lg mb-3">
                 {authError}
               </div>
             )}
 
-            <form onSubmit={handleAuthSubmit} className="space-y-3">
+            <form onSubmit={handleAuthSubmit} className="space-y-2.5">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Nombre de Usuario</label>
+                <label className="text-[11px] text-slate-400 block mb-0.5">Usuario</label>
                 <input 
                   type="text" 
                   required
                   value={authUsername}
                   onChange={(e) => setAuthUsername(e.target.value)}
-                  placeholder="ej. juan_runner" 
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                  placeholder="ej. joshua" 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none"
                 />
               </div>
 
               {isRegister && (
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Correo Electrónico (opcional)</label>
+                  <label className="text-[11px] text-slate-400 block mb-0.5">Correo</label>
                   <input 
                     type="email" 
                     value={authEmail}
                     onChange={(e) => setAuthEmail(e.target.value)}
-                    placeholder="tu@email.com" 
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                    placeholder="tu@correo.com" 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none"
                   />
                 </div>
               )}
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Contraseña</label>
+                <label className="text-[11px] text-slate-400 block mb-0.5">Contraseña</label>
                 <input 
                   type="password" 
                   required
                   value={authPassword}
                   onChange={(e) => setAuthPassword(e.target.value)}
                   placeholder="••••••••" 
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none"
                 />
               </div>
 
               <button 
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-2.5 rounded-xl transition mt-2"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-2 rounded-xl transition mt-1"
               >
-                {isRegister ? 'Registrarse y Entrar' : 'Ingresar'}
+                {isRegister ? 'Registrarme' : 'Entrar'}
               </button>
             </form>
 
-            <div className="text-center mt-4">
+            <div className="text-center mt-3">
               <button 
                 onClick={() => { setIsRegister(!isRegister); setAuthError(''); }}
-                className="text-xs text-slate-400 hover:text-indigo-400 transition"
+                className="text-[11px] text-slate-400 hover:text-indigo-400"
               >
-                {isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate aquí'}
+                {isRegister ? '¿Ya tienes cuenta? Ingresa' : '¿No tienes cuenta? Regístrate'}
               </button>
             </div>
           </div>

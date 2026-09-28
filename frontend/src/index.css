@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+  background-color: #020617;
+}
+
+/* Safe area insets for iOS notches and gesture bars */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
