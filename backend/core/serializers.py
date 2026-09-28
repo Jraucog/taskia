@@ -53,7 +53,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class ProgramItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProgramItem
-        fields = ['id', 'title', 'day_offset', 'habit_type', 'target_value', 'unit', 'description']
+        fields = ['id', 'title', 'day_offset', 'habit_type', 'target_value', 'unit', 'description', 'estimated_minutes']
 
 class ProgramSerializer(serializers.ModelSerializer):
     items = ProgramItemSerializer(many=True, required=False)
@@ -95,7 +95,7 @@ class HabitSerializer(serializers.ModelSerializer):
         model = Habit
         fields = [
             'id', 'user', 'enrollment', 'title', 'description', 'habit_type',
-            'target_value', 'unit', 'frequency_type', 'days_of_week', 'day_offset',
+            'target_value', 'unit', 'estimated_minutes', 'frequency_type', 'days_of_week', 'day_offset',
             'weekly_target', 'sla_target_percent', 'active', 'created_at',
             'today_log', 'compliance_summary', 'is_scheduled_today'
         ]

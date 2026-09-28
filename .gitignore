@@ -36,7 +36,8 @@ venv.bak/
 # Django stuff:
 *.log
 local_settings.py
-db.sqlite3
+# db.sqlite3 incluido a solicitud para sincronizacion entre PCs
+!backend/db.sqlite3
 db.sqlite3-journal
 media/
 

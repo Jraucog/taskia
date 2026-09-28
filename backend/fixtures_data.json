@@ -1,0 +1,2584 @@
+[
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$stAvNE7r0jb9XWyFbz6OQg$WGdTfuwk//6DPNpsBk0a1GFXuwj++jGy3qXbA1VOFdY=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_user",
+    "first_name": "",
+    "last_name": "",
+    "email": "demo@taskia.app",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-28T18:17:28.775Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$mIAPWMZ4ZDPyuNd4LCO9f4$0pSkyQvzeX2S//zJcW0y8A5XzVh+Ml5dcWd8foooMP4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "Joshua",
+    "first_name": "",
+    "last_name": "",
+    "email": "joshua.r.gaete@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-28T19:04:20.513Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "core.program",
+  "pk": 1,
+  "fields": {
+    "title": "Plan de Acondicionamiento 30 Días",
+    "description": "Programa progresivo de fuerza, movilidad y cardio para formar el hábito deportivo.",
+    "category": "Fitness & Salud",
+    "duration_days": 30,
+    "created_at": "2026-09-28T18:17:29.902Z"
+  }
+},
+{
+  "model": "core.program",
+  "pk": 2,
+  "fields": {
+    "title": "Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)",
+    "description": "Frecuencia: 2 a 3 veces por semana | Cadencia: 3s bajada / 1s pausa / subida firme. Enfoque en tobillo, sóleo, gemelo, cuádriceps y estabilidad.",
+    "category": "Fuerza & Fisioterapia",
+    "duration_days": 30,
+    "created_at": "2026-09-28T18:34:10.759Z"
+  }
+},
+{
+  "model": "core.program",
+  "pk": 3,
+  "fields": {
+    "title": "Desafio 21 Dias del Cuaderno de Brian Tracy",
+    "description": "Reto cerrado de 21 dias continuos. Escribir 10 metas diarias a mano sin mirar el dia anterior. Si fallas un dia, reinicio a 0/21.",
+    "category": "Disciplina & Mentalidad",
+    "duration_days": 21,
+    "created_at": "2026-09-28T18:44:49.395Z"
+  }
+},
+{
+  "model": "core.program",
+  "pk": 4,
+  "fields": {
+    "title": "Mañanas Milagrosas & Enfoque Profundo (SAVERS)",
+    "description": "Estructura matutina de alto impacto: Silencio, Afirmaciones, Visualización, Ejercicio, Lectura y Escritura.",
+    "category": "Desarrollo Personal",
+    "duration_days": 30,
+    "created_at": "2026-09-28T19:06:48.355Z"
+  }
+},
+{
+  "model": "core.program",
+  "pk": 5,
+  "fields": {
+    "title": "Desintoxicación Dopamina & Productividad",
+    "description": "Reset neurocognitivo para recuperar foco, eliminar procrastinación en redes y producir software de calidad.",
+    "category": "Foco & Disciplina",
+    "duration_days": 14,
+    "created_at": "2026-09-28T19:06:48.399Z"
+  }
+},
+{
+  "model": "core.program",
+  "pk": 6,
+  "fields": {
+    "title": "Respiración Táctica & Alivio del Estrés Diario",
+    "description": "Protocolo neurobiológico de respiración consciente para reducir cortisol, resetear el sistema nervioso autónomo y mantener claridad mental ante alta presión.",
+    "category": "Respiración",
+    "duration_days": 21,
+    "created_at": "2026-09-28T19:49:06.417Z"
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 1,
+  "fields": {
+    "program": 1,
+    "title": "Correr o Caminata Rápida (minutos)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 30.0,
+    "unit": "min",
+    "description": "Cardio moderado continuo",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 2,
+  "fields": {
+    "program": 1,
+    "title": "Sesión de Fuerza / Calistenia (series)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 4.0,
+    "unit": "series",
+    "description": "Flexiones, sentadillas y fondos",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 3,
+  "fields": {
+    "program": 1,
+    "title": "Estiramientos y Movilidad",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "10 min de estiramientos post entreno",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 4,
+  "fields": {
+    "program": 2,
+    "title": "1. Dorsiflexión dinámica de tobillo en pared",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 2.0,
+    "unit": "series",
+    "description": "2 series x 10 reps por pierna (Movilidad y Activación)",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 5,
+  "fields": {
+    "program": 2,
+    "title": "2. Sentadilla búlgara en suspensión TRX",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "description": "3 series x 8-10 reps por pierna (bajada excéntrica 3-4s)",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 6,
+  "fields": {
+    "program": 2,
+    "title": "3. Pistol squat asistida TRX",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "description": "3 series x 8 reps por pierna (Cadera y Cuádriceps)",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 7,
+  "fields": {
+    "program": 2,
+    "title": "4. Curl de isquiotibiales en suspensión + puente TRX",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "description": "3 series x 10-12 reps (Cadena Posterior)",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 8,
+  "fields": {
+    "program": 2,
+    "title": "5. Peso muerto rumano a una pierna asistido TRX",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "description": "3 series x 10 reps por pierna (Estabilidad de Apoyo)",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 9,
+  "fields": {
+    "program": 2,
+    "title": "6. Elevación de talón a 1 pierna en escalón TRX",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 4.0,
+    "unit": "series",
+    "description": "3-4 series x 10-12 reps (3s subida, 1s pausa, 3-4s bajada excéntrica Aquiles)",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 10,
+  "fields": {
+    "program": 2,
+    "title": "7. Sentadilla isométrica en pared c/ talones elevados",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "description": "3 series x 35-40s (Enfoque Sóleo)",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 11,
+  "fields": {
+    "program": 2,
+    "title": "8. Plancha Saw con pies en suspensión TRX",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "description": "3 series x 10 reps lentas (Core / Anti-rotación)",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 12,
+  "fields": {
+    "program": 3,
+    "title": "Dia 1 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 13,
+  "fields": {
+    "program": 3,
+    "title": "Dia 2 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 1,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 14,
+  "fields": {
+    "program": 3,
+    "title": "Dia 3 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 2,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 15,
+  "fields": {
+    "program": 3,
+    "title": "Dia 4 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 3,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 16,
+  "fields": {
+    "program": 3,
+    "title": "Dia 5 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 4,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 17,
+  "fields": {
+    "program": 3,
+    "title": "Dia 6 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 5,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 18,
+  "fields": {
+    "program": 3,
+    "title": "Dia 7 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 6,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 19,
+  "fields": {
+    "program": 3,
+    "title": "Dia 8 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 7,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 20,
+  "fields": {
+    "program": 3,
+    "title": "Dia 9 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 8,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 21,
+  "fields": {
+    "program": 3,
+    "title": "Dia 10 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 9,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 22,
+  "fields": {
+    "program": 3,
+    "title": "Dia 11 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 10,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 23,
+  "fields": {
+    "program": 3,
+    "title": "Dia 12 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 11,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 24,
+  "fields": {
+    "program": 3,
+    "title": "Dia 13 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 12,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 25,
+  "fields": {
+    "program": 3,
+    "title": "Dia 14 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 13,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 26,
+  "fields": {
+    "program": 3,
+    "title": "Dia 15 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 14,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 27,
+  "fields": {
+    "program": 3,
+    "title": "Dia 16 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 15,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 28,
+  "fields": {
+    "program": 3,
+    "title": "Dia 17 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 16,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 29,
+  "fields": {
+    "program": 3,
+    "title": "Dia 18 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 17,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 30,
+  "fields": {
+    "program": 3,
+    "title": "Dia 19 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 18,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 31,
+  "fields": {
+    "program": 3,
+    "title": "Dia 20 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 19,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 32,
+  "fields": {
+    "program": 3,
+    "title": "Dia 21 - Escribir 10 Metas a Mano (Formula 3P)",
+    "day_offset": 20,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 33,
+  "fields": {
+    "program": 4,
+    "title": "Silencio y Meditación (10 min)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 10.0,
+    "unit": "min",
+    "description": "Respiración consciente o meditación guiada",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 34,
+  "fields": {
+    "program": 4,
+    "title": "Visualización de Metas 100M",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "5 minutos viendo tu Vision Board y objetivos",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 35,
+  "fields": {
+    "program": 4,
+    "title": "Lectura de Crecimiento (páginas)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 10.0,
+    "unit": "págs",
+    "description": "Libro de negocios, disciplina o filosofía",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 36,
+  "fields": {
+    "program": 4,
+    "title": "Escritura & Journaling Diario",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "10 metas diarias de Brian Tracy a mano",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 37,
+  "fields": {
+    "program": 5,
+    "title": "Cero Redes Sociales antes de las 12:00",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Protege tus mañanas de la distracción",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 38,
+  "fields": {
+    "program": 5,
+    "title": "Bloque Deep Work Software / MVP (horas)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 2.0,
+    "unit": "hrs",
+    "description": "Programación pura sin interrupciones",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 39,
+  "fields": {
+    "program": 5,
+    "title": "Caminar 8.000 pasos en naturaleza / sol",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 8000.0,
+    "unit": "pasos",
+    "description": "Regulación del cortisol y claridad mental",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 40,
+  "fields": {
+    "program": 6,
+    "title": "Respiración Cuadrada (Box Breathing 4-4-4-4)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 1.0,
+    "unit": "sesión",
+    "description": "Inhala 4s, retén 4s, exhala 4s, retén vacío 4s. 5 minutos para calmar el ritmo cardíaco y enfocar la mente.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 41,
+  "fields": {
+    "program": 6,
+    "title": "Suspiro Fisiológico Cíclico (Dr. Huberman)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 25.0,
+    "unit": "ciclos",
+    "description": "Doble inhalación profunda por la nariz + exhalación prolongada y lenta por la boca. 25 repeticiones para desactivar ansiedad inmediata.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 42,
+  "fields": {
+    "program": 6,
+    "title": "Respiración 4-7-8 al finalizar la jornada laboral",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 4.0,
+    "unit": "ciclos",
+    "description": "Inhala en 4s, retén 7s, exhala suavemente en 8s por la boca. Estimula el nervio vago y facilita desconexión y sueño reparador.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 43,
+  "fields": {
+    "program": 6,
+    "title": "Pausa de Coherencia Cardíaca (5s Inhala / 5s Exhala)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 5.0,
+    "unit": "minutos",
+    "description": "Cadencia rítmica de 6 respiraciones por minuto durante 5 minutos a mitad del día laboral para restaurar equilibrio emocional.",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programenrollment",
+  "pk": 1,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "program": 1,
+    "start_date": "2026-09-28",
+    "active": true,
+    "created_at": "2026-09-28T18:17:29.995Z"
+  }
+},
+{
+  "model": "core.programenrollment",
+  "pk": 2,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "program": 2,
+    "start_date": "2026-09-28",
+    "active": true,
+    "created_at": "2026-09-28T18:34:10.887Z"
+  }
+},
+{
+  "model": "core.programenrollment",
+  "pk": 3,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "program": 3,
+    "start_date": "2026-09-28",
+    "active": true,
+    "created_at": "2026-09-28T18:44:49.675Z"
+  }
+},
+{
+  "model": "core.programenrollment",
+  "pk": 4,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "program": 3,
+    "start_date": "2026-09-28",
+    "active": true,
+    "created_at": "2026-09-28T19:04:37.159Z"
+  }
+},
+{
+  "model": "core.programenrollment",
+  "pk": 5,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "program": 2,
+    "start_date": "2026-09-28",
+    "active": true,
+    "created_at": "2026-09-28T19:39:33.385Z"
+  }
+},
+{
+  "model": "core.programenrollment",
+  "pk": 6,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "program": 6,
+    "start_date": "2026-09-28",
+    "active": true,
+    "created_at": "2026-09-28T19:53:01.449Z"
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 1,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 1,
+    "title": "[Plan 30D] Cardio Diario (30 min)",
+    "description": "Cumplimiento de sesión aeróbica diaria",
+    "habit_type": "numeric",
+    "target_value": 30.0,
+    "unit": "min",
+    "estimated_minutes": 5,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 80,
+    "created_at": "2026-09-28T18:17:30.011Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 2,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 1,
+    "title": "[Plan 30D] Fuerza & Core",
+    "description": "Rutina de 4 series de fuerza",
+    "habit_type": "numeric",
+    "target_value": 4.0,
+    "unit": "series",
+    "estimated_minutes": 5,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 70,
+    "created_at": "2026-09-28T18:17:30.032Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 3,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": null,
+    "title": "Beber 2.5L de Agua",
+    "description": "Hidratación completa durante el día",
+    "habit_type": "numeric",
+    "target_value": 2.5,
+    "unit": "L",
+    "estimated_minutes": 5,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 90,
+    "created_at": "2026-09-28T18:17:30.050Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 4,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 2,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 1. Dorsiflexión dinámica de tobillo en pared",
+    "description": "2 series x 10 reps por pierna (Movilidad y Activación)",
+    "habit_type": "numeric",
+    "target_value": 2.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:34:10.896Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 5,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 2,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 2. Sentadilla búlgara en suspensión TRX",
+    "description": "3 series x 8-10 reps por pierna (bajada excéntrica 3-4s)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:34:10.904Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 6,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 2,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 3. Pistol squat asistida TRX",
+    "description": "3 series x 8 reps por pierna (Cadera y Cuádriceps)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:34:10.911Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 7,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 2,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 4. Curl de isquiotibiales en suspensión + puente TRX",
+    "description": "3 series x 10-12 reps (Cadena Posterior)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:34:10.918Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 8,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 2,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 5. Peso muerto rumano a una pierna asistido TRX",
+    "description": "3 series x 10 reps por pierna (Estabilidad de Apoyo)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:34:10.926Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 9,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 2,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 6. Elevación de talón a 1 pierna en escalón TRX",
+    "description": "3-4 series x 10-12 reps (3s subida, 1s pausa, 3-4s bajada excéntrica Aquiles)",
+    "habit_type": "numeric",
+    "target_value": 4.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:34:10.934Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 10,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 2,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 7. Sentadilla isométrica en pared c/ talones elevados",
+    "description": "3 series x 35-40s (Enfoque Sóleo)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:34:10.941Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 11,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 2,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 8. Plancha Saw con pies en suspensión TRX",
+    "description": "3 series x 10 reps lentas (Core / Anti-rotación)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:34:10.948Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 12,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 1 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 0,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.689Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 13,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 2 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 1,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.701Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 14,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 3 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 2,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.713Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 15,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 4 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 3,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.725Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 16,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 5 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 4,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.736Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 17,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 6 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 5,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.747Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 18,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 7 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 6,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.758Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 19,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 8 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 7,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.769Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 20,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 9 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 8,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.781Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 21,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 10 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 9,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.793Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 22,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 11 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 10,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.805Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 23,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 12 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 11,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.817Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 24,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 13 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 12,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.828Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 25,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 14 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 13,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.838Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 26,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 15 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 14,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.851Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 27,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 16 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 15,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.862Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 28,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 17 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 16,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.872Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 29,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 18 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 17,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.883Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 30,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 19 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 18,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.894Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 31,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 20 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 19,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.906Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 32,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "enrollment": 3,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 21 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 20,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T18:44:49.918Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 33,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 1 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 0,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.168Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 34,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 2 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 1,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.175Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 35,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 3 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 2,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.182Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 36,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 4 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 3,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.189Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 37,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 5 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 4,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.196Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 38,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 6 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 5,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.204Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 39,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 7 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 6,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.211Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 40,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 8 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 7,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.218Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 41,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 9 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 8,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.225Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 42,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 10 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 9,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.230Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 43,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 11 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 10,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.238Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 44,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 12 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 11,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.244Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 45,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 13 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 12,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.252Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 46,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 14 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 13,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.258Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 47,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 15 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 14,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.264Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 48,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 16 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 15,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.271Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 49,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 17 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 16,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.277Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 50,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 18 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 17,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.285Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 51,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 19 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 18,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.291Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 52,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 20 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 19,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.298Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 53,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 4,
+    "title": "[Desafio 21 Dias del Cuaderno de Brian Tracy] Dia 21 - Escribir 10 Metas a Mano (Formula 3P)",
+    "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "registro",
+    "estimated_minutes": 10,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": 20,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:04:37.305Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 54,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 5,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 1. Dorsiflexión dinámica de tobillo en pared",
+    "description": "2 series x 10 reps por pierna (Movilidad y Activación)",
+    "habit_type": "numeric",
+    "target_value": 2.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:39:33.392Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 55,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 5,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 2. Sentadilla búlgara en suspensión TRX",
+    "description": "3 series x 8-10 reps por pierna (bajada excéntrica 3-4s)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:39:33.400Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 56,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 5,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 3. Pistol squat asistida TRX",
+    "description": "3 series x 8 reps por pierna (Cadera y Cuádriceps)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:39:33.406Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 57,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 5,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 4. Curl de isquiotibiales en suspensión + puente TRX",
+    "description": "3 series x 10-12 reps (Cadena Posterior)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:39:33.414Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 58,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 5,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 5. Peso muerto rumano a una pierna asistido TRX",
+    "description": "3 series x 10 reps por pierna (Estabilidad de Apoyo)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:39:33.421Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 59,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 5,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 6. Elevación de talón a 1 pierna en escalón TRX",
+    "description": "3-4 series x 10-12 reps (3s subida, 1s pausa, 3-4s bajada excéntrica Aquiles)",
+    "habit_type": "numeric",
+    "target_value": 4.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:39:33.430Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 60,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 5,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 7. Sentadilla isométrica en pared c/ talones elevados",
+    "description": "3 series x 35-40s (Enfoque Sóleo)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:39:33.436Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 61,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 5,
+    "title": "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] 8. Plancha Saw con pies en suspensión TRX",
+    "description": "3 series x 10 reps lentas (Core / Anti-rotación)",
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "series",
+    "estimated_minutes": 15,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:39:33.443Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 62,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 6,
+    "title": "[Respiración Táctica & Alivio del Estrés Diario] Respiración Cuadrada (Box Breathing 4-4-4-4)",
+    "description": "Inhala 4s, retén 4s, exhala 4s, retén vacío 4s. 5 minutos para calmar el ritmo cardíaco y enfocar la mente.",
+    "habit_type": "numeric",
+    "target_value": 1.0,
+    "unit": "sesión",
+    "estimated_minutes": 5,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:53:01.459Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 63,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 6,
+    "title": "[Respiración Táctica & Alivio del Estrés Diario] Suspiro Fisiológico Cíclico (Dr. Huberman)",
+    "description": "Doble inhalación profunda por la nariz + exhalación prolongada y lenta por la boca. 25 repeticiones para desactivar ansiedad inmediata.",
+    "habit_type": "numeric",
+    "target_value": 5.0,
+    "unit": "minutos",
+    "estimated_minutes": 5,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:53:01.467Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 64,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 6,
+    "title": "[Respiración Táctica & Alivio del Estrés Diario] Respiración 4-7-8 al finalizar la jornada laboral",
+    "description": "Inhala en 4s, retén 7s, exhala suavemente en 8s por la boca. Estimula el nervio vago y facilita desconexión y sueño reparador.",
+    "habit_type": "numeric",
+    "target_value": 4.0,
+    "unit": "ciclos",
+    "estimated_minutes": 5,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:53:01.474Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habit",
+  "pk": 65,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "enrollment": 6,
+    "title": "[Respiración Táctica & Alivio del Estrés Diario] Pausa de Coherencia Cardíaca (5s Inhala / 5s Exhala)",
+    "description": "Cadencia rítmica de 6 respiraciones por minuto durante 5 minutos a mitad del día laboral para restaurar equilibrio emocional.",
+    "habit_type": "numeric",
+    "target_value": 5.0,
+    "unit": "minutos",
+    "estimated_minutes": 5,
+    "frequency_type": "daily",
+    "days_of_week": "0,1,2,3,4,5,6",
+    "day_offset": null,
+    "weekly_target": 7,
+    "sla_target_percent": 85,
+    "created_at": "2026-09-28T19:53:01.481Z",
+    "active": true
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 1,
+  "fields": {
+    "habit": 1,
+    "date": "2026-09-27",
+    "value": 30.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.069Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 2,
+  "fields": {
+    "habit": 2,
+    "date": "2026-09-27",
+    "value": 4.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.098Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 3,
+  "fields": {
+    "habit": 3,
+    "date": "2026-09-27",
+    "value": 2.5,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.119Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 4,
+  "fields": {
+    "habit": 1,
+    "date": "2026-09-26",
+    "value": 30.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.139Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 5,
+  "fields": {
+    "habit": 2,
+    "date": "2026-09-26",
+    "value": 4.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.161Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 6,
+  "fields": {
+    "habit": 3,
+    "date": "2026-09-26",
+    "value": 2.5,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.182Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 7,
+  "fields": {
+    "habit": 1,
+    "date": "2026-09-25",
+    "value": 30.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.212Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 8,
+  "fields": {
+    "habit": 3,
+    "date": "2026-09-25",
+    "value": 2.5,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.250Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 9,
+  "fields": {
+    "habit": 2,
+    "date": "2026-09-24",
+    "value": 4.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.266Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 10,
+  "fields": {
+    "habit": 3,
+    "date": "2026-09-24",
+    "value": 2.5,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.283Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 11,
+  "fields": {
+    "habit": 1,
+    "date": "2026-09-23",
+    "value": 30.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.306Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 12,
+  "fields": {
+    "habit": 3,
+    "date": "2026-09-23",
+    "value": 2.5,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.325Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 13,
+  "fields": {
+    "habit": 1,
+    "date": "2026-09-22",
+    "value": 30.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.337Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 14,
+  "fields": {
+    "habit": 2,
+    "date": "2026-09-22",
+    "value": 4.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.350Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 15,
+  "fields": {
+    "habit": 3,
+    "date": "2026-09-22",
+    "value": 2.5,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:17:30.364Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 16,
+  "fields": {
+    "habit": 1,
+    "date": "2026-09-28",
+    "value": 30.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:20:16.611Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 17,
+  "fields": {
+    "habit": 2,
+    "date": "2026-09-28",
+    "value": 4.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:24:01.422Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 18,
+  "fields": {
+    "habit": 3,
+    "date": "2026-09-28",
+    "value": 2.5,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T18:24:03.778Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 19,
+  "fields": {
+    "habit": 4,
+    "date": "2026-09-28",
+    "value": 0.0,
+    "completed": false,
+    "notes": "",
+    "created_at": "2026-09-28T18:52:18.168Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 20,
+  "fields": {
+    "habit": 62,
+    "date": "2026-09-28",
+    "value": 1.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T20:14:44.547Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 21,
+  "fields": {
+    "habit": 63,
+    "date": "2026-09-28",
+    "value": 25.0,
+    "completed": true,
+    "notes": "",
+    "created_at": "2026-09-28T20:15:01.988Z"
+  }
+},
+{
+  "model": "core.coachprofile",
+  "pk": 1,
+  "fields": {
+    "name": "Sargento David (Cero Excusas)",
+    "slug": "david-goggins",
+    "tone": "drill_sergeant",
+    "avatar_emoji": "🔥",
+    "bio": "Mentalidad de acero militar. No hay lugar para la pereza ni para postergar.",
+    "morning_quote": "¡Levántate! El dolor de la disciplina pesa gramos, el remordimiento pesa toneladas.",
+    "midday_reminder": "¿Ya estás poniendo excusas? Agarra el cuaderno o cumple la serie AHORA.",
+    "evening_warning": "¡No te atrevas a tocar la almohada sin haber cumplido tu meta diaria!"
+  }
+},
+{
+  "model": "core.coachprofile",
+  "pk": 2,
+  "fields": {
+    "name": "Marco Aurelio (Estoico)",
+    "slug": "marco-aurelio",
+    "tone": "stoic_mentor",
+    "avatar_emoji": "🏛️",
+    "bio": "Sabiduría clásica. El obstáculo es el camino, la constancia es tu único deber.",
+    "morning_quote": "Al amanecer, dite a ti mismo: Hoy debo hacer la obra de un ser humano.",
+    "midday_reminder": "Concéntrate como un romano en cumplir la tarea presente con gravedad y amor.",
+    "evening_warning": "Reflexiona sobre tu jornada: ¿Hiciste lo correcto con tus metas hoy?"
+  }
+},
+{
+  "model": "core.coachprofile",
+  "pk": 3,
+  "fields": {
+    "name": "Mamba Mentality (Alto Rendimiento)",
+    "slug": "kobe-mamba",
+    "tone": "high_performance",
+    "avatar_emoji": "🐍",
+    "bio": "Obsesión por el detalle y el trabajo implacable para alcanzar los 100M.",
+    "morning_quote": "Los grandes no negocian consigo mismos. Despierta y ejecuta.",
+    "midday_reminder": "Cada repetición y cada meta escrita te acerca al 1% élite.",
+    "evening_warning": "Descansa solo cuando el trabajo esté terminado, no cuando estés cansado."
+  }
+},
+{
+  "model": "core.usercoachpreference",
+  "pk": 1,
+  "fields": {
+    "user": [
+      "demo_user"
+    ],
+    "coach": 1,
+    "notifications_enabled": true,
+    "push_subscription": {},
+    "intensity_level": 3
+  }
+}
+]

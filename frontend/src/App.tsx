@@ -7,7 +7,7 @@ import {
   Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
   ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle,
   Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks,
-  Wind, Pause, Target, Info
+  Wind, Pause, Target, Info, Clock, Volume2, VolumeX
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -28,6 +28,7 @@ interface Habit {
   habit_type: 'boolean' | 'numeric';
   target_value: number;
   unit: string;
+  estimated_minutes?: number;
   frequency_type?: string;
   days_of_week?: string;
   day_offset?: number | null;
@@ -54,6 +55,7 @@ interface ProgramItem {
   target_value: number;
   unit: string;
   description: string;
+  estimated_minutes?: number;
 }
 
 interface CoachProfile {
@@ -184,6 +186,33 @@ export default function App() {
   const [breathingTotalSeconds, setBreathingTotalSeconds] = useState(180); // 3 minutos por sesión
   const [breathingIsRunning, setBreathingIsRunning] = useState(false);
   const [breathingCompletedRounds, setBreathingCompletedRounds] = useState(0);
+  const [breathingSoundEnabled, setBreathingSoundEnabled] = useState(true);
+
+  // Reproducir campana tibetana suave para guiar la respiración con ojos cerrados
+  const playBreathingChime = (phase: 'inhale' | 'hold' | 'exhale' | 'hold_empty') => {
+    if (!breathingSoundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      // Frecuencias binaurales armónicas: Inhale = 528Hz (Solfeo / Calma), Hold = 432Hz, Exhale = 396Hz
+      const freq = phase === 'inhale' ? 528 : phase === 'hold' ? 432 : phase === 'exhale' ? 396 : 352;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 1.2);
+    } catch {
+      // Audio context policy
+    }
+  };
 
   // Modal Detalle Interactivo de Tarea / Guía de Ejecución
   const [selectedDetailHabit, setSelectedDetailHabit] = useState<Habit | null>(null);
@@ -279,6 +308,7 @@ export default function App() {
     habit_type: 'boolean' as 'boolean' | 'numeric',
     target_value: 1,
     unit: '',
+    estimated_minutes: 5,
     frequency_type: 'daily',
     days_of_week: '0,1,2,3,4,5,6',
     sla_target_percent: 85
@@ -435,23 +465,26 @@ export default function App() {
           const is478 = activeBreathingHabit.title.includes('4-7-8');
 
           if (is478) {
-            if (breathingPhase === 'inhale') { setBreathingPhase('hold'); return 7; }
-            if (breathingPhase === 'hold') { setBreathingPhase('exhale'); return 8; }
+            if (breathingPhase === 'inhale') { setBreathingPhase('hold'); playBreathingChime('hold'); return 7; }
+            if (breathingPhase === 'hold') { setBreathingPhase('exhale'); playBreathingChime('exhale'); return 8; }
             setBreathingPhase('inhale');
+            playBreathingChime('inhale');
             setBreathingCompletedRounds(r => r + 1);
             return 4;
           } else if (isPhysiologicalSigh) {
-            if (breathingPhase === 'inhale') { setBreathingPhase('hold'); return 1; }
-            if (breathingPhase === 'hold') { setBreathingPhase('exhale'); return 6; }
+            if (breathingPhase === 'inhale') { setBreathingPhase('hold'); playBreathingChime('hold'); return 1; }
+            if (breathingPhase === 'hold') { setBreathingPhase('exhale'); playBreathingChime('exhale'); return 6; }
             setBreathingPhase('inhale');
+            playBreathingChime('inhale');
             setBreathingCompletedRounds(r => r + 1);
             return 3;
           } else {
             // Box Breathing 4-4-4-4
-            if (breathingPhase === 'inhale') { setBreathingPhase('hold'); return 4; }
-            if (breathingPhase === 'hold') { setBreathingPhase('exhale'); return 4; }
-            if (breathingPhase === 'exhale') { setBreathingPhase('hold_empty'); return 4; }
+            if (breathingPhase === 'inhale') { setBreathingPhase('hold'); playBreathingChime('hold'); return 4; }
+            if (breathingPhase === 'hold') { setBreathingPhase('exhale'); playBreathingChime('exhale'); return 4; }
+            if (breathingPhase === 'exhale') { setBreathingPhase('hold_empty'); playBreathingChime('hold_empty'); return 4; }
             setBreathingPhase('inhale');
+            playBreathingChime('inhale');
             setBreathingCompletedRounds(r => r + 1);
             return 4;
           }
@@ -461,7 +494,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeBreathingHabit, breathingIsRunning, breathingPhase]);
+  }, [activeBreathingHabit, breathingIsRunning, breathingPhase, breathingSoundEnabled]);
 
   // Recordatorios periódicos del Coach (cada 45 minutos si quedan hábitos pendientes)
   useEffect(() => {
@@ -626,11 +659,17 @@ export default function App() {
     setActiveBreathingHabit(habit);
     setBreathingPhase('inhale');
     setBreathingSecondsLeft(4);
-    // Configurar duración según target_value si es numérico (ej. 3 min)
-    const minutes = (habit.habit_type === 'numeric' && habit.target_value > 0) ? habit.target_value : 3;
+    // Configurar duración inteligente: si la unidad son minutos, usar target_value; si no, usar estimated_minutes (ej. 3 a 5 min)
+    let minutes = 3;
+    if (habit.unit?.toLowerCase().includes('min')) {
+      minutes = habit.target_value > 0 ? habit.target_value : 3;
+    } else if (habit.estimated_minutes && habit.estimated_minutes > 0) {
+      minutes = habit.estimated_minutes;
+    }
     setBreathingTotalSeconds(Math.round(minutes * 60));
     setBreathingCompletedRounds(0);
     setBreathingIsRunning(true);
+    playBreathingChime('inhale');
   };
 
   const confirmBrianTracyCheck = async () => {
@@ -696,6 +735,7 @@ export default function App() {
       habit_type: 'boolean',
       target_value: 1,
       unit: '',
+      estimated_minutes: 5,
       frequency_type: 'daily',
       days_of_week: '0,1,2,3,4,5,6',
       sla_target_percent: 85
@@ -713,6 +753,7 @@ export default function App() {
       habit_type: habit.habit_type || 'boolean',
       target_value: habit.target_value || 1,
       unit: habit.unit || '',
+      estimated_minutes: habit.estimated_minutes ?? 5,
       frequency_type: habit.frequency_type || 'daily',
       days_of_week: habit.days_of_week || '0,1,2,3,4,5,6',
       sla_target_percent: habit.sla_target_percent || 85
@@ -736,6 +777,7 @@ export default function App() {
       habit_type: habitFormData.habit_type,
       target_value: habitFormData.target_value,
       unit: habitFormData.unit.trim(),
+      estimated_minutes: Number(habitFormData.estimated_minutes) || 5,
       frequency_type: habitFormData.frequency_type,
       days_of_week: habitFormData.days_of_week,
       sla_target_percent: Number(habitFormData.sla_target_percent) || 85
@@ -1295,10 +1337,16 @@ export default function App() {
                                               onClick={() => setSelectedDetailHabit(habit)}
                                               className="flex-1 min-w-0 cursor-pointer group/item select-none"
                                             >
-                                              <div className="flex items-center gap-1.5">
+                                              <div className="flex items-center gap-1.5 flex-wrap">
                                                 <h4 className={`text-xs sm:text-sm font-semibold leading-snug group-hover/item:text-indigo-300 transition ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
                                                   {title}
                                                 </h4>
+                                                {habit.estimated_minutes ? (
+                                                  <span className="text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                                    <Clock className="w-2.5 h-2.5 text-indigo-400" />
+                                                    <span>~{habit.estimated_minutes}m</span>
+                                                  </span>
+                                                ) : null}
                                                 <Info className="w-3 h-3 text-slate-500 opacity-0 group-hover/item:opacity-100 transition shrink-0" />
                                               </div>
                                               {habit.description && (
@@ -1411,10 +1459,16 @@ export default function App() {
                                       onClick={() => setSelectedDetailHabit(habit)}
                                       className="flex-1 min-w-0 cursor-pointer group/flat select-none"
                                     >
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex items-center gap-2 flex-wrap">
                                         <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-indigo-400 truncate max-w-[140px]">
                                           {planName}
                                         </span>
+                                        {habit.estimated_minutes ? (
+                                          <span className="text-[10px] font-mono text-slate-400 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                            <Clock className="w-2.5 h-2.5 text-indigo-400" />
+                                            <span>~{habit.estimated_minutes}m</span>
+                                          </span>
+                                        ) : null}
                                         {habit.unit === 'series' && (
                                           <span className="text-[10px] font-mono text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">
                                             {currentVal}/{targetVal} {habit.unit}
@@ -1705,7 +1759,7 @@ export default function App() {
                           onClick={() => toggleBlockCollapse(`habit_${habit.id}`)}
                           className="p-3.5 flex items-center justify-between gap-3 cursor-pointer select-none"
                         >
-                          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                          <div className="flex items-center gap-2.5 flex-1 min-w-0 flex-wrap">
                             <span className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${
                               isCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-300'
                             }`}>
@@ -1714,6 +1768,12 @@ export default function App() {
                             <h3 className={`font-bold text-xs sm:text-sm truncate ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
                               {title}
                             </h3>
+                            {habit.estimated_minutes ? (
+                              <span className="text-[10px] font-mono text-slate-400 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                <Clock className="w-2.5 h-2.5 text-indigo-400" />
+                                <span>~{habit.estimated_minutes} min</span>
+                              </span>
+                            ) : null}
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
@@ -2796,16 +2856,28 @@ export default function App() {
       {activeBreathingHabit && (
         <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-4">
           <div className="w-full max-w-sm bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
-            {/* Botón cerrar */}
-            <button
-              onClick={() => {
-                setActiveBreathingHabit(null);
-                setBreathingIsRunning(false);
-              }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800/60 transition"
-            >
-              ✕
-            </button>
+            {/* Botones de control superior (Audio y Cerrar) */}
+            <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
+              <button
+                onClick={() => setBreathingSoundEnabled(!breathingSoundEnabled)}
+                className={`p-2 rounded-full transition ${
+                  breathingSoundEnabled ? 'text-indigo-400 bg-indigo-950/80' : 'text-slate-500 hover:text-slate-300'
+                }`}
+                title={breathingSoundEnabled ? "Silenciar campana de respiración" : "Activar campana tibetana suave"}
+              >
+                {breathingSoundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveBreathingHabit(null);
+                  setBreathingIsRunning(false);
+                }}
+                className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800/60 transition"
+              >
+                ✕
+              </button>
+            </div>
 
             {/* Cabecera y Técnica */}
             <div className="mb-4">
@@ -2928,8 +3000,15 @@ export default function App() {
               )}
             </div>
 
-            {/* Panel de Métricas y Meta de la Tarea */}
-            <div className="grid grid-cols-3 gap-2 my-3">
+            {/* Panel de Métricas y Meta de la Tarea con Tiempo Estimado */}
+            <div className="grid grid-cols-4 gap-2 my-3">
+              <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800 text-center">
+                <span className="text-[9px] text-slate-400 uppercase font-bold block">Estimado</span>
+                <span className="text-xs font-black text-indigo-300 font-mono flex items-center justify-center gap-0.5 mt-0.5">
+                  <Clock className="w-3 h-3 text-indigo-400" />
+                  <span>{selectedDetailHabit.estimated_minutes ?? 5} min</span>
+                </span>
+              </div>
               <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
                 <span className="text-[10px] text-slate-400 uppercase font-bold block">Meta diaria</span>
                 <span className="text-sm font-black text-amber-400 font-mono">
@@ -3216,6 +3295,41 @@ export default function App() {
                 placeholder="ej. 3 series de 10 reps controladas en 3-4 segundos de bajada..."
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 h-20"
               />
+            </div>
+
+            {/* Tiempo Estimado (minutos) */}
+            <div>
+              <label className="text-[11px] font-bold text-slate-300 block mb-1 flex items-center gap-1">
+                <Clock className="w-3 h-3 text-indigo-400" />
+                <span>Tiempo Estimado para Completarla (minutos) *</span>
+              </label>
+              <div className="flex items-center gap-2 flex-wrap">
+                <input
+                  type="number"
+                  min="1"
+                  max="180"
+                  value={habitFormData.estimated_minutes}
+                  onChange={(e) => setHabitFormData({ ...habitFormData, estimated_minutes: Number(e.target.value) || 5 })}
+                  placeholder="ej. 5, 10, 25..."
+                  className="w-28 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                />
+                <div className="flex items-center gap-1 flex-wrap">
+                  {[3, 5, 10, 15, 25, 45].map(min => (
+                    <button
+                      key={min}
+                      type="button"
+                      onClick={() => setHabitFormData({ ...habitFormData, estimated_minutes: min })}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition ${
+                        habitFormData.estimated_minutes === min
+                          ? 'bg-indigo-600 border-indigo-500 text-white'
+                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {min}m
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Tipo de Registro (Booleano vs Numérico) */}

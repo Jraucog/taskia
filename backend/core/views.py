@@ -123,6 +123,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
                     'habit_type': item.habit_type,
                     'target_value': item.target_value,
                     'unit': item.unit,
+                    'estimated_minutes': item.estimated_minutes,
                     'day_offset': item.day_offset,
                     'frequency_type': 'daily',
                     'sla_target_percent': 85
