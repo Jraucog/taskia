@@ -244,6 +244,17 @@ export default function App() {
   // Modal para editar tarjeta individual del Vision Board
   const [editingCard, setEditingCard] = useState<VisionCard | null>(null);
 
+  // Sistema de notificación/alerta en pantalla (In-App Coach Banners & Push Simulation)
+  const [activeAlert, setActiveAlert] = useState<{ title: string; body: string; emoji: string } | null>(null);
+
+  const showInAppNotification = (title: string, body: string, emoji = '🔥') => {
+    setActiveAlert({ title, body, emoji });
+    setTimeout(() => {
+      setActiveAlert(null);
+    }, 6000);
+  };
+
+
   const brianTracy10Goals = [
     { id: 1, text: "Yo peso 91 kg con energía y constancia diaria para el 31 de octubre de 2026.", date: "31/10/2026", cat: "Físico" },
     { id: 2, text: "Yo cumplo mi rutina de 3 entrenamientos semanales más 1 partido de fútbol cada semana.", date: "Semanal", cat: "Deporte" },
@@ -367,35 +378,62 @@ export default function App() {
   };
 
   const requestNotificationPermission = async () => {
+    const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
+    const coachName = activeCoach ? activeCoach.name : 'Entrenador Taskia';
+    const msg = activeCoach ? activeCoach.morning_quote : '¡Notificaciones activadas! Ahora sí estás obligado a cumplir tu meta.';
+
     if (typeof Notification === 'undefined') {
-      alert('Tu navegador no soporta Notificaciones Web nativas.');
+      showInAppNotification(`🔥 ${coachName} activado`, msg, activeCoach?.avatar_emoji || '🔥');
       return;
     }
+
     try {
       const perm = await Notification.requestPermission();
       setNotificationPermission(perm);
       if (perm === 'granted') {
         setShowNotificationBanner(false);
-        // Enviar notificación de bienvenida del entrenador
-        const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
-        const coachName = activeCoach ? activeCoach.name : 'Entrenador Taskia';
-        const msg = activeCoach ? activeCoach.morning_quote : '¡Notificaciones activadas! Ahora sí estás obligado a cumplir tu meta.';
-        
-        new Notification(`🔥 ${coachName} activado`, {
-          body: msg,
-          icon: '/pwa-icon.svg'
-        });
+
+        // Disparar vía ServiceWorker si está disponible (estándar en PWA Android/iOS)
+        if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+          navigator.serviceWorker.ready.then((reg) => {
+            reg.showNotification(`🔥 ${coachName} activado`, {
+              body: msg,
+              icon: '/pwa-icon.svg',
+              badge: '/pwa-icon.svg'
+            });
+          }).catch(() => {
+            try {
+              new Notification(`🔥 ${coachName} activado`, { body: msg, icon: '/pwa-icon.svg' });
+            } catch (e) {
+              console.log("Fallback notification", e);
+            }
+          });
+        } else {
+          try {
+            new Notification(`🔥 ${coachName} activado`, { body: msg, icon: '/pwa-icon.svg' });
+          } catch (e) {
+            console.log("Direct notification", e);
+          }
+        }
+
+        // Siempre mostrar también el aviso In-App para retroalimentación visual inmediata
+        showInAppNotification(`🔥 ${coachName} activado`, msg, activeCoach?.avatar_emoji || '🔥');
 
         // Actualizar preferencia en el backend
         await axios.post(`${API_BASE}/auth/me/`, {
           notifications_enabled: true,
           coach_id: selectedCoachId
         }, getHeaders());
+      } else {
+        // Si el usuario o el navegador restringe permisos (e.g. HTTP en vez de HTTPS), activar notificador In-App
+        showInAppNotification(`⚠️ Notificaciones en modo In-App`, 'Tu navegador requiere HTTPS para alertas de sistema. Activamos el modo disciplinario dentro de la app.', '🛡️');
       }
     } catch (err) {
       console.error("Error pidiendo permiso de notificación:", err);
+      showInAppNotification(`🔥 ${coachName} activado`, msg, activeCoach?.avatar_emoji || '🔥');
     }
   };
+
 
   const handleSelectCoach = async (coachId: number) => {
     setSelectedCoachId(coachId);
@@ -538,15 +576,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans w-full max-w-full overflow-x-hidden safe-top safe-bottom pb-28 md:pb-12">
-      {/* Top Header Responsivo */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-4 py-3 w-full">
+      {/* Top Header Responsivo - Minimalista y Sofisticado */}
+      <header className="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-4 py-2.5 w-full">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-tr from-amber-500 to-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-500/20">
-              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <div className="bg-slate-800 border border-slate-700 p-1.5 rounded-xl shadow-sm">
+              <Flame className="w-4 h-4 text-amber-500" />
             </div>
             <div>
-              <span className="text-base sm:text-lg font-black tracking-tight bg-gradient-to-r from-amber-400 to-indigo-300 bg-clip-text text-transparent">
+              <span className="text-base font-black tracking-tight text-white">
                 TASKIA
               </span>
             </div>
@@ -556,11 +594,11 @@ export default function App() {
             {/* Botón de Perfil de Entrenador Motivador */}
             <button 
               onClick={() => setShowCoachModal(true)}
-              className="flex items-center gap-1 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-800/80 text-indigo-300 text-xs px-2.5 py-1 rounded-xl transition"
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-xl transition"
               title="Cambiar Entrenador / Tono del Motivador"
             >
               <span>{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
-              <span className="hidden sm:inline font-bold">Coach</span>
+              <span className="hidden sm:inline font-medium text-slate-300">Coach</span>
             </button>
 
             {/* Indicador de Notificaciones */}
@@ -568,16 +606,16 @@ export default function App() {
               onClick={requestNotificationPermission}
               className={`p-1.5 rounded-xl border transition ${
                 notificationPermission === 'granted' 
-                  ? 'bg-emerald-950/50 border-emerald-800/50 text-emerald-400' 
-                  : 'bg-amber-950/50 border-amber-800/60 text-amber-400 animate-pulse'
+                  ? 'bg-slate-900 border-emerald-800/60 text-emerald-400' 
+                  : 'bg-slate-900 border-amber-800/60 text-amber-400 hover:bg-slate-800'
               }`}
-              title={notificationPermission === 'granted' ? 'Notificaciones Push activadas' : 'Activar Notificaciones de disciplina'}
+              title={notificationPermission === 'granted' ? 'Notificaciones activas' : 'Activar notificaciones'}
             >
               {notificationPermission === 'granted' ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
             </button>
 
             <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-xl text-xs">
-              <User className="w-3.5 h-3.5 text-indigo-400" />
+              <User className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-slate-300 font-medium max-w-[80px] sm:max-w-none truncate">
                 {currentUser?.username ? `@${currentUser.username}` : 'demo'}
               </span>
@@ -586,13 +624,13 @@ export default function App() {
                   <LogOut className="w-3 h-3" />
                 </button>
               ) : (
-                <button onClick={() => { setShowAuthModal(true); setIsRegister(false); }} className="text-indigo-400 font-semibold text-[11px]">
+                <button onClick={() => { setShowAuthModal(true); setIsRegister(false); }} className="text-slate-300 hover:text-white font-semibold text-[11px]">
                   Entrar
                 </button>
               )}
             </div>
 
-            <button onClick={fetchData} className="p-1.5 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white">
+            <button onClick={fetchData} className="p-1.5 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
@@ -604,10 +642,10 @@ export default function App() {
         <div className="max-w-xs mx-auto mt-2 flex justify-center">
           <div 
             onClick={() => setIslandExpanded(!islandExpanded)}
-            className={`bg-black/90 border border-slate-700/80 rounded-full transition-all duration-300 ease-out cursor-pointer shadow-xl flex items-center justify-between px-3.5 py-1.5 ${
+            className={`bg-slate-900/90 border border-slate-800 rounded-full transition-all duration-300 ease-out cursor-pointer shadow-lg flex items-center justify-between px-3.5 py-1.5 ${
               islandExpanded 
-                ? 'w-full max-w-sm rounded-2xl py-3 px-4 bg-slate-900 border-indigo-500/60 shadow-indigo-500/20' 
-                : 'w-auto gap-2.5 hover:scale-105'
+                ? 'w-full max-w-sm rounded-2xl py-3 px-4 bg-slate-900 border-slate-700' 
+                : 'w-auto gap-2.5 hover:border-slate-700'
             }`}
           >
             {/* Vista Compacta de Dynamic Island */}
@@ -618,22 +656,22 @@ export default function App() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </span>
-                  <span className="text-[11px] font-bold text-white flex items-center gap-1">
+                  <span className="text-[11px] font-medium text-slate-200 flex items-center gap-1">
                     {coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}
-                    <span className="text-amber-400 font-mono font-bold">
+                    <span className="text-slate-100 font-mono font-bold">
                       {habits.filter(h => h.today_log?.completed).length}/{habits.length}
                     </span>
                   </span>
                 </div>
 
                 {restTimer !== null && (
-                  <div className="flex items-center gap-1 text-[11px] font-mono font-black text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                  <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-900/40">
                     <Timer className="w-3 h-3" />
                     <span>{restTimer}s</span>
                   </div>
                 )}
 
-                <span className="text-[10px] text-slate-400 font-medium">Island</span>
+                <span className="text-[10px] text-slate-500 font-mono">Island</span>
               </>
             ) : (
               /* Vista Expandida de Dynamic Island */
@@ -645,7 +683,7 @@ export default function App() {
                       {coaches.find(c => c.id === selectedCoachId)?.name || 'Entrenador Taskia'}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-indigo-400 font-bold">En vivo</span>
+                  <span className="text-[10px] font-mono text-slate-400">En vivo</span>
                 </div>
 
                 <p className="text-xs text-slate-300 italic leading-relaxed">
@@ -654,7 +692,7 @@ export default function App() {
 
                 <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800">
                   <span>Cumplimiento hoy:</span>
-                  <span className="font-bold text-amber-400">
+                  <span className="font-bold text-slate-200">
                     {habits.filter(h => h.today_log?.completed).length} de {habits.length} ({metrics?.today_compliance_percent || 0}%)
                   </span>
                 </div>
@@ -664,59 +702,74 @@ export default function App() {
         </div>
 
         {/* ======================================================== */}
-        {/* BARRA DE CITA MOTIVACIONAL ROTATIVA (TONY ROBBINS, BRIAN TRACY, ETC.) */}
+        {/* BARRA DE CITA MOTIVACIONAL ROTATIVA (TEXTO COMPLETO Y LEGIBLE) */}
         {/* ======================================================== */}
         <div className="max-w-md mx-auto mt-2 px-1">
           <div 
             onClick={changeQuote}
-            className="group bg-gradient-to-r from-indigo-950/60 via-slate-900/80 to-amber-950/60 border border-slate-800/80 hover:border-indigo-500/50 rounded-2xl px-3 py-2 flex items-center justify-between gap-2 cursor-pointer transition shadow-sm hover:shadow-indigo-500/10 active:scale-[0.98]"
+            className="group bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl px-3.5 py-2.5 flex items-start justify-between gap-3 cursor-pointer transition active:scale-[0.99]"
             title="Toca para cambiar la frase motivacional"
           >
-            <div className="flex items-center gap-2 overflow-hidden">
-              <span className="text-amber-400 text-xs shrink-0">💡</span>
-              <div className="overflow-hidden">
-                <p className="text-[11px] text-slate-200 italic truncate font-medium">
+            <div className="flex items-start gap-2.5 flex-1">
+              <span className="text-amber-500 text-xs shrink-0 mt-0.5">💬</span>
+              <div className="flex-1">
+                <p className="text-xs text-slate-200 italic font-medium leading-snug">
                   "{motivationalQuotes[currentQuoteIndex].quote}"
                 </p>
-                <p className="text-[9px] text-amber-400 font-bold uppercase tracking-wider">
-                  — {motivationalQuotes[currentQuoteIndex].author}
+                <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1 flex items-center gap-1.5">
+                  <span>— {motivationalQuotes[currentQuoteIndex].author}</span>
+                  <span className="text-[9px] text-slate-600 font-normal lowercase">(toca para rotar)</span>
                 </p>
               </div>
             </div>
-            <button className="text-slate-500 group-hover:text-indigo-400 shrink-0 p-1">
+            <button className="text-slate-500 group-hover:text-slate-300 shrink-0 p-1">
               <RefreshCw className="w-3 h-3 group-hover:rotate-180 transition-transform duration-500" />
             </button>
           </div>
         </div>
       </header>
 
+      {/* Alerta / Notificación Flotante Estilo Sistema (In-App Push Banner) */}
+      {activeAlert && (
+        <div className="fixed top-3 left-3 right-3 z-50 max-w-md mx-auto animate-bounce-short">
+          <div className="bg-slate-900 border border-slate-700/80 text-white rounded-2xl p-3.5 shadow-2xl flex items-start gap-3 backdrop-blur-md">
+            <span className="text-2xl shrink-0">{activeAlert.emoji}</span>
+            <div className="flex-1">
+              <h4 className="text-xs font-bold text-white">{activeAlert.title}</h4>
+              <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">{activeAlert.body}</p>
+            </div>
+            <button onClick={() => setActiveAlert(null)} className="text-slate-500 hover:text-white text-xs p-1">✕</button>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 flex-1 flex flex-col gap-4">
         
-        {/* Banner de Obligación / Activación de Notificaciones si están apagadas */}
+        {/* Banner de Activación de Notificaciones (Elegante y No Estridente) */}
         {showNotificationBanner && (
-          <div className="bg-gradient-to-r from-amber-950/80 to-red-950/80 border border-amber-600/50 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-lg shadow-amber-950/30 animate-pulse">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-md">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-amber-500/20 text-amber-400 rounded-xl">
-                <ShieldAlert className="w-5 h-5" />
+              <div className="p-2 bg-slate-800 text-amber-400 rounded-xl">
+                <ShieldAlert className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">¡Activa las notificaciones de disciplina!</h4>
-                <p className="text-[11px] text-amber-200/80">
-                  La app te recordará tus hábitos y la regla de reinicio de Brian Tracy.
+                <h4 className="text-xs font-bold text-slate-200">Activa las notificaciones de disciplina</h4>
+                <p className="text-[11px] text-slate-400">
+                  Oblígate a no romper la racha y recibir avisos de tu Coach.
                 </p>
               </div>
             </div>
 
             <button 
               onClick={requestNotificationPermission}
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs py-2 px-3 rounded-xl shrink-0 shadow-md active:scale-95 transition"
+              className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs py-2 px-3 rounded-xl shrink-0 transition"
             >
-              Activar Ahora
+              Activar
             </button>
           </div>
         )}
+
         
         {/* ======================================================== */}
         {/* PESTAÑA 1: MIS PLANES Y TAREAS (SISTEMA DE DRILL-DOWN / ENTRAR Y SALIR) */}
@@ -1185,16 +1238,16 @@ export default function App() {
                   setGrillAnswers({ area: 'Cuerpo & Salud', goal: '', why: '', deadline: '', commitment: '90%' });
                   setShowGrillMeModal(true);
                 }}
-                className="bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex items-center gap-1.5"
+                className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 active:scale-95"
               >
-                <Sparkles className="w-3.5 h-3.5" /> Grill Me
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Grill Me
               </button>
             </div>
 
             {/* Banner explicativo del Vision Board */}
             <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-3 flex items-start gap-2.5">
               <span className="text-base">🎯</span>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
+              <p className="text-[11px] text-slate-400 leading-relaxed">
                 El Vision Board conecta tus hábitos diarios con tus metas trascendentales de vida. Toca cualquier tarjeta para editarla o usa el botón <strong>"Grill Me"</strong> para que el asistente te entreviste y formule una nueva meta precisa con la fórmula 3P.
               </p>
             </div>
@@ -1204,18 +1257,18 @@ export default function App() {
               {visionCards.map((card) => (
                 <div 
                   key={card.id} 
-                  className={`bg-gradient-to-b ${card.color} p-4 rounded-2xl border flex flex-col justify-between shadow-lg relative group transition hover:border-slate-500/50`}
+                  className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-4 rounded-2xl flex flex-col justify-between shadow-sm relative group transition"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-2xl">{card.emoji}</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-mono text-slate-400 bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800">
+                        <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800">
                           📅 {card.deadline}
                         </span>
                         <button 
                           onClick={() => setEditingCard(card)}
-                          className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition"
+                          className="p-1 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-slate-300 transition"
                           title="Editar Meta"
                         >
                           <Edit3 className="w-3 h-3" />
@@ -1223,14 +1276,14 @@ export default function App() {
                       </div>
                     </div>
 
-                    <span className="text-[9px] uppercase font-bold tracking-wider text-amber-400">
+                    <span className="text-[9px] uppercase font-bold tracking-wider text-slate-400">
                       {card.category}
                     </span>
-                    <h3 className="font-bold text-sm text-white mt-0.5 leading-snug">
+                    <h3 className="font-bold text-sm text-slate-100 mt-0.5 leading-snug">
                       {card.title}
                     </h3>
 
-                    <p className="text-[11px] text-slate-300/90 mt-2 bg-slate-950/40 p-2 rounded-xl border border-slate-800/40 leading-relaxed italic">
+                    <p className="text-[11px] text-slate-400 mt-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed italic">
                       "{card.why}"
                     </p>
                   </div>
@@ -1238,11 +1291,11 @@ export default function App() {
                   <div className="mt-3 pt-2.5 border-t border-slate-800/60">
                     <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
                       <span>Progreso estimado:</span>
-                      <span className="font-mono font-bold text-white">{card.progress}%</span>
+                      <span className="font-mono font-bold text-slate-300">{card.progress}%</span>
                     </div>
-                    <div className="w-full bg-slate-950/80 h-1.5 rounded-full overflow-hidden border border-slate-800">
+                    <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800">
                       <div 
-                        className="bg-gradient-to-r from-amber-400 to-indigo-500 h-full rounded-full transition-all duration-500"
+                        className="bg-slate-400 h-full rounded-full transition-all duration-500"
                         style={{ width: `${card.progress}%` }}
                       />
                     </div>
@@ -1250,6 +1303,7 @@ export default function App() {
                 </div>
               ))}
             </div>
+
           </div>
         )}
 
