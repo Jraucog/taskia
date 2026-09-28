@@ -58,6 +58,7 @@ class Habit(models.Model):
     unit = models.CharField(max_length=50, blank=True, default='')
     frequency_type = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, default='daily')
     days_of_week = models.CharField(max_length=50, default='0,1,2,3,4,5,6', help_text="0=Lunes, 6=Domingo")
+    day_offset = models.IntegerField(null=True, blank=True, help_text="Día relativo del programa (0 es día 1, etc.)")
     weekly_target = models.IntegerField(default=7)
     sla_target_percent = models.IntegerField(default=80, help_text="Meta de cumplimiento porcentual para estar en SLA")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -65,6 +66,32 @@ class Habit(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.user.username})"
+
+    def is_scheduled_on(self, target_date=None):
+        """
+        Determina si este hábito está programado para una fecha específica.
+        - Si pertenece a un programa con day_offset secuencial (retos de N días como Brian Tracy):
+          solo está programado si el offset respecto a start_date coincide.
+        - Si es 'specific_days': verifica si el día de la semana (0=Lunes...6=Domingo) está en days_of_week.
+        - Si es 'daily': programado todos los días.
+        - Si es 'weekly_quota': programado por cuota semanal.
+        """
+        if target_date is None:
+            target_date = datetime.date.today()
+
+        # 1. Hábitos secuenciales vinculados a un programa (ej. Desafío 21 Días)
+        if self.enrollment and self.day_offset is not None:
+            # Calcular qué día del programa corresponde a target_date
+            prog_day = (target_date - self.enrollment.start_date).days
+            return self.day_offset == prog_day
+
+        # 2. Días específicos de la semana (ej. TRX lunes, miércoles y viernes: '0,2,4')
+        if self.frequency_type == 'specific_days':
+            allowed_days = [d.strip() for d in self.days_of_week.split(',') if d.strip()]
+            return str(target_date.weekday()) in allowed_days
+
+        # 3. Diario o cuota semanal
+        return True
 
 class HabitLog(models.Model):
     habit = models.ForeignKey(Habit, related_name='logs', on_delete=models.CASCADE)

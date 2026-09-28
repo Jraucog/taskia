@@ -81,6 +81,7 @@ interface MetricsSummary {
     email: string;
   };
   total_active_habits: number;
+  scheduled_today_count?: number;
   completed_today: number;
   today_compliance_percent: number;
   habits_meeting_sla_percent: number;
@@ -1576,7 +1577,9 @@ export default function App() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl">
                   <span className="text-[10px] text-slate-400 uppercase font-bold">Cumplimiento Hoy</span>
-                  <div className="text-lg font-black text-white mt-0.5">{metrics.completed_today} / {metrics.total_active_habits}</div>
+                  <div className="text-lg font-black text-white mt-0.5">
+                    {metrics.completed_today} / {metrics.scheduled_today_count ?? habits.length}
+                  </div>
                   <span className="text-[11px] text-indigo-400 font-semibold">{metrics.today_compliance_percent}%</span>
                 </div>
 

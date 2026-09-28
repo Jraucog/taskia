@@ -79,16 +79,20 @@ class HabitLogSerializer(serializers.ModelSerializer):
 class HabitSerializer(serializers.ModelSerializer):
     today_log = serializers.SerializerMethodField()
     compliance_summary = serializers.SerializerMethodField()
+    is_scheduled_today = serializers.SerializerMethodField()
 
     class Meta:
         model = Habit
         fields = [
             'id', 'user', 'enrollment', 'title', 'description', 'habit_type',
-            'target_value', 'unit', 'frequency_type', 'days_of_week',
+            'target_value', 'unit', 'frequency_type', 'days_of_week', 'day_offset',
             'weekly_target', 'sla_target_percent', 'active', 'created_at',
-            'today_log', 'compliance_summary'
+            'today_log', 'compliance_summary', 'is_scheduled_today'
         ]
         read_only_fields = ['user', 'enrollment', 'created_at']
+
+    def get_is_scheduled_today(self, obj):
+        return obj.is_scheduled_on(datetime.date.today())
 
     def get_today_log(self, obj):
         today = datetime.date.today()
@@ -104,22 +108,38 @@ class HabitSerializer(serializers.ModelSerializer):
         
         history = []
         completed_count = 0
+        scheduled_count = 0
+
         for i in range(6, -1, -1):
             d = today - datetime.timedelta(days=i)
             log = logs.get(d)
             is_comp = bool(log and log.completed)
+            is_sched = obj.is_scheduled_on(d)
+
+            if is_sched:
+                scheduled_count += 1
+
             if is_comp:
                 completed_count += 1
+
             history.append({
                 "date": str(d),
                 "day_name": d.strftime("%a"),
                 "completed": is_comp,
+                "scheduled": is_sched,
                 "value": log.value if log else 0.0
             })
 
-        rate = round((completed_count / 7.0) * 100, 1)
+        # Si el hábito tiene una frecuencia de días específicos o cuota, el denominador
+        # debe reflejar los días donde realmente estaba programado realizarse
+        denominator = max(scheduled_count, 1)
+        rate = round((completed_count / float(denominator)) * 100, 1)
+        # Cap a 100% si sobrecumple
+        rate = min(rate, 100.0)
+
         return {
             "completed_last_7_days": completed_count,
+            "scheduled_last_7_days": scheduled_count,
             "rate_percent": rate,
             "meets_sla": rate >= obj.sla_target_percent,
             "history": history
