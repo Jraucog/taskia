@@ -2017,9 +2017,22 @@ export default function App() {
 
             {/* Barra de Filtros por Categoría */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-              {['all', 'Respiración', 'Fuerza & Fisioterapia', 'Disciplina & Mentalidad', 'Fitness & Salud', 'Desarrollo Personal', 'Foco & Disciplina'].map((cat) => {
+              {[
+                { id: 'all', label: 'Todas las Plantillas' },
+                { id: 'Respiración', label: '🫁 Respiración & Estrés' },
+                { id: 'Fuerza', label: '🦵 TRX & Aquiles' },
+                { id: 'Disciplina', label: '✍️ Brian Tracy (Fórmula 3P)' },
+                { id: 'Software', label: '💻 Software & 100M' },
+                { id: 'Sueño', label: '🌙 Sueño & Circadiano' },
+                { id: 'Nutrición', label: '🥗 Nutrición & 85kg' },
+                { id: 'Música', label: '🎵 Producción Musical' },
+                { id: 'Hogar', label: '🏡 Hogar & Proyectos' },
+                { id: 'Desarrollo', label: '🌅 Mañanas SAVERS' },
+                { id: 'Foco', label: '⚡ Desintoxicación Dopamina' }
+              ].map((categoryItem) => {
+                const cat = categoryItem.id;
+                const label = categoryItem.label;
                 const isSelected = selectedCatalogCategory === cat;
-                const label = cat === 'all' ? 'Todas' : cat;
                 return (
                   <button
                     key={cat}
@@ -2030,7 +2043,7 @@ export default function App() {
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
                     }`}
                   >
-                    {cat === 'Respiración' ? '🫁 ' : ''}{label}
+                    {label}
                   </button>
                 );
               })}
@@ -2068,9 +2081,17 @@ export default function App() {
                               <p className="font-medium text-white">{it.title}</p>
                               {it.description && <p className="text-[10px] text-slate-400 mt-0.5">{it.description}</p>}
                             </div>
-                            <span className="text-[10px] text-amber-400 font-mono font-bold shrink-0 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
-                              {it.target_value} {it.unit}
-                            </span>
+                            <div className="flex flex-col items-end gap-1 shrink-0">
+                              <span className="text-[10px] text-amber-400 font-mono font-bold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                                {it.target_value} {it.unit}
+                              </span>
+                              {it.estimated_minutes ? (
+                                <span className="text-[9px] font-mono text-slate-400 flex items-center gap-0.5">
+                                  <Clock className="w-2.5 h-2.5 text-indigo-400" />
+                                  <span>~{it.estimated_minutes}m</span>
+                                </span>
+                              ) : null}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -2565,9 +2586,17 @@ export default function App() {
                       {it.description && <p className="text-[11px] text-slate-400 mt-0.5">{it.description}</p>}
                     </div>
                   </div>
-                  <span className="text-[11px] font-mono text-indigo-300 bg-indigo-950/80 border border-indigo-900 px-2 py-0.5 rounded-lg shrink-0">
-                    {it.target_value} {it.unit}
-                  </span>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className="text-[11px] font-mono text-indigo-300 bg-indigo-950/80 border border-indigo-900 px-2 py-0.5 rounded-lg">
+                      {it.target_value} {it.unit}
+                    </span>
+                    {it.estimated_minutes ? (
+                      <span className="text-[10px] font-mono text-slate-400 flex items-center gap-0.5">
+                        <Clock className="w-2.5 h-2.5 text-indigo-400" />
+                        <span>~{it.estimated_minutes}m</span>
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               ))}
             </div>

@@ -100,6 +100,61 @@
   }
 },
 {
+  "model": "core.program",
+  "pk": 7,
+  "fields": {
+    "title": "Higiene del Sueño & Ritmo Circadiano Óptimo",
+    "description": "Protocolo neurocientífico para optimizar el sueño profundo (REM y No-REM), acelerar la recuperación muscular y despertar con energía.",
+    "category": "Sueño & Recuperación",
+    "duration_days": 21,
+    "created_at": "2026-09-28T20:51:40.966Z"
+  }
+},
+{
+  "model": "core.program",
+  "pk": 8,
+  "fields": {
+    "title": "Protocolo de Composición Corporal & Meta 85 kg",
+    "description": "Nutrición estructurada de precisión para recomposición atlética, preservando tendón de Aquiles y masa muscular magra.",
+    "category": "Nutrición & Salud",
+    "duration_days": 30,
+    "created_at": "2026-09-28T20:51:41.014Z"
+  }
+},
+{
+  "model": "core.program",
+  "pk": 9,
+  "fields": {
+    "title": "Sprint de Desarrollo de Software & Camino a 100M",
+    "description": "Disciplina de ejecución técnica semanal para avanzar de prototipo a software monetizable con clientes recurrentes de pago.",
+    "category": "Software & Negocios",
+    "duration_days": 30,
+    "created_at": "2026-09-28T20:51:41.060Z"
+  }
+},
+{
+  "model": "core.program",
+  "pk": 10,
+  "fields": {
+    "title": "Laboratorio de Producción Musical & Lanzamiento Single",
+    "description": "Régimen diario de 30-45 minutos de creatividad estructurada para producir, pulir y tener listo el single oficial masterizado.",
+    "category": "Música & Creatividad",
+    "duration_days": 30,
+    "created_at": "2026-09-28T20:51:41.097Z"
+  }
+},
+{
+  "model": "core.program",
+  "pk": 11,
+  "fields": {
+    "title": "Proyecto Hogar & Instalación Termopaneles",
+    "description": "Plan de acción para medición, cotización de proveedores y ejecución del cambio de termopaneles en toda la casa.",
+    "category": "Hogar & Proyectos",
+    "duration_days": 21,
+    "created_at": "2026-09-28T20:51:41.134Z"
+  }
+},
+{
   "model": "core.programitem",
   "pk": 1,
   "fields": {
@@ -699,6 +754,230 @@
     "unit": "minutos",
     "description": "Cadencia rítmica de 6 respiraciones por minuto durante 5 minutos a mitad del día laboral para restaurar equilibrio emocional.",
     "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 44,
+  "fields": {
+    "program": 7,
+    "title": "Luz solar matutina directa (10-15 min)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 15.0,
+    "unit": "min",
+    "description": "Mirar hacia la luz natural sin gafas de sol antes de las 9:00 para fijar el reloj circadiano",
+    "estimated_minutes": 15
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 45,
+  "fields": {
+    "program": 7,
+    "title": "Corte absoluto de cafeína antes de las 14:00",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Evitar adenosina residual que bloquea la arquitectura del sueño nocturno",
+    "estimated_minutes": 1
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 46,
+  "fields": {
+    "program": 7,
+    "title": "Ducha tibia y magnesio bisglicinato (30 min antes)",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Bajar la temperatura central del cuerpo e inducir la liberación natural de melatonina",
+    "estimated_minutes": 15
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 47,
+  "fields": {
+    "program": 7,
+    "title": "Cero pantallas y luz azul 60 min antes de dormir",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Dormitorio a oscuras (19-20°C) sin teléfono móvil junto a la cama",
+    "estimated_minutes": 60
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 48,
+  "fields": {
+    "program": 8,
+    "title": "Ingesta proteica mínima 1.8g/kg (150-160g diarios)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 155.0,
+    "unit": "gramos",
+    "description": "Huevos, pollo, carnes magras o pescado distribuidos en 3-4 comidas",
+    "estimated_minutes": 10
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 49,
+  "fields": {
+    "program": 8,
+    "title": "Hidratación con electrolitos (3 Litros de agua diarios)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 3.0,
+    "unit": "litros",
+    "description": "Agua con pizca de sal marina al despertar para transporte de nutrientes y volumen celular",
+    "estimated_minutes": 5
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 50,
+  "fields": {
+    "program": 8,
+    "title": "Ventana de ayuno intermitente 14/10",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Cenar antes de las 21:00 y desayunar a las 11:00 para desinflamar el tracto digestivo y tendones",
+    "estimated_minutes": 1
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 51,
+  "fields": {
+    "program": 8,
+    "title": "Cero ultraprocesados ni azúcar refinada en jornada laboral",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Mantener glucosa plana sin picos de insulina que generen somnolencia vespertina",
+    "estimated_minutes": 1
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 52,
+  "fields": {
+    "program": 9,
+    "title": "Bloque de Programación Profunda / Deep Work (2 horas)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 2.0,
+    "unit": "horas",
+    "description": "Sin notificaciones, teléfono en otra habitación. Desarrollar features nucleares del MVP",
+    "estimated_minutes": 120
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 53,
+  "fields": {
+    "program": 9,
+    "title": "Commit y Verificación de Calidad en Git",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Subir código limpio, probado y documentado al repositorio diario",
+    "estimated_minutes": 10
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 54,
+  "fields": {
+    "program": 9,
+    "title": "Contacto o Feedback de 1 Potencial Cliente / Usuario",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Validar dolor real de mercado y propuesta de valor antes de sobre-diseñar",
+    "estimated_minutes": 20
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 55,
+  "fields": {
+    "program": 10,
+    "title": "Sesión en DAW / Beatmaking (40 min)",
+    "day_offset": 0,
+    "habit_type": "numeric",
+    "target_value": 40.0,
+    "unit": "min",
+    "description": "Composición de estructura, baterías, bajo, melodías principales y puente",
+    "estimated_minutes": 40
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 56,
+  "fields": {
+    "program": 10,
+    "title": "Diseño Sonoro & Selección de Timbres Únicos",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Elegir sintetizadores, texturas y percusiones con carácter distintivo",
+    "estimated_minutes": 15
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 57,
+  "fields": {
+    "program": 10,
+    "title": "Escucha Crítica & Referenciación A/B en Distintos Altavoces",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Probar balance estéreo y frecuencias bajas en audífonos, monitores y celular",
+    "estimated_minutes": 15
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 58,
+  "fields": {
+    "program": 11,
+    "title": "Gestión de Cotizaciones y Contacto de Proveedores",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Comparar perfiles PVC, cristales Low-E, garantías y tiempos de instalación",
+    "estimated_minutes": 25
+  }
+},
+{
+  "model": "core.programitem",
+  "pk": 59,
+  "fields": {
+    "program": 11,
+    "title": "Presupuesto y Planificación Financiera del Hogar",
+    "day_offset": 0,
+    "habit_type": "boolean",
+    "target_value": 1.0,
+    "unit": "",
+    "description": "Asignar fondos mensuales para compras de materiales sin desviar capital operativo",
+    "estimated_minutes": 15
   }
 },
 {
