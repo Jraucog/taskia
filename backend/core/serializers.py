@@ -83,13 +83,29 @@ class HabitSerializer(serializers.ModelSerializer):
     def get_compliance_summary(self, obj):
         today = datetime.date.today()
         seven_days_ago = today - datetime.timedelta(days=6)
-        logs = obj.logs.filter(date__gte=seven_days_ago, date__lte=today)
-        completed_count = logs.filter(completed=True).count()
+        logs = {log.date: log for log in obj.logs.filter(date__gte=seven_days_ago, date__lte=today)}
+        
+        history = []
+        completed_count = 0
+        for i in range(6, -1, -1):
+            d = today - datetime.timedelta(days=i)
+            log = logs.get(d)
+            is_comp = bool(log and log.completed)
+            if is_comp:
+                completed_count += 1
+            history.append({
+                "date": str(d),
+                "day_name": d.strftime("%a"),
+                "completed": is_comp,
+                "value": log.value if log else 0.0
+            })
+
         rate = round((completed_count / 7.0) * 100, 1)
         return {
             "completed_last_7_days": completed_count,
             "rate_percent": rate,
-            "meets_sla": rate >= obj.sla_target_percent
+            "meets_sla": rate >= obj.sla_target_percent,
+            "history": history
         }
 
 class ProgramEnrollmentSerializer(serializers.ModelSerializer):

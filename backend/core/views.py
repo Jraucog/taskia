@@ -141,9 +141,15 @@ class HabitViewSet(viewsets.ModelViewSet):
     def toggle_today(self, request, pk=None):
         habit = self.get_object()
         today = datetime.date.today()
-        log, created = HabitLog.objects.get_or_create(habit=habit, date=today)
+        target_date = request.data.get('date', str(today))
+        log, created = HabitLog.objects.get_or_create(habit=habit, date=target_date)
 
-        if 'value' in request.data:
+        if 'step' in request.data:
+            # Incrementar una serie (ej. 1 de 3)
+            step_delta = float(request.data['step'])
+            log.value = max(0.0, round(log.value + step_delta, 1))
+            log.completed = (log.value >= habit.target_value)
+        elif 'value' in request.data:
             val = float(request.data['value'])
             log.value = val
             log.completed = (val >= habit.target_value)
@@ -155,7 +161,7 @@ class HabitViewSet(viewsets.ModelViewSet):
         return Response({
             "habit_id": habit.id,
             "habit_title": habit.title,
-            "date": str(today),
+            "date": str(target_date),
             "completed": log.completed,
             "value": log.value,
             "is_in_sla": log.is_in_sla

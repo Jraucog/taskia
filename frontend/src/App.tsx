@@ -1,12 +1,20 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
-  CheckCircle2, Circle, Flame, Target, Zap, 
-  Layers, BarChart3, AlertCircle, Play, RefreshCw,
-  User, LogOut, LogIn, UserPlus
+  CheckCircle2, Circle, Flame, Zap, 
+  Layers, Play, RefreshCw,
+  User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
+  Timer, Check, Plus, Minus
 } from 'lucide-react';
 
 const API_BASE = `http://${window.location.hostname}:8000/api`;
+
+interface DayHistory {
+  date: string;
+  day_name: string;
+  completed: boolean;
+  value: number;
+}
 
 interface Habit {
   id: number;
@@ -25,6 +33,7 @@ interface Habit {
     completed_last_7_days: number;
     rate_percent: number;
     meets_sla: boolean;
+    history?: DayHistory[];
   };
 }
 
@@ -77,37 +86,34 @@ export default function App() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [metrics, setMetrics] = useState<MetricsSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'today' | 'programs' | 'inject'>('today');
+  
+  // Navegación principal intuitiva
+  const [viewMode, setViewMode] = useState<'workout' | 'habits' | 'calendar' | 'programs' | 'inject'>('workout');
+
+  // Temporizador de descanso para entrenar
+  const [restTimer, setRestTimer] = useState<number | null>(null);
 
   const [jsonPayload, setJsonPayload] = useState(JSON.stringify({
-    title: "Plan de Resistencia Running 21 Días",
-    description: "Programa de preparación aeróbica e hidratación running",
-    category: "Running / Atletismo",
-    duration_days: 21,
+    title: "Plan de Movilidad y Cadena Posterior",
+    description: "Rutina corta de 15 minutos para salud articular y tendones",
+    category: "Movilidad",
+    duration_days: 14,
     items: [
       {
-        title: "Trote Progresivo (Kilómetros)",
+        title: "Dorsiflexión dinámica en pared",
         day_offset: 0,
         habit_type: "numeric",
-        target_value: 5,
-        unit: "km",
-        description: "Ritmo cómodo zona 2"
+        target_value: 3,
+        unit: "series",
+        description: "10 repeticiones por pierna"
       },
       {
-        title: "Electrolitos y Recuperación",
+        title: "Puente glúteo isométrico",
         day_offset: 0,
-        habit_type: "boolean",
-        target_value: 1,
-        unit: "",
-        description: "Tomar sales minerales post entreno"
-      },
-      {
-        title: "Movilidad de Tobillos y Cadera",
-        day_offset: 0,
-        habit_type: "boolean",
-        target_value: 1,
-        unit: "",
-        description: "15 min de drills técnicos"
+        habit_type: "numeric",
+        target_value: 3,
+        unit: "series",
+        description: "30 segundos de contracción sostenida"
       }
     ]
   }, null, 2));
@@ -144,32 +150,30 @@ export default function App() {
     fetchData();
   }, [authToken]);
 
+  // Countdown para el temporizador de descanso
+  useEffect(() => {
+    if (restTimer === null || restTimer <= 0) return;
+    const interval = setInterval(() => {
+      setRestTimer((prev) => (prev && prev > 1 ? prev - 1 : null));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [restTimer]);
+
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
     try {
-      if (isRegister) {
-        const res = await axios.post(`${API_BASE}/auth/register/`, {
-          username: authUsername,
-          password: authPassword,
-          email: authEmail
-        });
-        const token = res.data.tokens.access;
-        localStorage.setItem('taskia_token', token);
-        setAuthToken(token);
-        setCurrentUser(res.data.user);
-        setShowAuthModal(false);
-      } else {
-        const res = await axios.post(`${API_BASE}/auth/login/`, {
-          username: authUsername,
-          password: authPassword
-        });
-        const token = res.data.tokens.access;
-        localStorage.setItem('taskia_token', token);
-        setAuthToken(token);
-        setCurrentUser(res.data.user);
-        setShowAuthModal(false);
-      }
+      const endpoint = isRegister ? `${API_BASE}/auth/register/` : `${API_BASE}/auth/login/`;
+      const payload = isRegister 
+        ? { username: authUsername, password: authPassword, email: authEmail }
+        : { username: authUsername, password: authPassword };
+      
+      const res = await axios.post(endpoint, payload);
+      const token = res.data.tokens.access;
+      localStorage.setItem('taskia_token', token);
+      setAuthToken(token);
+      setCurrentUser(res.data.user);
+      setShowAuthModal(false);
     } catch (err: any) {
       setAuthError(err.response?.data?.error || 'Error al autenticar. Revisa tus credenciales.');
     }
@@ -181,6 +185,7 @@ export default function App() {
     fetchData();
   };
 
+  // Toggle rápido o incremento de series
   const toggleHabit = async (habitId: number) => {
     try {
       await axios.post(`${API_BASE}/habits/${habitId}/toggle_today/`, {}, getHeaders());
@@ -190,12 +195,25 @@ export default function App() {
     }
   };
 
+  const logSeriesStep = async (habitId: number, stepDelta: number) => {
+    try {
+      await axios.post(`${API_BASE}/habits/${habitId}/toggle_today/`, { step: stepDelta }, getHeaders());
+      if (stepDelta > 0) {
+        // Lanzar temporizador de descanso de 45 segundos
+        setRestTimer(45);
+      }
+      fetchData();
+    } catch (err) {
+      console.error("Error al registrar serie:", err);
+    }
+  };
+
   const handleEnroll = async (programId: number) => {
     try {
       const res = await axios.post(`${API_BASE}/programs/${programId}/enroll/`, {}, getHeaders());
       alert(res.data.message || "¡Programa inscrito correctamente!");
       fetchData();
-      setActiveTab('today');
+      setViewMode('workout');
     } catch (err) {
       console.error("Error al inscribir programa:", err);
       alert("Error al inscribirse en el programa.");
@@ -207,7 +225,7 @@ export default function App() {
       setInjectStatus("Inyectando por API...");
       const parsed = JSON.parse(jsonPayload);
       const res = await axios.post(`${API_BASE}/programs/inject/`, parsed, getHeaders());
-      setInjectStatus(`Programa "${res.data.title}" inyectado exitosamente!`);
+      setInjectStatus(`¡Programa "${res.data.title}" inyectado exitosamente!`);
       fetchData();
     } catch (err: any) {
       console.error("Error inyectando:", err);
@@ -215,29 +233,61 @@ export default function App() {
     }
   };
 
+  // Separar y limpiar tareas:
+  // 1. Tareas de Entrenamiento (TRX, series, ejercicios)
+  // 2. Hábitos Diarios Personales (agua, lectura, etc.)
+  const cleanTitle = (rawTitle: string) => {
+    return rawTitle.replace(/^\[.*?\]\s*/, '');
+  };
+
+  const workoutHabits = habits.filter(h => 
+    h.unit === 'series' || 
+    h.title.toLowerCase().includes('trx') || 
+    h.title.toLowerCase().includes('squat') ||
+    h.title.toLowerCase().includes('talón') ||
+    h.title.toLowerCase().includes('dorsiflexión') ||
+    h.title.toLowerCase().includes('cardio') ||
+    h.title.toLowerCase().includes('fuerza')
+  );
+
+  const dailyHabits = habits.filter(h => !workoutHabits.includes(h));
+
+  const workoutCompletedCount = workoutHabits.filter(h => h.today_log?.completed).length;
+  const workoutProgressPercent = workoutHabits.length > 0 
+    ? Math.round((workoutCompletedCount / workoutHabits.length) * 100) 
+    : 0;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Top Header */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20 flex items-center justify-center">
-              <Flame className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-24 md:pb-10">
+      {/* Top Navbar */}
+      <header className="border-b border-slate-800 bg-slate-900/70 backdrop-blur-md sticky top-0 z-40 px-4 py-3">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-gradient-to-tr from-amber-500 to-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
+              <Flame className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-violet-300 bg-clip-text text-transparent">
-                TASKIA
-              </span>
-              <span className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-400 border border-indigo-800">
-                SLA & Program Engine
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg font-black tracking-tight bg-gradient-to-r from-amber-400 via-indigo-300 to-white bg-clip-text text-transparent">
+                  TASKIA
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-widest bg-indigo-950 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-800/80">
+                  TRAIN & SLA
+                </span>
+              </div>
             </div>
           </div>
 
           {/* User profile & actions */}
-          <div className="flex items-center gap-3">
-            {/* User badge */}
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
+          <div className="flex items-center gap-2">
+            {restTimer !== null && (
+              <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-2.5 py-1 rounded-xl animate-pulse font-mono font-bold">
+                <Timer className="w-3.5 h-3.5" />
+                <span>Descanso: {restTimer}s</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl text-xs">
               <User className="w-3.5 h-3.5 text-indigo-400" />
               <span className="text-slate-300 font-medium">
                 {currentUser?.username ? `@${currentUser.username}` : 'demo_user'}
@@ -248,37 +298,473 @@ export default function App() {
                   title="Cerrar Sesión" 
                   className="ml-1 text-slate-500 hover:text-red-400 transition"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <LogOut className="w-3 h-3" />
                 </button>
               ) : (
                 <button 
                   onClick={() => { setShowAuthModal(true); setIsRegister(false); }}
-                  className="ml-1 text-indigo-400 hover:text-indigo-300 font-semibold"
+                  className="ml-1 text-indigo-400 hover:text-indigo-300 font-semibold text-xs"
                 >
-                  Login
+                  Entrar
                 </button>
               )}
             </div>
 
-            <a 
-              href={`http://${window.location.hostname}:8000/api/docs/`} 
-              target="_blank" 
-              rel="noreferrer"
-              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700 transition"
-            >
-              Swagger Docs
-            </a>
-
             <button 
               onClick={fetchData} 
-              className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition"
+              className="p-1.5 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition"
               title="Recargar datos"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
       </header>
+
+      {/* Main Container */}
+      <main className="max-w-4xl mx-auto w-full p-4 flex-1 flex flex-col gap-5">
+        
+        {/* Intuitiva Barra de Navegación por Pestañas */}
+        <div className="bg-slate-900/90 border border-slate-800 p-1.5 rounded-2xl flex items-center justify-between gap-1 shadow-md">
+          <button 
+            onClick={() => setViewMode('workout')}
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${
+              viewMode === 'workout' 
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <Dumbbell className="w-4 h-4" /> 
+            <span>Entrenamiento</span>
+            {workoutHabits.length > 0 && (
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${viewMode === 'workout' ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-slate-300'}`}>
+                {workoutCompletedCount}/{workoutHabits.length}
+              </span>
+            )}
+          </button>
+
+          <button 
+            onClick={() => setViewMode('habits')}
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${
+              viewMode === 'habits' 
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4" /> 
+            <span>Mis Hábitos</span>
+            {dailyHabits.length > 0 && (
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${viewMode === 'habits' ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-slate-300'}`}>
+                {dailyHabits.filter(h => h.today_log?.completed).length}/{dailyHabits.length}
+              </span>
+            )}
+          </button>
+
+          <button 
+            onClick={() => setViewMode('calendar')}
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition ${
+              viewMode === 'calendar' 
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <Calendar className="w-4 h-4" /> 
+            <span>Semana & SLA</span>
+          </button>
+
+          <button 
+            onClick={() => setViewMode('programs')}
+            className={`py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition ${
+              viewMode === 'programs' 
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+            title="Catálogo de Programas e Inyección"
+          >
+            <Layers className="w-4 h-4" />
+            <span className="hidden sm:inline">Planes</span>
+          </button>
+        </div>
+
+        {/* ======================================================== */}
+        {/* VISTA 1: MODO ENTRENAMIENTO GUIADO (SUPER INTUITIVO) */}
+        {/* ======================================================== */}
+        {viewMode === 'workout' && (
+          <div className="space-y-4">
+            {/* Header del Workout con Progreso */}
+            <div className="bg-gradient-to-r from-slate-900 to-indigo-950/40 border border-slate-800 p-4 rounded-2xl">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 border border-amber-800/50 px-2 py-0.5 rounded-full">
+                    Sesión del Día
+                  </span>
+                  <h2 className="text-base font-bold text-white mt-1">Fuerza Tren Inferior y Prevención Aquiles (TRX)</h2>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-black text-amber-400">{workoutProgressPercent}%</div>
+                  <div className="text-[11px] text-slate-400">completado</div>
+                </div>
+              </div>
+
+              {/* Barra de progreso visual */}
+              <div className="w-full bg-slate-800/80 h-2.5 rounded-full overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-amber-500 to-indigo-500 h-full rounded-full transition-all duration-300"
+                  style={{ width: `${workoutProgressPercent}%` }}
+                />
+              </div>
+
+              {workoutProgressPercent === 100 && (
+                <div className="mt-3 p-2 bg-emerald-950/60 border border-emerald-800/80 rounded-xl text-center text-xs font-bold text-emerald-300 flex items-center justify-center gap-2">
+                  <Check className="w-4 h-4" /> ¡Excelente! Has completado todos los ejercicios de la sesión de hoy.
+                </div>
+              )}
+            </div>
+
+            {/* Lista de Ejercicios como Tareas Claras e Interactivas */}
+            <div className="space-y-3">
+              {workoutHabits.map((habit, idx) => {
+                const currentSeries = habit.today_log?.value ?? 0;
+                const targetSeries = habit.target_value;
+                const isCompleted = habit.today_log?.completed ?? false;
+                const title = cleanTitle(habit.title);
+
+                return (
+                  <div 
+                    key={habit.id}
+                    className={`border rounded-2xl p-4 transition-all duration-200 ${
+                      isCompleted 
+                        ? 'bg-slate-900/50 border-emerald-900/50' 
+                        : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 shadow-sm'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                            isCompleted ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300'
+                          }`}>
+                            {idx + 1}
+                          </span>
+                          <h3 className={`font-bold text-sm ${isCompleted ? 'text-slate-300 line-through' : 'text-white'}`}>
+                            {title}
+                          </h3>
+                        </div>
+
+                        {habit.description && (
+                          <p className="text-xs text-slate-400 mt-1.5 ml-7 leading-relaxed bg-slate-950/40 p-2 rounded-xl border border-slate-800/50">
+                            💡 {habit.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* SLA badge */}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                        habit.compliance_summary.meets_sla 
+                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' 
+                          : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+                      }`}>
+                        SLA {habit.compliance_summary.rate_percent}%
+                      </span>
+                    </div>
+
+                    {/* Botones de control de Series (Marcar 1/3, 2/3, 3/3) */}
+                    <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400 font-medium">Series completadas:</span>
+                        <span className="text-xs font-black font-mono px-2 py-0.5 bg-slate-950 border border-slate-800 rounded-lg text-amber-400">
+                          {currentSeries} / {targetSeries} {habit.unit}
+                        </span>
+                      </div>
+
+                      {/* Contador con botones +/- rápidos */}
+                      <div className="flex items-center gap-1.5">
+                        <button 
+                          onClick={() => logSeriesStep(habit.id, -1)}
+                          disabled={currentSeries <= 0}
+                          className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white disabled:opacity-40 transition"
+                          title="Restar 1 serie"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button 
+                          onClick={() => logSeriesStep(habit.id, 1)}
+                          className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition ${
+                            isCompleted 
+                              ? 'bg-emerald-600 hover:bg-emerald-500 text-white' 
+                              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20'
+                          }`}
+                        >
+                          {isCompleted ? (
+                            <>
+                              <Check className="w-3.5 h-3.5" /> Lista
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5" /> Marcar Serie
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {workoutHabits.length === 0 && (
+                <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl">
+                  <Dumbbell className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+                  <p className="text-xs text-slate-400">No hay ejercicios de entrenamiento activos.</p>
+                  <button 
+                    onClick={() => setViewMode('programs')}
+                    className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
+                  >
+                    Activar Plan TRX Aquiles
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* VISTA 2: MIS HÁBITOS DIARIOS GENERALES (CHECKLIST RÁPIDO) */}
+        {/* ======================================================== */}
+        {viewMode === 'habits' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-white">Hábitos Personales del Día</h2>
+                <p className="text-xs text-slate-400">Rutinas fuera del entrenamiento para sostener tus hábitos saludables</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {dailyHabits.map((habit) => {
+                const isCompleted = habit.today_log?.completed ?? false;
+                const meetsSla = habit.compliance_summary.meets_sla;
+
+                return (
+                  <div 
+                    key={habit.id}
+                    onClick={() => toggleHabit(habit.id)}
+                    className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between ${
+                      isCompleted 
+                        ? 'bg-slate-900/60 border-indigo-900/50' 
+                        : 'bg-slate-900/90 border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl transition ${
+                        isCompleted ? 'text-indigo-400 bg-indigo-950' : 'text-slate-500 bg-slate-800'
+                      }`}>
+                        {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
+                      </div>
+
+                      <div>
+                        <h3 className={`font-semibold text-sm ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                          {cleanTitle(habit.title)}
+                        </h3>
+                        {habit.description && (
+                          <p className="text-xs text-slate-400 mt-0.5">{habit.description}</p>
+                        )}
+                        {habit.unit && (
+                          <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded mt-1 inline-block">
+                            Meta: {habit.target_value} {habit.unit}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        meetsSla 
+                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' 
+                          : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+                      }`}>
+                        {meetsSla ? '✓ En SLA' : '⚠ En Riesgo'} ({habit.compliance_summary.rate_percent}%)
+                      </span>
+                      <div className="text-[10px] text-slate-500 mt-1">
+                        {habit.compliance_summary.completed_last_7_days}/7 días completados
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {dailyHabits.length === 0 && (
+                <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl">
+                  <p className="text-xs text-slate-400">Todos tus hábitos actuales son parte de tus entrenamientos.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* VISTA 3: MATRIZ SEMANAL & MONITOREO DE SLA (CALENDARIO) */}
+        {/* ======================================================== */}
+        {viewMode === 'calendar' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-white">Cumplimiento Semanal & SLA</h2>
+                <p className="text-xs text-slate-400">Supervisa de un vistazo qué días cumpliste cada tarea en los últimos 7 días</p>
+              </div>
+            </div>
+
+            {/* Tarjeta de Resumen Global */}
+            {metrics && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cumplimiento Hoy</span>
+                  <div className="text-xl font-bold text-white mt-1">{metrics.completed_today} / {metrics.total_active_habits}</div>
+                  <div className="text-xs text-indigo-400 font-medium">{metrics.today_compliance_percent}%</div>
+                </div>
+
+                <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Salud SLA 7 Días</span>
+                  <div className="text-xl font-bold text-emerald-400 mt-1">{metrics.habits_meeting_sla_percent}%</div>
+                  <div className="text-xs text-slate-400">{metrics.healthy_habits} hábitos en meta</div>
+                </div>
+
+                <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">En Riesgo</span>
+                  <div className="text-xl font-bold text-amber-400 mt-1">{metrics.at_risk_habits}</div>
+                  <div className="text-xs text-slate-400">Bajo umbral mínimo</div>
+                </div>
+
+                <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Programas</span>
+                  <div className="text-xl font-bold text-white mt-1">{programs.length}</div>
+                  <div className="text-xs text-violet-400">Activos en catálogo</div>
+                </div>
+              </div>
+            )}
+
+            {/* Matriz Heatmap / Días de la Semana */}
+            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 overflow-x-auto shadow-sm">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400">
+                    <th className="pb-3 font-semibold">Hábito / Tarea</th>
+                    <th className="pb-3 text-center font-semibold">Historial (7 Días)</th>
+                    <th className="pb-3 text-right font-semibold">SLA</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {habits.map((habit) => (
+                    <tr key={habit.id} className="hover:bg-slate-800/30">
+                      <td className="py-3 pr-2">
+                        <div className="font-semibold text-white max-w-[200px] truncate">{cleanTitle(habit.title)}</div>
+                        <div className="text-[10px] text-slate-400">Meta: {habit.target_value} {habit.unit}</div>
+                      </td>
+
+                      <td className="py-3 px-2">
+                        <div className="flex items-center justify-center gap-1.5">
+                          {habit.compliance_summary.history?.map((h, i) => (
+                            <div 
+                              key={i} 
+                              className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold ${
+                                h.completed 
+                                  ? 'bg-emerald-500 text-slate-950 font-black' 
+                                  : 'bg-slate-800 text-slate-500'
+                              }`}
+                              title={`${h.date}: ${h.completed ? 'Cumplido' : 'No cumplido'}`}
+                            >
+                              {h.day_name.slice(0, 1)}
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+
+                      <td className="py-3 pl-2 text-right">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          habit.compliance_summary.meets_sla 
+                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' 
+                            : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+                        }`}>
+                          {habit.compliance_summary.rate_percent}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* VISTA 4: PROGRAMAS & SIMULADOR DE INYECCIÓN API */}
+        {/* ======================================================== */}
+        {viewMode === 'programs' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-base font-bold text-white">Catálogo de Programas</h2>
+              <p className="text-xs text-slate-400">Planes estructurados inyectados por API</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {programs.map((program) => (
+                <div key={program.id} className="bg-slate-900/70 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800/50">
+                        {program.category}
+                      </span>
+                      <span className="text-xs text-slate-400 font-mono">{program.duration_days} días</span>
+                    </div>
+                    <h3 className="font-bold text-sm text-white mb-1">{program.title}</h3>
+                    <p className="text-xs text-slate-400 mb-3">{program.description}</p>
+                    
+                    <span className="text-xs font-semibold text-slate-300">Ejercicios ({program.items?.length || 0}):</span>
+                    <div className="space-y-1 mt-1 max-h-32 overflow-y-auto pr-1">
+                      {program.items?.map(it => (
+                        <div key={it.id} className="text-[11px] bg-slate-950/60 p-1.5 rounded-lg text-slate-300 flex justify-between">
+                          <span>{it.title}</span>
+                          <span className="text-slate-400 font-mono">{it.target_value} {it.unit}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => handleEnroll(program.id)}
+                    className="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-white" /> Activar este Programa
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Simulador API */}
+            <div className="border-t border-slate-800 pt-5">
+              <h3 className="text-sm font-bold text-white mb-1">Inyector de Programas (API Simulator)</h3>
+              <p className="text-xs text-slate-400 mb-3">Envía un JSON con un nuevo plan al endpoint <code className="bg-slate-800 px-1 py-0.5 rounded text-indigo-300 font-mono">POST /api/programs/inject/</code></p>
+              
+              <textarea 
+                value={jsonPayload}
+                onChange={(e) => setJsonPayload(e.target.value)}
+                className="w-full h-48 bg-slate-950 font-mono text-xs text-emerald-400 p-3 rounded-xl border border-slate-800 focus:border-indigo-500 focus:outline-none"
+              />
+
+              <div className="flex items-center justify-between mt-2">
+                <button 
+                  onClick={handleInjectProgram}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 transition"
+                >
+                  <Zap className="w-3.5 h-3.5" /> Inyectar Programa al Backend
+                </button>
+                {injectStatus && <span className="text-xs text-indigo-400">{injectStatus}</span>}
+              </div>
+            </div>
+          </div>
+        )}
+
+      </main>
 
       {/* Auth Modal */}
       {showAuthModal && (
@@ -355,290 +841,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      {/* Main Container */}
-      <main className="max-w-6xl mx-auto w-full p-6 flex-1 flex flex-col gap-6">
-        {/* Metric Cards Banner */}
-        {metrics && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col gap-1 shadow-sm">
-              <div className="flex items-center justify-between text-slate-400 text-xs font-medium uppercase tracking-wider">
-                <span>Cumplimiento Hoy</span>
-                <Target className="w-4 h-4 text-indigo-400" />
-              </div>
-              <div className="text-2xl font-bold text-white mt-1">
-                {metrics.completed_today} / {metrics.total_active_habits}
-              </div>
-              <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-2">
-                <div 
-                  className="bg-indigo-500 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${metrics.today_compliance_percent}%` }}
-                />
-              </div>
-              <span className="text-xs text-indigo-400 font-medium mt-1">{metrics.today_compliance_percent}% completado</span>
-            </div>
-
-            <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col gap-1 shadow-sm">
-              <div className="flex items-center justify-between text-slate-400 text-xs font-medium uppercase tracking-wider">
-                <span>Salud Global de SLA</span>
-                <BarChart3 className="w-4 h-4 text-emerald-400" />
-              </div>
-              <div className="text-2xl font-bold text-white mt-1">
-                {metrics.habits_meeting_sla_percent}%
-              </div>
-              <div className="text-xs text-emerald-400 mt-2 font-medium">
-                {metrics.healthy_habits} hábitos en SLA óptimo
-              </div>
-              <span className="text-xs text-slate-500 mt-1">Base: últimos 7 días</span>
-            </div>
-
-            <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col gap-1 shadow-sm">
-              <div className="flex items-center justify-between text-slate-400 text-xs font-medium uppercase tracking-wider">
-                <span>Hábitos en Riesgo</span>
-                <AlertCircle className="w-4 h-4 text-amber-400" />
-              </div>
-              <div className="text-2xl font-bold text-amber-400 mt-1">
-                {metrics.at_risk_habits}
-              </div>
-              <span className="text-xs text-slate-400 mt-2">Bajo umbral de SLA asignado</span>
-            </div>
-
-            <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col gap-1 shadow-sm">
-              <div className="flex items-center justify-between text-slate-400 text-xs font-medium uppercase tracking-wider">
-                <span>Programas Activos</span>
-                <Layers className="w-4 h-4 text-violet-400" />
-              </div>
-              <div className="text-2xl font-bold text-white mt-1">
-                {programs.length}
-              </div>
-              <span className="text-xs text-slate-400 mt-2">Planes inyectados listos</span>
-            </div>
-          </div>
-        )}
-
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-800 gap-6 text-sm font-medium">
-          <button 
-            onClick={() => setActiveTab('today')}
-            className={`pb-3 border-b-2 flex items-center gap-2 transition ${
-              activeTab === 'today' 
-                ? 'border-indigo-500 text-indigo-400' 
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <CheckCircle2 className="w-4 h-4" /> Mi Día & Hábitos SLA ({habits.length})
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('programs')}
-            className={`pb-3 border-b-2 flex items-center gap-2 transition ${
-              activeTab === 'programs' 
-                ? 'border-indigo-500 text-indigo-400' 
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Layers className="w-4 h-4" /> Catálogo de Programas ({programs.length})
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('inject')}
-            className={`pb-3 border-b-2 flex items-center gap-2 transition ${
-              activeTab === 'inject' 
-                ? 'border-indigo-500 text-indigo-400' 
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Zap className="w-4 h-4" /> Inyector de Programas (API Simulator)
-          </button>
-        </div>
-
-        {/* Tab 1: Mi Día & Hábitos */}
-        {activeTab === 'today' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-white">Hábitos de Hoy</h2>
-                <p className="text-xs text-slate-400">Marca tu cumplimiento diario en 1-click y supervisa el SLA semanal</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3">
-              {habits.map((habit) => {
-                const isCompleted = habit.today_log?.completed ?? false;
-                const meetsSla = habit.compliance_summary.meets_sla;
-
-                return (
-                  <div 
-                    key={habit.id}
-                    className={`p-4 rounded-xl border transition-all duration-200 flex items-center justify-between ${
-                      isCompleted 
-                        ? 'bg-slate-900/90 border-indigo-900/60 shadow-sm' 
-                        : 'bg-slate-900/40 border-slate-800/80 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      {/* Check Button */}
-                      <button 
-                        onClick={() => toggleHabit(habit.id)}
-                        className={`p-2 rounded-xl transition duration-150 ${
-                          isCompleted 
-                            ? 'text-indigo-400 bg-indigo-950/80 hover:bg-indigo-900' 
-                            : 'text-slate-500 hover:text-slate-300 bg-slate-800/60'
-                        }`}
-                        title="Marcar / Desmarcar cumplimiento hoy"
-                      >
-                        {isCompleted ? (
-                          <CheckCircle2 className="w-7 h-7 fill-indigo-500/20" />
-                        ) : (
-                          <Circle className="w-7 h-7" />
-                        )}
-                      </button>
-
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className={`font-semibold text-base ${isCompleted ? 'text-slate-300 line-through' : 'text-white'}`}>
-                            {habit.title}
-                          </h3>
-                          {habit.unit && (
-                            <span className="text-xs font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
-                              Meta: {habit.target_value} {habit.unit}
-                            </span>
-                          )}
-                        </div>
-                        {habit.description && (
-                          <p className="text-xs text-slate-400 mt-0.5">{habit.description}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* SLA Compliance Indicator */}
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <div className="flex items-center gap-1.5 justify-end">
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                            meetsSla 
-                              ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/80' 
-                              : 'bg-amber-950 text-amber-400 border border-amber-800/80'
-                          }`}>
-                            {meetsSla ? '✓ En SLA' : '⚠ En Riesgo'}
-                          </span>
-                          <span className="text-xs font-bold text-slate-300">
-                            {habit.compliance_summary.rate_percent}%
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-slate-400 mt-1">
-                          SLA Requerido: <span className="text-slate-300">{habit.sla_target_percent}%</span> ({habit.compliance_summary.completed_last_7_days}/7 días)
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {habits.length === 0 && (
-                <div className="text-center py-12 border border-dashed border-slate-800 rounded-2xl bg-slate-900/30">
-                  <Flame className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">No tienes hábitos activos en este momento.</p>
-                  <button 
-                    onClick={() => setActiveTab('programs')} 
-                    className="mt-4 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    Explorar e Inscribir un Programa
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: Catálogo de Programas */}
-        {activeTab === 'programs' && (
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-white">Programas Disponibles</h2>
-              <p className="text-xs text-slate-400">Planes estructurados inyectados por API listos para activar</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {programs.map((program) => (
-                <div key={program.id} className="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950/80 border border-indigo-800/50 px-2.5 py-0.5 rounded-full">
-                        {program.category}
-                      </span>
-                      <span className="text-xs text-slate-400 font-mono">
-                        {program.duration_days} días
-                      </span>
-                    </div>
-                    <h3 className="text-base font-bold text-white mb-1">{program.title}</h3>
-                    <p className="text-xs text-slate-400 mb-4">{program.description}</p>
-
-                    <div className="space-y-2 border-t border-slate-800 pt-3 mb-4">
-                      <span className="text-xs font-semibold text-slate-300">Hábitos incluidos ({program.items?.length || 0}):</span>
-                      {program.items?.map((item) => (
-                        <div key={item.id} className="text-xs bg-slate-800/50 p-2 rounded-lg flex items-center justify-between text-slate-300">
-                          <span>{item.title}</span>
-                          {item.unit && (
-                            <span className="font-mono text-slate-400">{item.target_value} {item.unit}</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => handleEnroll(program.id)}
-                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs py-2.5 rounded-xl flex items-center justify-center gap-2 transition"
-                  >
-                    <Play className="w-3.5 h-3.5 fill-white" /> Inscribirme y Activar Hábitos
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Inyector de Programas (API Simulator) */}
-        {activeTab === 'inject' && (
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-white">Inyección Externa de Programas por API</h2>
-              <p className="text-xs text-slate-400">
-                Prueba enviar un JSON directo al endpoint <code className="bg-slate-800 px-1 py-0.5 rounded text-indigo-300 font-mono">POST /api/programs/inject/</code>
-              </p>
-            </div>
-
-            <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl flex flex-col gap-4">
-              <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                <span>Payload JSON del Programa</span>
-                <span className="text-[11px] text-slate-500 font-mono">drf-spectacular compatible</span>
-              </label>
-
-              <textarea 
-                value={jsonPayload}
-                onChange={(e) => setJsonPayload(e.target.value)}
-                className="w-full h-80 bg-slate-950 font-mono text-xs text-emerald-400 p-4 rounded-xl border border-slate-800 focus:border-indigo-500 focus:outline-none"
-              />
-
-              <div className="flex items-center justify-between">
-                <button 
-                  onClick={handleInjectProgram}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-5 py-2.5 rounded-xl flex items-center gap-2 transition"
-                >
-                  <Zap className="w-4 h-4" /> Inyectar Programa al Backend
-                </button>
-                
-                {injectStatus && (
-                  <span className="text-xs font-medium text-indigo-400">
-                    {injectStatus}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
     </div>
   );
 }
