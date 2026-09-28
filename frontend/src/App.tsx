@@ -623,6 +623,107 @@ export default function App() {
   // Hábitos a mostrar cuando se entra dentro de un plan
   const selectedPlanHabits = selectedPlanName ? (planGroups[selectedPlanName] || []) : [];
 
+  // PANTALLA DE INICIO DE SESIÓN OBLIGATORIA (Privacidad de Hábitos y Metas Personales)
+  if (!authToken) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
+        {/* Glow de fondo sofisticado */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="w-full max-w-sm relative z-10 space-y-6">
+          {/* Logo y Branding */}
+          <div className="text-center space-y-2">
+            <div className="inline-flex p-3 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl shadow-indigo-950/30">
+              <Flame className="w-8 h-8 text-amber-500" />
+            </div>
+            <h1 className="text-2xl font-black tracking-tight text-white">TASKIA</h1>
+            <p className="text-xs text-slate-400 font-medium">
+              Tu espacio privado de hábitos, disciplina y visualización 3P
+            </p>
+          </div>
+
+          {/* Tarjeta de Login / Registro */}
+          <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                {isRegister ? <UserPlus className="w-4 h-4 text-indigo-400" /> : <LogIn className="w-4 h-4 text-indigo-400" />}
+                {isRegister ? 'Crear mi Cuenta' : 'Iniciar Sesión'}
+              </h2>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-800/50">
+                Privado
+              </span>
+            </div>
+
+            {authError && (
+              <div className="bg-red-950/60 border border-red-800 text-red-300 text-xs p-2.5 rounded-xl mb-4 leading-snug">
+                {authError}
+              </div>
+            )}
+
+            <form onSubmit={handleAuthSubmit} className="space-y-3.5">
+              <div>
+                <label className="text-[11px] font-semibold text-slate-300 block mb-1">Nombre de Usuario</label>
+                <input 
+                  type="text" 
+                  required
+                  value={authUsername}
+                  onChange={(e) => setAuthUsername(e.target.value)}
+                  placeholder="ej. joshua" 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              {isRegister && (
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-300 block mb-1">Correo Electrónico</label>
+                  <input 
+                    type="email" 
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    placeholder="tu@correo.com" 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="text-[11px] font-semibold text-slate-300 block mb-1">Contraseña</label>
+                <input 
+                  type="password" 
+                  required
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  placeholder="••••••••" 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <button 
+                type="submit"
+                className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition mt-2"
+              >
+                {isRegister ? 'Registrarme y Comenzar' : 'Entrar a mi Cuenta'}
+              </button>
+            </form>
+
+            <div className="text-center mt-4 pt-3 border-t border-slate-800/80">
+              <button 
+                onClick={() => { setIsRegister(!isRegister); setAuthError(''); }}
+                className="text-xs text-slate-400 hover:text-indigo-400 font-medium transition"
+              >
+                {isRegister ? '¿Ya tienes cuenta? Inicia sesión aquí' : '¿Nuevo usuario? Crea tu cuenta aquí'}
+              </button>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-500 text-center leading-relaxed">
+            🔒 Tus hábitos, notas de entrenamiento, SLAs y tarjetas de visualización están completamente cifradas y asociadas a tu usuario.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans w-full max-w-full overflow-x-hidden safe-top safe-bottom pb-28 md:pb-12">
       {/* Top Header Responsivo - Minimalista y Sofisticado */}
