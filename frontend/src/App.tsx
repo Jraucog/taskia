@@ -7,7 +7,7 @@ import {
   Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
   ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle,
   Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks,
-  Wind, Pause
+  Wind, Pause, Target, Info
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -181,6 +181,9 @@ export default function App() {
   const [breathingTotalSeconds, setBreathingTotalSeconds] = useState(180); // 3 minutos por sesión
   const [breathingIsRunning, setBreathingIsRunning] = useState(false);
   const [breathingCompletedRounds, setBreathingCompletedRounds] = useState(0);
+
+  // Modal Detalle Interactivo de Tarea / Guía de Ejecución
+  const [selectedDetailHabit, setSelectedDetailHabit] = useState<Habit | null>(null);
 
   // Modal para inspeccionar plantilla en el Catálogo antes de inscribir
   const [previewProgram, setPreviewProgram] = useState<Program | null>(null);
@@ -1161,12 +1164,18 @@ export default function App() {
                                               )}
                                             </button>
 
-                                            <div className="flex-1 min-w-0">
-                                              <h4 className={`text-xs sm:text-sm font-semibold leading-snug ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
-                                                {title}
-                                              </h4>
+                                            <div 
+                                              onClick={() => setSelectedDetailHabit(habit)}
+                                              className="flex-1 min-w-0 cursor-pointer group/item select-none"
+                                            >
+                                              <div className="flex items-center gap-1.5">
+                                                <h4 className={`text-xs sm:text-sm font-semibold leading-snug group-hover/item:text-indigo-300 transition ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                                                  {title}
+                                                </h4>
+                                                <Info className="w-3 h-3 text-slate-500 opacity-0 group-hover/item:opacity-100 transition shrink-0" />
+                                              </div>
                                               {habit.description && (
-                                                <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                                                <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1 group-hover/item:text-slate-300">
                                                   💡 {habit.description}
                                                 </p>
                                               )}
@@ -1271,7 +1280,10 @@ export default function App() {
                                       )}
                                     </button>
 
-                                    <div className="flex-1 min-w-0">
+                                    <div 
+                                      onClick={() => setSelectedDetailHabit(habit)}
+                                      className="flex-1 min-w-0 cursor-pointer group/flat select-none"
+                                    >
                                       <div className="flex items-center gap-2">
                                         <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-indigo-400 truncate max-w-[140px]">
                                           {planName}
@@ -1281,12 +1293,13 @@ export default function App() {
                                             {currentVal}/{targetVal} {habit.unit}
                                           </span>
                                         )}
+                                        <Info className="w-3 h-3 text-slate-500 opacity-0 group-hover/flat:opacity-100 transition shrink-0 ml-auto" />
                                       </div>
-                                      <h3 className={`text-xs sm:text-sm font-bold mt-1 leading-snug ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                                      <h3 className={`text-xs sm:text-sm font-bold mt-1 leading-snug group-hover/flat:text-indigo-300 transition ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
                                         {title}
                                       </h3>
                                       {habit.description && (
-                                        <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
+                                        <p className="text-[11px] text-slate-400 mt-1 line-clamp-1 group-hover/flat:text-slate-300">
                                           💡 {habit.description}
                                         </p>
                                       )}
@@ -1581,10 +1594,21 @@ export default function App() {
                         {!isCollapsed && (
                           <div className="px-3.5 pb-3.5 pt-1 border-t border-slate-800/60 bg-slate-950/30">
                             {habit.description && (
-                              <p className="text-xs text-slate-400 leading-relaxed bg-slate-950/60 p-2 rounded-xl border border-slate-800/60 mb-3">
-                                💡 {habit.description}
+                              <p className="text-xs text-slate-400 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60 mb-3 flex items-start gap-2">
+                                <span>💡</span>
+                                <span>{habit.description}</span>
                               </p>
                             )}
+
+                            <div className="flex items-center justify-between mb-3 bg-slate-900/60 p-2 rounded-xl border border-slate-800/60 text-xs">
+                              <span className="text-[11px] text-slate-400">¿Cómo ejecutar este hábito con técnica perfecta?</span>
+                              <button
+                                onClick={() => setSelectedDetailHabit(habit)}
+                                className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition"
+                              >
+                                <Info className="w-3.5 h-3.5" /> Ver Guía de Ejecución
+                              </button>
+                            </div>
 
                             {/* Controles de Registro */}
                             {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
@@ -2711,6 +2735,222 @@ export default function App() {
                 <span>Listo</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* ======================================================== */}
+      {/* MODAL / GUÍA DE EJECUCIÓN DETALLADA DE CUALQUIER TAREA  */}
+      {/* ======================================================== */}
+      {selectedDetailHabit && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto relative">
+            {/* Botón cerrar */}
+            <button
+              onClick={() => setSelectedDetailHabit(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800/80 transition z-10"
+            >
+              ✕
+            </button>
+
+            {/* Cabecera de la Tarea */}
+            <div className="pb-3 border-b border-slate-800/80">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-400 bg-indigo-950 px-2.5 py-0.5 rounded-full border border-indigo-800/50">
+                {getPlanNameFromHabit(selectedDetailHabit)}
+              </span>
+              <h3 className="text-base sm:text-lg font-bold text-white mt-2 leading-snug">
+                {cleanTitle(selectedDetailHabit.title)}
+              </h3>
+              {selectedDetailHabit.description && (
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+                  💡 {selectedDetailHabit.description}
+                </p>
+              )}
+            </div>
+
+            {/* Panel de Métricas y Meta de la Tarea */}
+            <div className="grid grid-cols-3 gap-2 my-3">
+              <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">Meta diaria</span>
+                <span className="text-sm font-black text-amber-400 font-mono">
+                  {selectedDetailHabit.target_value} {selectedDetailHabit.unit || 'vez'}
+                </span>
+              </div>
+
+              <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">Progreso Hoy</span>
+                <span className="text-sm font-black text-indigo-400 font-mono">
+                  {selectedDetailHabit.today_log?.value ?? 0} {selectedDetailHabit.unit || ''}
+                </span>
+              </div>
+
+              <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">SLA 7 Días</span>
+                <span className={`text-sm font-black font-mono ${selectedDetailHabit.compliance_summary.meets_sla ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {selectedDetailHabit.compliance_summary.rate_percent}%
+                </span>
+              </div>
+            </div>
+
+            {/* Guía Técnica Específica de Ejecución según disciplina */}
+            <div className="space-y-3 mb-4 flex-1">
+              <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <Target className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Instrucciones de Ejecución y Técnica</span>
+              </h4>
+
+              {/* Si es ejercicio de fuerza / TRX / Calistenia */}
+              {(selectedDetailHabit.unit === 'series' || selectedDetailHabit.title.toLowerCase().includes('trx') || selectedDetailHabit.title.toLowerCase().includes('sentadilla') || selectedDetailHabit.title.toLowerCase().includes('talón') || selectedDetailHabit.title.toLowerCase().includes('aquiles')) && (
+                <div className="space-y-2 text-xs text-slate-300">
+                  <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 space-y-1.5">
+                    <p className="font-semibold text-white flex items-center gap-1.5">
+                      <span>⏱️</span> <strong>Tempo y Control Muscular:</strong>
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Ejecuta la fase excéntrica (bajada) en <strong>3-4 segundos lentos y controlados</strong>. Pausa isométrica de 1 segundo abajo y empuje potente hacia arriba. Esto protege tendones como el Aquiles y maximiza la hipertrofia funcional.
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 space-y-1.5">
+                    <p className="font-semibold text-white flex items-center gap-1.5">
+                      <span>🧠</span> <strong>Enfoque de Conexión Mente-Músculo:</strong>
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Mantén el core apretado, respiración fluida (exhala al hacer la fuerza) y asegúrate de no compensar con la otra pierna o la espalda baja.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Si es de Brian Tracy (escritura de 10 metas) */}
+              {selectedDetailHabit.title.toLowerCase().includes('brian tracy') && (
+                <div className="space-y-2 text-xs text-slate-300">
+                  <div className="bg-amber-950/30 p-3 rounded-xl border border-amber-800/50 space-y-1.5">
+                    <p className="font-semibold text-amber-300 flex items-center gap-1.5">
+                      <span>✍️</span> <strong>Fórmula 3P (Presente, Positiva, Personal):</strong>
+                    </p>
+                    <p className="text-[11px] text-amber-200/80">
+                      Escribe tus 10 metas comenzando con "Yo gano...", "Yo peso...", "Yo conduzco...". Redacta siempre en presente como si ya fuese una realidad consolidada.
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 space-y-1.5">
+                    <p className="font-semibold text-white flex items-center gap-1.5">
+                      <span>📖</span> <strong>Regla de Oro del Reto:</strong>
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Tapa la hoja del día anterior. Deja que tu mente filtre las metas verdaderamente prioritarias. Si un día se olvida, el ciclo se reinicia a 0.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Si es de Respiración */}
+              {(selectedDetailHabit.title.toLowerCase().includes('respir') || selectedDetailHabit.title.toLowerCase().includes('suspiro') || selectedDetailHabit.title.toLowerCase().includes('coherencia') || selectedDetailHabit.title.toLowerCase().includes('4-7-8')) && (
+                <div className="space-y-2 text-xs text-slate-300">
+                  <div className="bg-indigo-950/30 p-3 rounded-xl border border-indigo-800/50 space-y-1.5">
+                    <p className="font-semibold text-indigo-300 flex items-center gap-1.5">
+                      <Wind className="w-3.5 h-3.5" /> <strong>Protocolo de Regulación del Cortisol:</strong>
+                    </p>
+                    <p className="text-[11px] text-indigo-200/80">
+                      Inhala profundamente por la nariz expandiendo el diafragma y la caja torácica. Exhala largo y relajado por la boca. Activa inmediatamente el tono vagal parasimpático.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const h = selectedDetailHabit;
+                      setSelectedDetailHabit(null);
+                      startBreathingSession(h);
+                    }}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-md transition active:scale-95"
+                  >
+                    <Wind className="w-4 h-4 animate-pulse" />
+                    <span>Lanzar Entrenador Visual Interactivo</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Si es de Agua / Hidratación */}
+              {selectedDetailHabit.title.toLowerCase().includes('agua') && (
+                <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 space-y-1 text-xs">
+                  <p className="font-semibold text-white">💧 Estrategia de Ingesta:</p>
+                  <p className="text-[11px] text-slate-400">
+                    Bebe un vaso de 500ml nada más despertar con una pizca de sal marina. El resto distribúyelo cada 2 horas antes de las 19:00 para no interrumpir el descanso nocturno.
+                  </p>
+                </div>
+              )}
+
+              {/* Temporizador de Descanso Rápido entre Series */}
+              {selectedDetailHabit.unit === 'series' && (
+                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Timer className="w-4 h-4 text-amber-400" />
+                    <div>
+                      <span className="text-xs font-bold text-white block">Descanso entre Series</span>
+                      <span className="text-[10px] text-slate-400">
+                        {restTimer ? `Restante: ${restTimer}s` : 'Listo para la siguiente'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setRestTimer(45)}
+                      className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-lg text-slate-200 transition"
+                    >
+                      45s
+                    </button>
+                    <button
+                      onClick={() => setRestTimer(60)}
+                      className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-lg text-slate-200 transition"
+                    >
+                      60s
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Acciones de Ejecución de la Tarea en el Modal */}
+            <div className="pt-3 border-t border-slate-800 flex items-center gap-2">
+              {selectedDetailHabit.unit === 'series' || selectedDetailHabit.habit_type === 'numeric' ? (
+                <div className="flex items-center justify-between w-full gap-2">
+                  <button
+                    onClick={() => logSeriesStep(selectedDetailHabit.id, -1)}
+                    disabled={(selectedDetailHabit.today_log?.value ?? 0) <= 0}
+                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={() => logSeriesStep(selectedDetailHabit.id, 1)}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Registrar +1 Serie (45s descanso)</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    toggleHabit(selectedDetailHabit);
+                    setSelectedDetailHabit(null);
+                  }}
+                  className={`w-full font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-md active:scale-95 ${
+                    selectedDetailHabit.today_log?.completed
+                      ? 'bg-slate-800 text-emerald-400 border border-emerald-900/60'
+                      : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                  }`}
+                >
+                  <Check className="w-4 h-4" />
+                  <span>
+                    {selectedDetailHabit.today_log?.completed ? 'Completado (Desmarcar)' : 'Marcar como Completado Hoy'}
+                  </span>
+                </button>
+              )}
+            </div>
+
           </div>
         </div>
       )}
