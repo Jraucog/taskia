@@ -122,6 +122,8 @@ export default function App() {
   // Modo de visualización en 'today': 'checklist' (resumen directo de lo que hay que hacer) o 'plans' (por programas)
   const [todayViewMode, setTodayViewMode] = useState<'checklist' | 'plans'>('checklist');
   const [todayFilter, setTodayFilter] = useState<'all' | 'pending' | 'completed'>('pending');
+  // Agrupar visualmente por plan/programa dentro del Resumen de Hoy
+  const [groupByPlan, setGroupByPlan] = useState<boolean>(true);
 
   // Estado de colapsar / expandir bloques o categorías
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
@@ -945,9 +947,9 @@ export default function App() {
                 {/* ======================================================== */}
                 {todayViewMode === 'checklist' && (
                   <div className="space-y-3">
-                    {/* Filtros de estado: Pendientes / Todo / Hecho */}
-                    <div className="flex items-center justify-between gap-2 px-1">
-                      <div className="flex items-center gap-1.5">
+                    {/* Filtros de estado y Toggle de Agrupación */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <button
                           onClick={() => setTodayFilter('pending')}
                           className={`text-xs px-2.5 py-1 rounded-lg font-bold border transition ${
@@ -980,139 +982,291 @@ export default function App() {
                         </button>
                       </div>
 
-                      <span className="text-[11px] font-mono text-slate-400 hidden sm:inline">
-                        {metrics?.today_compliance_percent || 0}% cumplimiento
-                      </span>
+                      <div className="flex items-center justify-between sm:justify-end gap-2">
+                        {/* Toggle de Agrupar por Plan */}
+                        <button
+                          onClick={() => setGroupByPlan(!groupByPlan)}
+                          className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border transition flex items-center gap-1.5 ${
+                            groupByPlan
+                              ? 'bg-indigo-950/70 border-indigo-700/80 text-indigo-300'
+                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                          }`}
+                          title="Alternar entre ver agrupado por programas o lista continua"
+                        >
+                          <Layers className="w-3 h-3" />
+                          <span>{groupByPlan ? 'Agrupado por Plan' : 'Lista Plana'}</span>
+                        </button>
+
+                        <span className="text-[11px] font-mono text-slate-400">
+                          {metrics?.today_compliance_percent || 0}%
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Lista directa de hábitos filtrados */}
-                    <div className="space-y-2.5">
-                      {habits
-                        .filter(h => {
-                          if (todayFilter === 'pending') return !h.today_log?.completed;
-                          if (todayFilter === 'completed') return !!h.today_log?.completed;
-                          return true;
-                        })
-                        .map((habit) => {
-                          const isCompleted = habit.today_log?.completed ?? false;
-                          const currentVal = habit.today_log?.value ?? 0;
-                          const targetVal = habit.target_value;
-                          const title = cleanTitle(habit.title);
-                          const planName = getPlanNameFromHabit(habit);
+                    {/* VISTA 1: AGRUPADA POR PLAN/CATEGORÍA CON ACORDEÓN */}
+                    {groupByPlan ? (
+                      <div className="space-y-4">
+                        {planSummaryList.map(plan => {
+                          const planFilteredHabits = plan.habits.filter(h => {
+                            if (todayFilter === 'pending') return !h.today_log?.completed;
+                            if (todayFilter === 'completed') return !!h.today_log?.completed;
+                            return true;
+                          });
+
+                          if (planFilteredHabits.length === 0 && todayFilter !== 'all') {
+                            return null;
+                          }
+
+                          const isGroupCollapsed = !!collapsedBlocks[`group_${plan.name}`];
+                          const completedInPlan = plan.habits.filter(h => h.today_log?.completed).length;
 
                           return (
-                            <div
-                              key={habit.id}
-                              className={`p-3.5 rounded-2xl border transition-all duration-200 flex flex-col gap-2.5 ${
-                                isCompleted
-                                  ? 'bg-slate-900/40 border-emerald-900/40 opacity-75'
-                                  : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 shadow-sm'
-                              }`}
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                                  <button
-                                    onClick={() => toggleHabit(habit)}
-                                    className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition"
-                                    title={isCompleted ? 'Marcar incompleto' : 'Completar hábito'}
-                                  >
-                                    {isCompleted ? (
-                                      <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950" />
-                                    ) : (
-                                      <Circle className="w-5 h-5 text-slate-500 hover:text-white" />
-                                    )}
-                                  </button>
-
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-indigo-400 truncate max-w-[140px]">
-                                        {planName}
-                                      </span>
-                                      {habit.unit === 'series' && (
-                                        <span className="text-[10px] font-mono text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">
-                                          {currentVal}/{targetVal} {habit.unit}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <h3 className={`text-xs sm:text-sm font-bold mt-1 leading-snug ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
-                                      {title}
-                                    </h3>
-                                    {habit.description && (
-                                      <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
-                                        💡 {habit.description}
-                                      </p>
-                                    )}
+                            <div key={plan.name} className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                              {/* Cabecera del Grupo (Tocable para colapsar/expandir el plan) */}
+                              <div
+                                onClick={() => toggleBlockCollapse(`group_${plan.name}`)}
+                                className="p-3 bg-slate-900/90 border-b border-slate-800/80 flex items-center justify-between gap-2 cursor-pointer select-none hover:bg-slate-900 transition"
+                              >
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <div className="p-1.5 rounded-lg bg-indigo-950 text-indigo-400">
+                                    <Layers className="w-4 h-4" />
                                   </div>
+                                  <h3 className="text-xs sm:text-sm font-bold text-white truncate">
+                                    {plan.name}
+                                  </h3>
+                                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800 shrink-0">
+                                    {completedInPlan}/{plan.totalCount}
+                                  </span>
                                 </div>
 
-                                {/* Acciones rápidas según tipo */}
-                                <div className="shrink-0 flex items-center gap-1.5">
-                                  {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
-                                    <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                                      <button
-                                        onClick={() => logSeriesStep(habit.id, -1)}
-                                        disabled={currentVal <= 0}
-                                        className="p-1 rounded-lg text-slate-400 hover:text-white disabled:opacity-30"
-                                      >
-                                        <Minus className="w-3 h-3" />
-                                      </button>
-                                      <span className="text-xs font-mono font-bold px-1 text-slate-200">
-                                        {currentVal}/{targetVal}
-                                      </span>
-                                      <button
-                                        onClick={() => logSeriesStep(habit.id, 1)}
-                                        className={`px-2 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition ${
-                                          isCompleted ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                                        }`}
-                                      >
-                                        <Plus className="w-3 h-3" />
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <button
-                                      onClick={() => toggleHabit(habit)}
-                                      className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition active:scale-95 ${
-                                        isCompleted
-                                          ? 'bg-slate-800 text-emerald-400 border border-emerald-900/60'
-                                          : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
-                                      }`}
-                                    >
-                                      {isCompleted ? <Check className="w-3.5 h-3.5" /> : null}
-                                      <span>{isCompleted ? 'Listo' : 'Hacer'}</span>
-                                    </button>
-                                  )}
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-xs font-mono font-bold text-amber-400">
+                                    {plan.progressPercent}%
+                                  </span>
+                                  {isGroupCollapsed ? <ChevronRight className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
                                 </div>
                               </div>
+
+                              {/* Tareas del Grupo */}
+                              {!isGroupCollapsed && (
+                                <div className="p-2.5 space-y-2">
+                                  {planFilteredHabits.map((habit) => {
+                                    const isCompleted = habit.today_log?.completed ?? false;
+                                    const currentVal = habit.today_log?.value ?? 0;
+                                    const targetVal = habit.target_value;
+                                    const title = cleanTitle(habit.title);
+
+                                    return (
+                                      <div
+                                        key={habit.id}
+                                        className={`p-3 rounded-xl border transition-all duration-200 flex flex-col gap-2 ${
+                                          isCompleted
+                                            ? 'bg-slate-950/40 border-emerald-900/30 opacity-75'
+                                            : 'bg-slate-950/80 border-slate-800/90 hover:border-slate-700'
+                                        }`}
+                                      >
+                                        <div className="flex items-start justify-between gap-3">
+                                          <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                                            <button
+                                              onClick={() => toggleHabit(habit)}
+                                              className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition"
+                                            >
+                                              {isCompleted ? (
+                                                <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950" />
+                                              ) : (
+                                                <Circle className="w-5 h-5 text-slate-500 hover:text-white" />
+                                              )}
+                                            </button>
+
+                                            <div className="flex-1 min-w-0">
+                                              <h4 className={`text-xs sm:text-sm font-semibold leading-snug ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                                                {title}
+                                              </h4>
+                                              {habit.description && (
+                                                <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                                                  💡 {habit.description}
+                                                </p>
+                                              )}
+                                            </div>
+                                          </div>
+
+                                          {/* Controles de registro rápido */}
+                                          <div className="shrink-0 flex items-center gap-1.5">
+                                            {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
+                                              <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+                                                <button
+                                                  onClick={() => logSeriesStep(habit.id, -1)}
+                                                  disabled={currentVal <= 0}
+                                                  className="p-1 rounded-lg text-slate-400 hover:text-white disabled:opacity-30"
+                                                >
+                                                  <Minus className="w-3 h-3" />
+                                                </button>
+                                                <span className="text-xs font-mono font-bold px-1 text-slate-200">
+                                                  {currentVal}/{targetVal}
+                                                </span>
+                                                <button
+                                                  onClick={() => logSeriesStep(habit.id, 1)}
+                                                  className={`px-2 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition ${
+                                                    isCompleted ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                                                  }`}
+                                                >
+                                                  <Plus className="w-3 h-3" />
+                                                </button>
+                                              </div>
+                                            ) : (
+                                              <button
+                                                onClick={() => toggleHabit(habit)}
+                                                className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition active:scale-95 ${
+                                                  isCompleted
+                                                    ? 'bg-slate-800 text-emerald-400 border border-emerald-900/60'
+                                                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
+                                                }`}
+                                              >
+                                                {isCompleted ? <Check className="w-3.5 h-3.5" /> : null}
+                                                <span>{isCompleted ? 'Listo' : 'Hacer'}</span>
+                                              </button>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
                           );
                         })}
+                      </div>
+                    ) : (
+                      /* VISTA 2: LISTA PLANA CONTINUA */
+                      <div className="space-y-2.5">
+                        {habits
+                          .filter(h => {
+                            if (todayFilter === 'pending') return !h.today_log?.completed;
+                            if (todayFilter === 'completed') return !!h.today_log?.completed;
+                            return true;
+                          })
+                          .map((habit) => {
+                            const isCompleted = habit.today_log?.completed ?? false;
+                            const currentVal = habit.today_log?.value ?? 0;
+                            const targetVal = habit.target_value;
+                            const title = cleanTitle(habit.title);
+                            const planName = getPlanNameFromHabit(habit);
 
-                      {habits.length === 0 && (
-                        <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-4">
-                          <p className="text-xs text-slate-400">No tienes hábitos cargados para hoy.</p>
-                          <button 
-                            onClick={() => setActiveTab('programs')}
-                            className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
-                          >
-                            Explorar Catálogo de Programas
-                          </button>
-                        </div>
-                      )}
+                            return (
+                              <div
+                                key={habit.id}
+                                className={`p-3.5 rounded-2xl border transition-all duration-200 flex flex-col gap-2.5 ${
+                                  isCompleted
+                                    ? 'bg-slate-900/40 border-emerald-900/40 opacity-75'
+                                    : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 shadow-sm'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                                    <button
+                                      onClick={() => toggleHabit(habit)}
+                                      className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition"
+                                      title={isCompleted ? 'Marcar incompleto' : 'Completar hábito'}
+                                    >
+                                      {isCompleted ? (
+                                        <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950" />
+                                      ) : (
+                                        <Circle className="w-5 h-5 text-slate-500 hover:text-white" />
+                                      )}
+                                    </button>
 
-                      {habits.length > 0 && habits.filter(h => !h.today_log?.completed).length === 0 && todayFilter === 'pending' && (
-                        <div className="text-center py-8 bg-slate-900/60 border border-emerald-800/40 rounded-2xl p-4">
-                          <span className="text-2xl block mb-1">🎉</span>
-                          <h4 className="text-sm font-bold text-emerald-400">¡Todo completado por hoy!</h4>
-                          <p className="text-xs text-slate-400 mt-1">Has cumplido el 100% de tus objetivos del día. Disciplina pura.</p>
-                          <button
-                            onClick={() => setTodayFilter('all')}
-                            className="mt-3 text-xs text-slate-300 hover:text-white underline"
-                          >
-                            Ver todos los hábitos completados
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-indigo-400 truncate max-w-[140px]">
+                                          {planName}
+                                        </span>
+                                        {habit.unit === 'series' && (
+                                          <span className="text-[10px] font-mono text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">
+                                            {currentVal}/{targetVal} {habit.unit}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <h3 className={`text-xs sm:text-sm font-bold mt-1 leading-snug ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                                        {title}
+                                      </h3>
+                                      {habit.description && (
+                                        <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
+                                          💡 {habit.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Acciones rápidas según tipo */}
+                                  <div className="shrink-0 flex items-center gap-1.5">
+                                    {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
+                                      <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                                        <button
+                                          onClick={() => logSeriesStep(habit.id, -1)}
+                                          disabled={currentVal <= 0}
+                                          className="p-1 rounded-lg text-slate-400 hover:text-white disabled:opacity-30"
+                                        >
+                                          <Minus className="w-3 h-3" />
+                                        </button>
+                                        <span className="text-xs font-mono font-bold px-1 text-slate-200">
+                                          {currentVal}/{targetVal}
+                                        </span>
+                                        <button
+                                          onClick={() => logSeriesStep(habit.id, 1)}
+                                          className={`px-2 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition ${
+                                            isCompleted ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                                          }`}
+                                        >
+                                          <Plus className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        onClick={() => toggleHabit(habit)}
+                                        className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition active:scale-95 ${
+                                          isCompleted
+                                            ? 'bg-slate-800 text-emerald-400 border border-emerald-900/60'
+                                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
+                                        }`}
+                                      >
+                                        {isCompleted ? <Check className="w-3.5 h-3.5" /> : null}
+                                        <span>{isCompleted ? 'Listo' : 'Hacer'}</span>
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
+
+                    {habits.length === 0 && (
+                      <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-4">
+                        <p className="text-xs text-slate-400">No tienes hábitos cargados para hoy.</p>
+                        <button 
+                          onClick={() => setActiveTab('programs')}
+                          className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
+                        >
+                          Explorar Catálogo de Programas
+                        </button>
+                      </div>
+                    )}
+
+                    {habits.length > 0 && habits.filter(h => !h.today_log?.completed).length === 0 && todayFilter === 'pending' && (
+                      <div className="text-center py-8 bg-slate-900/60 border border-emerald-800/40 rounded-2xl p-4">
+                        <span className="text-2xl block mb-1">🎉</span>
+                        <h4 className="text-sm font-bold text-emerald-400">¡Todo completado por hoy!</h4>
+                        <p className="text-xs text-slate-400 mt-1">Has cumplido el 100% de tus objetivos del día. Disciplina pura.</p>
+                        <button
+                          onClick={() => setTodayFilter('all')}
+                          className="mt-3 text-xs text-slate-300 hover:text-white underline"
+                        >
+                          Ver todos los hábitos completados
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 
