@@ -515,8 +515,14 @@ export default function App() {
       } else if (coachesRes.data.length > 0) {
         setSelectedCoachId(coachesRes.data[0].id);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error al cargar datos:", err);
+      if (err.response?.status === 401) {
+        // Token inválido o expirado: resetear sesión limpia
+        localStorage.removeItem('taskia_token');
+        setAuthToken(null);
+        setCurrentUser(null);
+      }
     } finally {
       setLoading(false);
     }

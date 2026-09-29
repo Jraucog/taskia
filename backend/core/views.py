@@ -56,9 +56,9 @@ def login_view(request):
     return Response({'error': 'Credenciales invalidas'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def current_user_view(request):
-    user = get_request_user(request)
+    user = request.user
     pref, _ = UserCoachPreference.objects.get_or_create(user=user)
     
     if request.method == 'POST':
@@ -96,13 +96,13 @@ class ProgramViewSet(viewsets.ModelViewSet):
             return Response(ProgramSerializer(program).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def enroll(self, request, pk=None):
         """
         Inscribir al usuario activo en el programa e instanciar sus hábitos asociados.
         """
         program = self.get_object()
-        user = get_request_user(request)
+        user = request.user
         start_date = request.data.get('start_date', datetime.date.today().isoformat())
 
         enrollment, created = ProgramEnrollment.objects.get_or_create(
@@ -141,15 +141,13 @@ class ProgramViewSet(viewsets.ModelViewSet):
 
 class HabitViewSet(viewsets.ModelViewSet):
     serializer_class = HabitSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = get_request_user(self.request)
-        return Habit.objects.filter(user=user, active=True).order_by('-created_at')
+        return Habit.objects.filter(user=self.request.user, active=True).order_by('-created_at')
 
     def perform_create(self, serializer):
-        user = get_request_user(self.request)
-        serializer.save(user=user)
+        serializer.save(user=self.request.user)
 
     @action(detail=False, methods=['get'])
     def today(self, request):
@@ -158,7 +156,7 @@ class HabitViewSet(viewsets.ModelViewSet):
         (o aquellos que hayan sido completados hoy).
         Si el parámetro ?all=true está presente, retorna todos los hábitos activos.
         """
-        user = get_request_user(request)
+        user = request.user
         habits = Habit.objects.filter(user=user, active=True)
         today = datetime.date.today()
         show_all = request.query_params.get('all', 'false').lower() == 'true'
@@ -182,6 +180,10 @@ class HabitViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def toggle_today(self, request, pk=None):
         habit = self.get_object()
+        # Verify ownership
+        if habit.user != request.user:
+            return Response({'error': 'No autorizado'}, status=status.HTTP_403_FORBIDDEN)
+
         today = datetime.date.today()
         target_date = request.data.get('date', str(today))
         log, created = HabitLog.objects.get_or_create(habit=habit, date=target_date)
@@ -210,13 +212,13 @@ class HabitViewSet(viewsets.ModelViewSet):
         })
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def sla_metrics_summary(request):
     """
     Calcula el SLA de cumplimiento considerando únicamente los hábitos y días
     que estaban efectivamente programados.
     """
-    user = get_request_user(request)
+    user = request.user
     all_habits = Habit.objects.filter(user=user, active=True)
     today = datetime.date.today()
     seven_days_ago = today - datetime.timedelta(days=6)
