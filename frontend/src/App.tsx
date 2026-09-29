@@ -8,7 +8,8 @@ import {
   ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle,
   Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks,
   Wind, Pause, Target, Info, Clock, Volume2, VolumeX,
-  Search, Award, TrendingUp, Trophy
+  Search, Award, TrendingUp, Trophy,
+  Palette
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -191,6 +192,82 @@ export default function App() {
   const [breathingIsRunning, setBreathingIsRunning] = useState(false);
   const [breathingCompletedRounds, setBreathingCompletedRounds] = useState(0);
   const [breathingSoundEnabled, setBreathingSoundEnabled] = useState(true);
+
+  // === SISTEMA DE TEMAS Y PERSONALIZACIÓN VISUAL ===
+  type AppTheme = 'dark' | 'light' | 'cyberpunk' | 'emerald' | 'dracula';
+  const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
+    return (localStorage.getItem('taskia_theme') as AppTheme) || 'dark';
+  });
+  const [showThemeModal, setShowThemeModal] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('taskia_theme', currentTheme);
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    if (currentTheme === 'light') {
+      document.documentElement.style.backgroundColor = '#f8fafc';
+      document.body.style.backgroundColor = '#f8fafc';
+    } else if (currentTheme === 'cyberpunk') {
+      document.documentElement.style.backgroundColor = '#0b0914';
+      document.body.style.backgroundColor = '#0b0914';
+    } else if (currentTheme === 'emerald') {
+      document.documentElement.style.backgroundColor = '#022c22';
+      document.body.style.backgroundColor = '#022c22';
+    } else if (currentTheme === 'dracula') {
+      document.documentElement.style.backgroundColor = '#181028';
+      document.body.style.backgroundColor = '#181028';
+    } else {
+      document.documentElement.style.backgroundColor = '#020617';
+      document.body.style.backgroundColor = '#020617';
+    }
+  }, [currentTheme]);
+
+  const themesCatalog: { id: AppTheme; name: string; desc: string; icon: string; bgBadge: string; border: string; preview: string }[] = [
+    {
+      id: 'dark',
+      name: 'Oscuro Élite (Slate)',
+      desc: 'Negro espacial con acentos índigo y pizarra. Diseñado para concentración profunda y descanso visual.',
+      icon: '🌌',
+      bgBadge: 'bg-slate-900 text-slate-300',
+      border: 'border-slate-800',
+      preview: 'from-slate-950 via-slate-900 to-indigo-950'
+    },
+    {
+      id: 'light',
+      name: 'Luz Diurna (Claro)',
+      desc: 'Fondo blanco papel con contrastes nítidos. Ideal para entrenamiento al aire libre o ambientes iluminados.',
+      icon: '☀️',
+      bgBadge: 'bg-slate-100 text-slate-800',
+      border: 'border-slate-300',
+      preview: 'from-white via-slate-50 to-blue-50'
+    },
+    {
+      id: 'cyberpunk',
+      name: 'Cyberpunk Neón',
+      desc: 'Oscuridad total de medianoche con pulsos magenta, violeta y cian.',
+      icon: '⚡',
+      bgBadge: 'bg-fuchsia-950 text-fuchsia-300',
+      border: 'border-fuchsia-800',
+      preview: 'from-purple-950 via-slate-950 to-fuchsia-950'
+    },
+    {
+      id: 'emerald',
+      name: 'Bio-Hacking Esmeralda',
+      desc: 'Inspirado en la salud celular, rendimiento físico, longevidad y tono vital.',
+      icon: '🌿',
+      bgBadge: 'bg-emerald-950 text-emerald-300',
+      border: 'border-emerald-800',
+      preview: 'from-emerald-950 via-teal-950 to-slate-950'
+    },
+    {
+      id: 'dracula',
+      name: 'Drácula & Obsidiana',
+      desc: 'Atmósfera gótica refinada con púrpuras profundos y dorados para hábitos inquebrantables.',
+      icon: '🔮',
+      bgBadge: 'bg-purple-950 text-purple-300',
+      border: 'border-purple-800',
+      preview: 'from-violet-950 via-slate-950 to-amber-950'
+    }
+  ];
 
   // === MEJORA: Búsqueda rápida ===
   const [searchQuery, setSearchQuery] = useState('');
@@ -1167,6 +1244,15 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-1.5">
+            {/* Botón de Selector de Tema Visual */}
+            <button
+              onClick={() => setShowThemeModal(true)}
+              className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl transition flex items-center gap-1"
+              title="Cambiar Tema Visual (Oscuro, Claro, Cyberpunk, etc.)"
+            >
+              <Palette className="w-3.5 h-3.5 text-indigo-400" />
+            </button>
+
             {/* Botón de Perfil de Usuario y Coach */}
             <button 
               onClick={() => setShowCoachModal(true)}
@@ -2816,6 +2902,78 @@ export default function App() {
         </div>
       )}
 
+      
+      {/* ======================================================== */}
+      {/* MODAL DE CONFIGURACIÓN Y SELECCIÓN DE TEMAS VISUALES     */}
+      {/* ======================================================== */}
+      {showThemeModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+                  <Palette className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Tema Visual de Taskia</h3>
+                  <p className="text-[11px] text-slate-400">Elige la atmósfera estética que te impulse a actuar</p>
+                </div>
+              </div>
+              <button onClick={() => setShowThemeModal(false)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
+            </div>
+
+            <div className="overflow-y-auto space-y-2.5 my-3 pr-1 flex-1">
+              {themesCatalog.map((t) => {
+                const isSelected = currentTheme === t.id;
+                return (
+                  <div
+                    key={t.id}
+                    onClick={() => setCurrentTheme(t.id)}
+                    className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? 'bg-indigo-950/60 border-indigo-500 shadow-md shadow-indigo-500/10'
+                        : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{t.icon}</span>
+                        <div>
+                          <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                            {t.name}
+                          </h4>
+                        </div>
+                      </div>
+                      {isSelected ? (
+                        <span className="text-[10px] bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Activo
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-500 font-mono">Seleccionar</span>
+                      )}
+                    </div>
+
+                    <p className="text-[11px] text-slate-400 leading-relaxed mb-2.5">
+                      {t.desc}
+                    </p>
+
+                    {/* Muestra de degradado de color */}
+                    <div className={`w-full h-3 rounded-lg bg-gradient-to-r ${t.preview} border border-slate-800 shadow-inner`} />
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setShowThemeModal(false)}
+              className="mt-2 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition"
+            >
+              Aplicar y Guardar Preferencia
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Modal de Selección y Configuración de Perfil de Entrenador */}
       {showCoachModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
@@ -2826,11 +2984,32 @@ export default function App() {
                   <Flame className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Tono del Motivador</h3>
-                  <p className="text-[11px] text-slate-400">Elige quién te exigirá cumplir tus hábitos</p>
+                  <h3 className="text-sm font-bold text-white">Perfil & Entrenador</h3>
+                  <p className="text-[11px] text-slate-400">Personaliza la exigencia y estética de tu app</p>
                 </div>
               </div>
               <button onClick={() => setShowCoachModal(false)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
+            </div>
+
+            {/* Acceso rápido a selector de temas */}
+            <div 
+              onClick={() => { setShowCoachModal(false); setShowThemeModal(true); }}
+              className="bg-slate-950/80 border border-slate-800 hover:border-slate-700 p-2.5 rounded-2xl flex items-center justify-between cursor-pointer transition"
+            >
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-indigo-950 text-indigo-400">
+                  <Palette className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white">Tema Visual Activo</h4>
+                  <p className="text-[10px] text-slate-400">
+                    {themesCatalog.find(t => t.id === currentTheme)?.name || 'Oscuro'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] text-indigo-400 font-bold px-2 py-0.5 rounded-lg bg-indigo-950/60 border border-indigo-800/40">
+                Cambiar
+              </span>
             </div>
 
             <div className="overflow-y-auto space-y-3 my-3 pr-1 flex-1">
