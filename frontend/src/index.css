@@ -10,7 +10,7 @@ html, body {
   overflow-x: hidden;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
-  background-color: #020617;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Safe area insets for iOS notches and gesture bars */
@@ -32,8 +32,17 @@ html, body {
   50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.4); }
 }
 
-@keyframes shimmer {
-  100% { transform: translateX(100%); }
+@keyframes ultraInstinctAura {
+  0%, 100% { 
+    filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.4)) drop-shadow(0 0 30px rgba(224, 242, 254, 0.25)); 
+  }
+  50% { 
+    filter: drop-shadow(0 0 25px rgba(14, 165, 233, 0.7)) drop-shadow(0 0 45px rgba(255, 255, 255, 0.45)); 
+  }
+}
+
+.animate-ultra-instinct {
+  animation: ultraInstinctAura 3s ease-in-out infinite;
 }
 
 .animate-float {
@@ -70,17 +79,35 @@ html, body {
 }
 
 /* ========================================================= */
-/* PALETAS DE TEMA DINÁMICO (data-theme)                     */
+/* PALETAS DE TEMA DINÁMICO COMPLETAS Y ULTRA COMPATIBLES    */
 /* ========================================================= */
 
-/* Tema Claro (Luz Diurna) */
+/* 1. TEMA OSCURO ÉLITE (SLATE) - Default */
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  background-color: #020617 !important;
+  color: #f8fafc !important;
+  color-scheme: dark;
+}
+
+/* 2. TEMA CLARO REAL (LUZ DIURNA MINIMALISTA) */
 html[data-theme="light"],
 html[data-theme="light"] body {
   background-color: #f8fafc !important;
   color: #0f172a !important;
   color-scheme: light;
 }
-
+html[data-theme="light"] .bg-slate-950,
+html[data-theme="light"] .bg-slate-950\/95,
+html[data-theme="light"] .bg-slate-950\/90,
+html[data-theme="light"] .bg-slate-950\/80,
+html[data-theme="light"] .bg-slate-950\/70,
+html[data-theme="light"] .bg-slate-950\/60,
+html[data-theme="light"] .bg-slate-950\/40,
+html[data-theme="light"] .bg-slate-950\/30 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
 html[data-theme="light"] header,
 html[data-theme="light"] nav,
 html[data-theme="light"] .bg-slate-900,
@@ -91,78 +118,164 @@ html[data-theme="light"] .bg-slate-900\/60,
 html[data-theme="light"] .bg-slate-900\/50,
 html[data-theme="light"] .bg-slate-900\/40 {
   background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
   color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
-
-html[data-theme="light"] .bg-slate-950,
-html[data-theme="light"] .bg-slate-950\/80,
-html[data-theme="light"] .bg-slate-950\/70,
-html[data-theme="light"] .bg-slate-950\/60,
-html[data-theme="light"] .bg-slate-950\/40,
-html[data-theme="light"] .bg-slate-950\/30 {
-  background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
-  color: #0f172a !important;
+html[data-theme="light"] .border-slate-800,
+html[data-theme="light"] .border-slate-800\/90,
+html[data-theme="light"] .border-slate-800\/80,
+html[data-theme="light"] .border-slate-800\/60,
+html[data-theme="light"] .border-slate-800\/50 {
+  border-color: #cbd5e1 !important;
 }
-
 html[data-theme="light"] .text-white {
   color: #0f172a !important;
 }
-
 html[data-theme="light"] .text-slate-100,
 html[data-theme="light"] .text-slate-200,
 html[data-theme="light"] .text-slate-300 {
   color: #1e293b !important;
 }
-
 html[data-theme="light"] .text-slate-400 {
   color: #475569 !important;
 }
-
-html[data-theme="light"] .border-slate-800,
-html[data-theme="light"] .border-slate-800\/80,
-html[data-theme="light"] .border-slate-800\/60 {
-  border-color: #e2e8f0 !important;
+html[data-theme="light"] .text-slate-500 {
+  color: #64748b !important;
 }
 
-/* Tema Cyberpunk Neón */
+/* 3. TEMA CYBERPUNK NEÓN */
 html[data-theme="cyberpunk"],
 html[data-theme="cyberpunk"] body {
-  background-color: #07050d !important;
-  color: #fdf4ff !important;
+  background-color: #06020e !important;
+  color: #fae8ff !important;
+  color-scheme: dark;
 }
 html[data-theme="cyberpunk"] header,
 html[data-theme="cyberpunk"] nav {
-  background-color: rgba(15, 10, 26, 0.95) !important;
+  background-color: rgba(18, 6, 31, 0.95) !important;
+  border-color: #701a75 !important;
+}
+html[data-theme="cyberpunk"] .bg-slate-900,
+html[data-theme="cyberpunk"] .bg-slate-900\/90,
+html[data-theme="cyberpunk"] .bg-slate-900\/80,
+html[data-theme="cyberpunk"] .bg-slate-900\/60 {
+  background-color: #180929 !important;
   border-color: #4a044e !important;
+}
+html[data-theme="cyberpunk"] .bg-slate-950,
+html[data-theme="cyberpunk"] .bg-slate-950\/80,
+html[data-theme="cyberpunk"] .bg-slate-950\/60 {
+  background-color: #0d0417 !important;
+  border-color: #3b0764 !important;
 }
 html[data-theme="cyberpunk"] .border-slate-800,
 html[data-theme="cyberpunk"] .border-slate-800\/80 {
-  border-color: #3b0764 !important;
+  border-color: #581c87 !important;
 }
 
-/* Tema Bio-Hacking Esmeralda */
+/* 4. TEMA BIO-HACKING ESMERALDA */
 html[data-theme="emerald"],
 html[data-theme="emerald"] body {
-  background-color: #021a14 !important;
+  background-color: #021a13 !important;
   color: #ecfdf5 !important;
+  color-scheme: dark;
 }
 html[data-theme="emerald"] header,
 html[data-theme="emerald"] nav {
-  background-color: rgba(2, 44, 34, 0.95) !important;
+  background-color: rgba(2, 38, 28, 0.95) !important;
+  border-color: #065f46 !important;
+}
+html[data-theme="emerald"] .bg-slate-900,
+html[data-theme="emerald"] .bg-slate-900\/90,
+html[data-theme="emerald"] .bg-slate-900\/80,
+html[data-theme="emerald"] .bg-slate-900\/60 {
+  background-color: #032a1f !important;
+  border-color: #047857 !important;
+}
+html[data-theme="emerald"] .bg-slate-950,
+html[data-theme="emerald"] .bg-slate-950\/80,
+html[data-theme="emerald"] .bg-slate-950\/60 {
+  background-color: #01140e !important;
+  border-color: #064e3b !important;
+}
+html[data-theme="emerald"] .border-slate-800,
+html[data-theme="emerald"] .border-slate-800\/80 {
   border-color: #065f46 !important;
 }
 
-/* Tema Drácula & Obsidiana */
+/* 5. TEMA DRÁCULA & OBSIDIANA */
 html[data-theme="dracula"],
 html[data-theme="dracula"] body {
-  background-color: #110d1f !important;
-  color: #f5f3ff !important;
+  background-color: #120e24 !important;
+  color: #ede9fe !important;
+  color-scheme: dark;
 }
 html[data-theme="dracula"] header,
 html[data-theme="dracula"] nav {
-  background-color: rgba(26, 16, 43, 0.95) !important;
+  background-color: rgba(28, 20, 51, 0.95) !important;
+  border-color: #5b21b6 !important;
+}
+html[data-theme="dracula"] .bg-slate-900,
+html[data-theme="dracula"] .bg-slate-900\/90,
+html[data-theme="dracula"] .bg-slate-900\/80,
+html[data-theme="dracula"] .bg-slate-900\/60 {
+  background-color: #22183d !important;
   border-color: #4c1d95 !important;
 }
+html[data-theme="dracula"] .bg-slate-950,
+html[data-theme="dracula"] .bg-slate-950\/80,
+html[data-theme="dracula"] .bg-slate-950\/60 {
+  background-color: #0d0a1a !important;
+  border-color: #3b0764 !important;
+}
+html[data-theme="dracula"] .border-slate-800,
+html[data-theme="dracula"] .border-slate-800\/80 {
+  border-color: #581c87 !important;
+}
 
+/* 6. TEMA SAIYAN BLUE MIGATTE NO GOKUI (ULTRA INSTINTO) */
+/* Azul cósmico divino, blanco plateado estelar y aura resplandeciente */
+html[data-theme="saiyan"],
+html[data-theme="saiyan"] body {
+  background-color: #020914 !important;
+  color: #f0f9ff !important;
+  color-scheme: dark;
+  background-image: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.15), transparent 45%), radial-gradient(circle at 80% 90%, rgba(56, 189, 248, 0.08), transparent 40%) !important;
+}
+html[data-theme="saiyan"] header,
+html[data-theme="saiyan"] nav {
+  background-color: rgba(4, 19, 43, 0.95) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.2) !important;
+}
+html[data-theme="saiyan"] .bg-slate-900,
+html[data-theme="saiyan"] .bg-slate-900\/90,
+html[data-theme="saiyan"] .bg-slate-900\/80,
+html[data-theme="saiyan"] .bg-slate-900\/60 {
+  background-color: #071e3d !important;
+  border-color: #0369a1 !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.1) !important;
+}
+html[data-theme="saiyan"] .bg-slate-950,
+html[data-theme="saiyan"] .bg-slate-950\/80,
+html[data-theme="saiyan"] .bg-slate-950\/60 {
+  background-color: #031024 !important;
+  border-color: #0c4a6e !important;
+}
+html[data-theme="saiyan"] .border-slate-800,
+html[data-theme="saiyan"] .border-slate-800\/80 {
+  border-color: #0284c7 !important;
+}
+html[data-theme="saiyan"] .text-indigo-400 {
+  color: #38bdf8 !important;
+}
+html[data-theme="saiyan"] .bg-indigo-600 {
+  background-color: #0284c7 !important;
+}
+html[data-theme="saiyan"] .bg-indigo-600:hover {
+  background-color: #0ea5e9 !important;
+}
+html[data-theme="saiyan"] .text-amber-400 {
+  color: #e0f2fe !important;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.8) !important;
+}

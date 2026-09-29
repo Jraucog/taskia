@@ -194,7 +194,7 @@ export default function App() {
   const [breathingSoundEnabled, setBreathingSoundEnabled] = useState(true);
 
   // === SISTEMA DE TEMAS Y PERSONALIZACIÓN VISUAL ===
-  type AppTheme = 'dark' | 'light' | 'cyberpunk' | 'emerald' | 'dracula';
+  type AppTheme = 'dark' | 'light' | 'cyberpunk' | 'emerald' | 'dracula' | 'saiyan';
   const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
     return (localStorage.getItem('taskia_theme') as AppTheme) || 'dark';
   });
@@ -215,6 +215,9 @@ export default function App() {
     } else if (currentTheme === 'dracula') {
       document.documentElement.style.backgroundColor = '#181028';
       document.body.style.backgroundColor = '#181028';
+    } else if (currentTheme === 'saiyan') {
+      document.documentElement.style.backgroundColor = '#020914';
+      document.body.style.backgroundColor = '#020914';
     } else {
       document.documentElement.style.backgroundColor = '#020617';
       document.body.style.backgroundColor = '#020617';
@@ -266,7 +269,16 @@ export default function App() {
       bgBadge: 'bg-purple-950 text-purple-300',
       border: 'border-purple-800',
       preview: 'from-violet-950 via-slate-950 to-amber-950'
-    }
+    },
+    {
+      id: 'saiyan',
+      name: 'Saiyan Blue • Migatte no Gokui (Ultra Instinto)',
+      desc: 'Energía de los dioses y estado mental sin esfuerzo ni dudas. Aura celeste divina (#0284c7) y destellos de plata pura (#f0f9ff) para romper cualquier límite de disciplina.',
+      icon: '🌌',
+      bgBadge: 'bg-sky-950 text-sky-300',
+      border: 'border-sky-500',
+      preview: 'from-sky-500 via-indigo-600 to-slate-950'
+    },
   ];
 
   // === MEJORA: Búsqueda rápida ===
