@@ -313,18 +313,38 @@ export default function App() {
     earned: boolean;
     earnedDate?: string;
   }
+  const defaultBadgesList: Badge[] = [
+    { id: 'first_check', icon: '✅', title: 'Primer Paso', description: 'Completar tu primer hábito del día', earned: false },
+    { id: 'perfect_day', icon: '🌟', title: 'Día Perfecto', description: 'Completar el 100% de los hábitos programados', earned: false },
+    { id: 'week_streak', icon: '🔥', title: 'Semana de Fuego', description: 'Alcanzar 7 días consecutivos en SLA', earned: false },
+    { id: 'iron_will', icon: '💪', title: 'Voluntad de Hierro', description: 'Alcanzar 14 días consecutivos de racha', earned: false },
+    { id: 'unstoppable_30', icon: '⚡', title: 'Imparable (30 Días)', description: 'Mantener la disciplina durante 30 días seguidos', earned: false },
+    { id: 'centurion', icon: '🏆', title: 'Centurión (100 Tareas)', description: 'Superar 100 ejecuciones totales registradas', earned: false },
+    { id: 'brian_tracy', icon: '✍️', title: 'Reto Brian Tracy (21 Días)', description: 'Escribir tus 10 metas diarias durante 21 días sin fallar', earned: false },
+    { id: 'zen_master', icon: '🧘', title: 'Maestro de Respiración', description: 'Completar sesiones tácticas de regulación de estrés', earned: false },
+    { id: 'hydration_god', icon: '💧', title: 'Hidratación Óptima', description: 'Cumplir la ingesta diaria de agua (3L)', earned: false },
+    { id: 'trx_warrior', icon: '🏋️', title: 'Guerrero TRX & Fuerza', description: 'Ejecutar tus series de calistenia y tren inferior', earned: false },
+    { id: 'early_bird', icon: '🌅', title: 'Madrugador de Acero', description: 'Completar tus hábitos prioritarios antes de las 12:00', earned: false },
+    { id: 'night_shield', icon: '🛡️', title: 'Higiene del Sueño', description: 'Desconectar pantallas y proteger tu descanso reparador', earned: false },
+    { id: 'visionary', icon: '🧭', title: 'Mente Visionaria', description: 'Crear y dar seguimiento a tus metas 3P en el Vision Board', earned: false },
+    { id: 'sla_guardian', icon: '🎯', title: 'Guardián del SLA', description: 'Tener más de 5 hábitos activos cumpliendo su SLA', earned: false },
+    { id: 'saiyan_instinct', icon: '🌌', title: 'Ultra Instinto', description: 'Activar el tema Saiyan Blue y mantener disciplina divina', earned: false },
+    { id: 'spartan_mindset', icon: '⚔️', title: 'Mentalidad Espartana', description: 'Completar tareas aún en los días de mayor exigencia', earned: false },
+  ];
+
   const [badges, setBadges] = useState<Badge[]>(() => {
     const saved = localStorage.getItem('taskia_badges');
-    return saved ? JSON.parse(saved) : [
-      { id: 'first_check', icon: '✅', title: 'Primer Paso', description: 'Completar tu primer hábito', earned: false },
-      { id: 'perfect_day', icon: '🌟', title: 'Día Perfecto', description: 'Completar el 100% de un día', earned: false },
-      { id: 'week_streak', icon: '🔥', title: 'Semana de Fuego', description: '7 días consecutivos ≥80%', earned: false },
-      { id: 'zen_master', icon: '🧘', title: 'Maestro Zen', description: 'Completar 10 sesiones de respiración', earned: false },
-      { id: 'brian_tracy', icon: '📝', title: 'Discípulo Tracy', description: '21 días consecutivos escribiendo metas', earned: false },
-      { id: 'iron_will', icon: '💪', title: 'Voluntad de Hierro', description: 'Racha de 14 días ≥80%', earned: false },
-      { id: 'centurion', icon: '🏆', title: 'Centurión', description: 'Completar 100 tareas en total', earned: false },
-      { id: 'early_bird', icon: '🌅', title: 'Madrugador', description: 'Completar todo antes del mediodía', earned: false },
-    ];
+    if (!saved) return defaultBadgesList;
+    try {
+      const parsed: Badge[] = JSON.parse(saved);
+      // Merge with new badges so previously saved state doesn't hide newly added badges
+      return defaultBadgesList.map(def => {
+        const found = parsed.find(p => p.id === def.id);
+        return found ? found : def;
+      });
+    } catch {
+      return defaultBadgesList;
+    }
   });
 
   // Reproducir campana tibetana suave para guiar la respiración con ojos cerrados
@@ -455,7 +475,7 @@ export default function App() {
       if (b) { b.earned = true; b.earnedDate = today; changed = true; }
     }
 
-    // Week Streak
+    // Week Streak (7 days)
     if (!newBadges.find(b => b.id === 'week_streak')?.earned && streakData.current >= 7) {
       const b = newBadges.find(b => b.id === 'week_streak');
       if (b) { b.earned = true; b.earnedDate = today; changed = true; }
@@ -464,6 +484,51 @@ export default function App() {
     // Iron Will (14 days)
     if (!newBadges.find(b => b.id === 'iron_will')?.earned && streakData.current >= 14) {
       const b = newBadges.find(b => b.id === 'iron_will');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // Unstoppable (30 days)
+    if (!newBadges.find(b => b.id === 'unstoppable_30')?.earned && streakData.current >= 30) {
+      const b = newBadges.find(b => b.id === 'unstoppable_30');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // Visionary (Vision Cards active)
+    if (!newBadges.find(b => b.id === 'visionary')?.earned && visionCards.length >= 3) {
+      const b = newBadges.find(b => b.id === 'visionary');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // SLA Guardian (at least 5 habits meeting SLA)
+    const healthyCount = habits.filter(h => h.compliance_summary?.meets_sla).length;
+    if (!newBadges.find(b => b.id === 'sla_guardian')?.earned && healthyCount >= 5) {
+      const b = newBadges.find(b => b.id === 'sla_guardian');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // Hydration God (Completed water habit)
+    const waterHabit = habits.find(h => h.title.toLowerCase().includes('agua') || h.title.toLowerCase().includes('hidrat'));
+    if (!newBadges.find(b => b.id === 'hydration_god')?.earned && waterHabit?.today_log?.completed) {
+      const b = newBadges.find(b => b.id === 'hydration_god');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // TRX Warrior (Completed TRX or Fuerza habit)
+    const trxHabit = habits.find(h => h.title.toLowerCase().includes('trx') || h.title.toLowerCase().includes('calistenia') || h.title.toLowerCase().includes('fuerza'));
+    if (!newBadges.find(b => b.id === 'trx_warrior')?.earned && trxHabit?.today_log?.completed) {
+      const b = newBadges.find(b => b.id === 'trx_warrior');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // Ultra Instinct (Theme saiyan or saiyan-light with completed tasks)
+    if (!newBadges.find(b => b.id === 'saiyan_instinct')?.earned && (currentTheme === 'saiyan' || currentTheme === 'saiyan-light') && completedToday > 0) {
+      const b = newBadges.find(b => b.id === 'saiyan_instinct');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // Spartan Mindset (Completed 100% on challenging day)
+    if (!newBadges.find(b => b.id === 'spartan_mindset')?.earned && pctToday === 100 && totalToday >= 5) {
+      const b = newBadges.find(b => b.id === 'spartan_mindset');
       if (b) { b.earned = true; b.earnedDate = today; changed = true; }
     }
 
