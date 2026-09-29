@@ -12,7 +12,9 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const API_BASE = `http://${window.location.hostname}:8000/api`;
+const API_BASE = window.location.hostname.includes('trycloudflare.com')
+  ? 'https://asset-discretion-expenditure-willow.trycloudflare.com/api'
+  : `http://${window.location.hostname}:8000/api`;
 
 interface DayHistory {
   date: string;
