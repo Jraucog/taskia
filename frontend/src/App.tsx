@@ -36,6 +36,7 @@ interface Habit {
   days_of_week?: string;
   day_offset?: number | null;
   sla_target_percent: number;
+  reset_on_miss?: boolean;
   enrollment?: number | null;
   today_log?: {
     completed: boolean;
@@ -170,7 +171,7 @@ export default function App() {
     typeof Notification !== 'undefined' ? Notification.permission : 'default'
   );
   const [showNotificationBanner, setShowNotificationBanner] = useState(
-    typeof Notification !== 'undefined' && Notification.permission !== 'granted'
+    () => typeof Notification !== 'undefined' && Notification.permission !== 'granted' && localStorage.getItem('taskia_dismiss_notif_banner') !== 'true'
   );
 
   // Estado de Dynamic Island
@@ -406,7 +407,8 @@ export default function App() {
     estimated_minutes: 5,
     frequency_type: 'daily',
     days_of_week: '0,1,2,3,4,5,6',
-    sla_target_percent: 85
+    sla_target_percent: 85,
+    reset_on_miss: false
   });
 
   // Sistema de notificación/alerta en pantalla (In-App Coach Banners & Push Simulation)
@@ -861,7 +863,8 @@ export default function App() {
       estimated_minutes: 5,
       frequency_type: 'daily',
       days_of_week: '0,1,2,3,4,5,6',
-      sla_target_percent: 85
+      sla_target_percent: 85,
+      reset_on_miss: (defaultPlanName || selectedPlanName || '').toLowerCase().includes('brian tracy') || (defaultPlanName || selectedPlanName || '').toLowerCase().includes('21 d')
     });
     setShowHabitModal(true);
   };
@@ -879,7 +882,8 @@ export default function App() {
       estimated_minutes: habit.estimated_minutes ?? 5,
       frequency_type: habit.frequency_type || 'daily',
       days_of_week: habit.days_of_week || '0,1,2,3,4,5,6',
-      sla_target_percent: habit.sla_target_percent || 85
+      sla_target_percent: habit.sla_target_percent || 85,
+      reset_on_miss: habit.reset_on_miss ?? (habit.title.toLowerCase().includes('brian tracy') || habit.title.toLowerCase().includes('21 d'))
     });
     setShowHabitModal(true);
   };
@@ -905,6 +909,10 @@ export default function App() {
       days_of_week: habitFormData.days_of_week,
       sla_target_percent: Number(habitFormData.sla_target_percent) || 85
     };
+    // Guardar preferencia de reinicio por hábito en localStorage
+    if (editingHabit) {
+      localStorage.setItem(`taskia_reset_on_miss_${editingHabit.id}`, String(habitFormData.reset_on_miss));
+    }
 
     try {
       if (editingHabit) {
@@ -1268,23 +1276,35 @@ export default function App() {
       {/* Main Content Area */}
       <main className="max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 flex-1 flex flex-col gap-4">
         
-        {/* Banner de Notificaciones discreto */}
+        {/* Banner de Notificaciones con opción de cerrar y silenciar */}
         {showNotificationBanner && (
-          <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
-            <div className="flex items-center gap-2">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-2 min-w-0">
               <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-              <div>
-                <h4 className="text-xs font-semibold text-slate-200">Activa notificaciones de disciplina</h4>
+              <div className="min-w-0">
+                <h4 className="text-xs font-semibold text-slate-200 truncate">Notificaciones de disciplina</h4>
                 <p className="text-[10px] text-slate-400">Recordatorios para proteger tu racha diaria.</p>
               </div>
             </div>
 
-            <button 
-              onClick={requestNotificationPermission}
-              className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-semibold py-1.5 px-3 rounded-xl shrink-0 transition"
-            >
-              Activar
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button 
+                onClick={requestNotificationPermission}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold py-1.5 px-3 rounded-xl transition"
+              >
+                Activar
+              </button>
+              <button 
+                onClick={() => {
+                  setShowNotificationBanner(false);
+                  localStorage.setItem('taskia_dismiss_notif_banner', 'true');
+                }}
+                className="text-slate-500 hover:text-white p-1 rounded-lg text-xs"
+                title="Descartar este aviso"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         )}
 
@@ -1477,7 +1497,9 @@ export default function App() {
                             return null;
                           }
 
-                          const isGroupCollapsed = !!collapsedBlocks[`group_${plan.name}`];
+                          const isGroupCollapsed = collapsedBlocks[`group_${plan.name}`] !== undefined 
+                            ? collapsedBlocks[`group_${plan.name}`] 
+                            : true;
                           const completedInPlan = plan.habits.filter(h => h.today_log?.completed).length;
 
                           return (
@@ -1564,6 +1586,18 @@ export default function App() {
 
                                           {/* Controles de registro rápido */}
                                           <div className="shrink-0 flex items-center gap-1.5">
+                                            {/* Botón directo de 10 Metas para tareas de Brian Tracy */}
+                                            {(habit.title.toLowerCase().includes('brian tracy') || habit.title.toLowerCase().includes('10 meta') || habit.title.toLowerCase().includes('fórmula 3p')) && (
+                                              <button
+                                                onClick={() => setShowGoalsModal(true)}
+                                                className="bg-amber-950/80 hover:bg-amber-900 border border-amber-700/60 text-amber-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm active:scale-95"
+                                                title="Consultar las 10 metas oficiales de referencia"
+                                              >
+                                                <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                                                <span>10 Metas</span>
+                                              </button>
+                                            )}
+
                                             {/* Botón de Guía Visual Interactiva de Respiración si corresponde */}
                                             {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
                                               <button
@@ -1698,6 +1732,18 @@ export default function App() {
 
                                   {/* Acciones rápidas según tipo */}
                                   <div className="shrink-0 flex items-center gap-1.5">
+                                    {/* Botón directo de 10 Metas para tareas de Brian Tracy */}
+                                    {(habit.title.toLowerCase().includes('brian tracy') || habit.title.toLowerCase().includes('10 meta') || habit.title.toLowerCase().includes('fórmula 3p')) && (
+                                      <button
+                                        onClick={() => setShowGoalsModal(true)}
+                                        className="bg-amber-950/80 hover:bg-amber-900 border border-amber-700/60 text-amber-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm active:scale-95"
+                                        title="Consultar las 10 metas oficiales de referencia"
+                                      >
+                                        <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                                        <span>10 Metas</span>
+                                      </button>
+                                    )}
+
                                     {/* Botón de Guía Visual Interactiva de Respiración si corresponde */}
                                     {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
                                       <button
@@ -2287,9 +2333,19 @@ export default function App() {
                 </h2>
                 <p className="text-xs text-slate-400">Explora o previsualiza plantillas antes de activarlas</p>
               </div>
-              <span className="text-[10px] font-mono bg-indigo-950 text-indigo-300 border border-indigo-800/60 px-2 py-0.5 rounded-full">
-                {programs.length} disponibles
-              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setActiveTab('inject')}
+                  className="text-[10px] font-mono bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2 py-1 rounded-xl flex items-center gap-1 transition"
+                  title="Inyector de Programas JSON"
+                >
+                  <Zap className="w-3 h-3 text-emerald-400" />
+                  <span>API JSON</span>
+                </button>
+                <span className="text-[10px] font-mono bg-indigo-950 text-indigo-300 border border-indigo-800/60 px-2 py-1 rounded-xl">
+                  {programs.length}
+                </span>
+              </div>
             </div>
 
             {/* === MEJORA: Búsqueda en Catálogo === */}
@@ -2538,57 +2594,47 @@ export default function App() {
 
       </main>
 
-      {/* Bottom Navigation Bar Fija para Móviles (Estilo App Nativa) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-2 py-2 safe-bottom">
-        <div className="max-w-md mx-auto flex items-center justify-around">
+      {/* Bottom Navigation Bar Limpia y Ordenada (4 Secciones Esenciales) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-3 py-2 safe-bottom shadow-2xl">
+        <div className="max-w-md mx-auto grid grid-cols-4 gap-1">
           <button 
             onClick={() => { setActiveTab('today'); setSelectedPlanName(null); }}
-            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
-              activeTab === 'today' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            className={`flex flex-col items-center gap-1 py-1.5 px-2 rounded-xl transition active:scale-95 ${
+              activeTab === 'today' ? 'bg-indigo-950/60 text-indigo-400 font-bold border border-indigo-800/50' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Dumbbell className="w-5 h-5" />
-            <span className="text-[10px]">Mis Planes</span>
+            <Dumbbell className="w-4 h-4" />
+            <span className="text-[10px] tracking-tight">Hoy</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('calendar')}
-            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
-              activeTab === 'calendar' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            className={`flex flex-col items-center gap-1 py-1.5 px-2 rounded-xl transition active:scale-95 ${
+              activeTab === 'calendar' ? 'bg-indigo-950/60 text-indigo-400 font-bold border border-indigo-800/50' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Calendar className="w-5 h-5" />
-            <span className="text-[10px]">SLA</span>
+            <Calendar className="w-4 h-4" />
+            <span className="text-[10px] tracking-tight">Racha & SLA</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('vision')}
-            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
-              activeTab === 'vision' ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            className={`flex flex-col items-center gap-1 py-1.5 px-2 rounded-xl transition active:scale-95 ${
+              activeTab === 'vision' ? 'bg-amber-950/60 text-amber-400 font-bold border border-amber-800/50' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Compass className="w-5 h-5" />
-            <span className="text-[10px]">Vision Board</span>
+            <Compass className="w-4 h-4" />
+            <span className="text-[10px] tracking-tight">Vision Board</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('programs')}
-            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
-              activeTab === 'programs' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            className={`flex flex-col items-center gap-1 py-1.5 px-2 rounded-xl transition active:scale-95 ${
+              activeTab === 'programs' || activeTab === 'inject' ? 'bg-indigo-950/60 text-indigo-400 font-bold border border-indigo-800/50' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Layers className="w-5 h-5" />
-            <span className="text-[10px]">Catálogo</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('inject')}
-            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
-              activeTab === 'inject' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Zap className="w-5 h-5" />
-            <span className="text-[10px]">API</span>
+            <Layers className="w-4 h-4" />
+            <span className="text-[10px] tracking-tight">Catálogo</span>
           </button>
         </div>
       </nav>
@@ -2732,14 +2778,23 @@ export default function App() {
 
             <div>
               <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-800/50">
-                Pregunta de Control Diaria
+                Pregunta de Control Diaria • Brian Tracy
               </span>
               <h3 className="text-sm font-bold text-white mt-2">
                 {cleanTitle(confirmingHabit.title)}
               </h3>
-              <p className="text-xs text-slate-300 mt-3 p-3 bg-slate-950 rounded-2xl border border-slate-800 font-medium leading-relaxed">
-                "¿Hiciste hoy la acción prioritaria para mover tu meta más importante?"
+              <p className="text-xs text-slate-300 mt-2 p-2.5 bg-slate-950 rounded-xl border border-slate-800 font-medium leading-relaxed">
+                "¿Escribiste hoy tus 10 metas a mano en tu cuaderno, de memoria y en Fórmula 3P?"
               </p>
+
+              {/* Botón para ver las 10 metas directamente en la pregunta */}
+              <button
+                onClick={() => setShowGoalsModal(true)}
+                className="mt-2.5 w-full bg-amber-950/60 hover:bg-amber-950 border border-amber-800/60 text-amber-300 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                <span>Ver Mis 10 Metas de Referencia</span>
+              </button>
             </div>
 
             <div className="flex items-center gap-2 pt-1">
@@ -3433,6 +3488,14 @@ export default function App() {
                       Tapa la hoja del día anterior. Deja que tu mente filtre las metas verdaderamente prioritarias. Si un día se olvida, el ciclo se reinicia a 0.
                     </p>
                   </div>
+
+                  <button
+                    onClick={() => setShowGoalsModal(true)}
+                    className="w-full bg-amber-950/60 hover:bg-amber-950 border border-amber-700/60 text-amber-300 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-2 transition"
+                  >
+                    <BookOpen className="w-4 h-4 text-amber-400" />
+                    <span>Ver Mis 10 Metas Oficiales de Referencia</span>
+                  </button>
                 </div>
               )}
 
@@ -3805,6 +3868,24 @@ export default function App() {
                 onChange={(e) => setHabitFormData({ ...habitFormData, sla_target_percent: Number(e.target.value) })}
                 className="w-full accent-indigo-500"
               />
+            </div>
+
+            {/* Configuración de Reinicio Estricto (ej. Reto 21 Días) */}
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={habitFormData.reset_on_miss}
+                  onChange={(e) => setHabitFormData({ ...habitFormData, reset_on_miss: e.target.checked })}
+                  className="mt-0.5 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 accent-indigo-600"
+                />
+                <div>
+                  <span className="text-xs font-bold text-white block">Reinicio estricto si se falla 1 día</span>
+                  <span className="text-[10px] text-slate-400 leading-tight block mt-0.5">
+                    Ideal para retos como Brian Tracy (21 días). Si no se completa en un día programado, el progreso vuelve a 0.
+                  </span>
+                </div>
+              </label>
             </div>
 
             {/* Botones de Guardar / Cancelar */}
