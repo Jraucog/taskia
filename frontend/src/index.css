@@ -80,10 +80,12 @@ html, body {
 
 /* ========================================================= */
 /* PALETAS DE TEMA DINÁMICO COMPLETAS Y ULTRA COMPATIBLES    */
+/* Sistema de Design Tokens con Variables CSS y Fallbacks    */
 /* ========================================================= */
 
 /* 1. TEMA OSCURO ÉLITE (SLATE) - Default */
 html[data-theme="dark"],
+html:not([data-theme]),
 html[data-theme="dark"] body {
   background-color: #020617 !important;
   color: #f8fafc !important;
@@ -91,22 +93,12 @@ html[data-theme="dark"] body {
 }
 
 /* 2. TEMA CLARO REAL (LUZ DIURNA MINIMALISTA) */
+/* Cero elementos oscuros residuales: fondos limpios, bordes suaves y textos oscuros legibles */
 html[data-theme="light"],
 html[data-theme="light"] body {
   background-color: #f8fafc !important;
   color: #0f172a !important;
   color-scheme: light;
-}
-html[data-theme="light"] .bg-slate-950,
-html[data-theme="light"] .bg-slate-950\/95,
-html[data-theme="light"] .bg-slate-950\/90,
-html[data-theme="light"] .bg-slate-950\/80,
-html[data-theme="light"] .bg-slate-950\/70,
-html[data-theme="light"] .bg-slate-950\/60,
-html[data-theme="light"] .bg-slate-950\/40,
-html[data-theme="light"] .bg-slate-950\/30 {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
 }
 html[data-theme="light"] header,
 html[data-theme="light"] nav,
@@ -119,13 +111,82 @@ html[data-theme="light"] .bg-slate-900\/50,
 html[data-theme="light"] .bg-slate-900\/40 {
   background-color: #ffffff !important;
   color: #0f172a !important;
+  border-color: #e2e8f0 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+html[data-theme="light"] .bg-slate-950,
+html[data-theme="light"] .bg-slate-950\/95,
+html[data-theme="light"] .bg-slate-950\/90,
+html[data-theme="light"] .bg-slate-950\/80,
+html[data-theme="light"] .bg-slate-950\/70,
+html[data-theme="light"] .bg-slate-950\/60,
+html[data-theme="light"] .bg-slate-950\/40,
+html[data-theme="light"] .bg-slate-950\/30 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+html[data-theme="light"] .bg-slate-800,
+html[data-theme="light"] .bg-slate-800\/80,
+html[data-theme="light"] .bg-slate-800\/60,
+html[data-theme="light"] .bg-slate-800\/40 {
+  background-color: #e2e8f0 !important;
+  color: #1e293b !important;
+  border-color: #cbd5e1 !important;
+}
+html[data-theme="light"] .hover\:bg-slate-800:hover,
+html[data-theme="light"] .hover\:bg-slate-700:hover {
+  background-color: #cbd5e1 !important;
+}
+html[data-theme="light"] .bg-indigo-950,
+html[data-theme="light"] .bg-indigo-950\/90,
+html[data-theme="light"] .bg-indigo-950\/80,
+html[data-theme="light"] .bg-indigo-950\/60,
+html[data-theme="light"] .bg-indigo-950\/40,
+html[data-theme="light"] .bg-indigo-950\/30 {
+  background-color: #e0e7ff !important;
+  color: #3730a3 !important;
+  border-color: #c7d2fe !important;
+}
+html[data-theme="light"] .bg-amber-950,
+html[data-theme="light"] .bg-amber-950\/90,
+html[data-theme="light"] .bg-amber-950\/80,
+html[data-theme="light"] .bg-amber-950\/60,
+html[data-theme="light"] .bg-amber-950\/40,
+html[data-theme="light"] .bg-amber-950\/30 {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+html[data-theme="light"] .bg-emerald-950,
+html[data-theme="light"] .bg-emerald-950\/90,
+html[data-theme="light"] .bg-emerald-950\/80,
+html[data-theme="light"] .bg-emerald-950\/60,
+html[data-theme="light"] .bg-emerald-950\/40,
+html[data-theme="light"] .bg-emerald-950\/30 {
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+  border-color: #bbf7d0 !important;
+}
+html[data-theme="light"] .bg-red-950,
+html[data-theme="light"] .bg-red-950\/80,
+html[data-theme="light"] .bg-red-950\/70,
+html[data-theme="light"] .bg-red-950\/60 {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #fecaca !important;
 }
 html[data-theme="light"] .border-slate-800,
 html[data-theme="light"] .border-slate-800\/90,
 html[data-theme="light"] .border-slate-800\/80,
 html[data-theme="light"] .border-slate-800\/60,
-html[data-theme="light"] .border-slate-800\/50 {
+html[data-theme="light"] .border-slate-800\/50,
+html[data-theme="light"] .border-slate-700,
+html[data-theme="light"] .border-indigo-900,
+html[data-theme="light"] .border-amber-800,
+html[data-theme="light"] .border-amber-800\/50,
+html[data-theme="light"] .border-emerald-900\/60,
+html[data-theme="light"] .border-emerald-900\/30 {
   border-color: #cbd5e1 !important;
 }
 html[data-theme="light"] .text-white {
@@ -142,6 +203,29 @@ html[data-theme="light"] .text-slate-400 {
 html[data-theme="light"] .text-slate-500 {
   color: #64748b !important;
 }
+html[data-theme="light"] .text-indigo-400,
+html[data-theme="light"] .text-indigo-300 {
+  color: #4338ca !important;
+}
+html[data-theme="light"] .text-amber-400,
+html[data-theme="light"] .text-amber-300 {
+  color: #b45309 !important;
+}
+html[data-theme="light"] .text-emerald-400,
+html[data-theme="light"] .text-emerald-300 {
+  color: #047857 !important;
+}
+html[data-theme="light"] input,
+html[data-theme="light"] textarea,
+html[data-theme="light"] select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: #94a3b8 !important;
+}
 
 /* 3. TEMA CYBERPUNK NEÓN */
 html[data-theme="cyberpunk"],
@@ -156,6 +240,7 @@ html[data-theme="cyberpunk"] nav {
   border-color: #701a75 !important;
 }
 html[data-theme="cyberpunk"] .bg-slate-900,
+html[data-theme="cyberpunk"] .bg-slate-900\/95,
 html[data-theme="cyberpunk"] .bg-slate-900\/90,
 html[data-theme="cyberpunk"] .bg-slate-900\/80,
 html[data-theme="cyberpunk"] .bg-slate-900\/60 {
@@ -163,14 +248,32 @@ html[data-theme="cyberpunk"] .bg-slate-900\/60 {
   border-color: #4a044e !important;
 }
 html[data-theme="cyberpunk"] .bg-slate-950,
+html[data-theme="cyberpunk"] .bg-slate-950\/95,
+html[data-theme="cyberpunk"] .bg-slate-950\/90,
 html[data-theme="cyberpunk"] .bg-slate-950\/80,
 html[data-theme="cyberpunk"] .bg-slate-950\/60 {
   background-color: #0d0417 !important;
   border-color: #3b0764 !important;
 }
-html[data-theme="cyberpunk"] .border-slate-800,
-html[data-theme="cyberpunk"] .border-slate-800\/80 {
+html[data-theme="cyberpunk"] .bg-slate-800,
+html[data-theme="cyberpunk"] .bg-slate-800\/80 {
+  background-color: #2b0f47 !important;
   border-color: #581c87 !important;
+}
+html[data-theme="cyberpunk"] .border-slate-800,
+html[data-theme="cyberpunk"] .border-slate-800\/80,
+html[data-theme="cyberpunk"] .border-slate-700 {
+  border-color: #581c87 !important;
+}
+html[data-theme="cyberpunk"] .text-indigo-400,
+html[data-theme="cyberpunk"] .text-indigo-300 {
+  color: #e879f9 !important;
+}
+html[data-theme="cyberpunk"] .bg-indigo-600 {
+  background-color: #c026d3 !important;
+}
+html[data-theme="cyberpunk"] .bg-indigo-600:hover {
+  background-color: #d946ef !important;
 }
 
 /* 4. TEMA BIO-HACKING ESMERALDA */
@@ -186,6 +289,7 @@ html[data-theme="emerald"] nav {
   border-color: #065f46 !important;
 }
 html[data-theme="emerald"] .bg-slate-900,
+html[data-theme="emerald"] .bg-slate-900\/95,
 html[data-theme="emerald"] .bg-slate-900\/90,
 html[data-theme="emerald"] .bg-slate-900\/80,
 html[data-theme="emerald"] .bg-slate-900\/60 {
@@ -193,14 +297,32 @@ html[data-theme="emerald"] .bg-slate-900\/60 {
   border-color: #047857 !important;
 }
 html[data-theme="emerald"] .bg-slate-950,
+html[data-theme="emerald"] .bg-slate-950\/95,
+html[data-theme="emerald"] .bg-slate-950\/90,
 html[data-theme="emerald"] .bg-slate-950\/80,
 html[data-theme="emerald"] .bg-slate-950\/60 {
   background-color: #01140e !important;
   border-color: #064e3b !important;
 }
+html[data-theme="emerald"] .bg-slate-800,
+html[data-theme="emerald"] .bg-slate-800\/80 {
+  background-color: #064e3b !important;
+  border-color: #047857 !important;
+}
 html[data-theme="emerald"] .border-slate-800,
-html[data-theme="emerald"] .border-slate-800\/80 {
+html[data-theme="emerald"] .border-slate-800\/80,
+html[data-theme="emerald"] .border-slate-700 {
   border-color: #065f46 !important;
+}
+html[data-theme="emerald"] .text-indigo-400,
+html[data-theme="emerald"] .text-indigo-300 {
+  color: #34d399 !important;
+}
+html[data-theme="emerald"] .bg-indigo-600 {
+  background-color: #059669 !important;
+}
+html[data-theme="emerald"] .bg-indigo-600:hover {
+  background-color: #10b981 !important;
 }
 
 /* 5. TEMA DRÁCULA & OBSIDIANA */
@@ -216,6 +338,7 @@ html[data-theme="dracula"] nav {
   border-color: #5b21b6 !important;
 }
 html[data-theme="dracula"] .bg-slate-900,
+html[data-theme="dracula"] .bg-slate-900\/95,
 html[data-theme="dracula"] .bg-slate-900\/90,
 html[data-theme="dracula"] .bg-slate-900\/80,
 html[data-theme="dracula"] .bg-slate-900\/60 {
@@ -223,18 +346,35 @@ html[data-theme="dracula"] .bg-slate-900\/60 {
   border-color: #4c1d95 !important;
 }
 html[data-theme="dracula"] .bg-slate-950,
+html[data-theme="dracula"] .bg-slate-950\/95,
+html[data-theme="dracula"] .bg-slate-950\/90,
 html[data-theme="dracula"] .bg-slate-950\/80,
 html[data-theme="dracula"] .bg-slate-950\/60 {
   background-color: #0d0a1a !important;
   border-color: #3b0764 !important;
 }
+html[data-theme="dracula"] .bg-slate-800,
+html[data-theme="dracula"] .bg-slate-800\/80 {
+  background-color: #321f52 !important;
+  border-color: #6d28d9 !important;
+}
 html[data-theme="dracula"] .border-slate-800,
-html[data-theme="dracula"] .border-slate-800\/80 {
+html[data-theme="dracula"] .border-slate-800\/80,
+html[data-theme="dracula"] .border-slate-700 {
   border-color: #581c87 !important;
 }
+html[data-theme="dracula"] .text-indigo-400,
+html[data-theme="dracula"] .text-indigo-300 {
+  color: #a78bfa !important;
+}
+html[data-theme="dracula"] .bg-indigo-600 {
+  background-color: #7c3aed !important;
+}
+html[data-theme="dracula"] .bg-indigo-600:hover {
+  background-color: #8b5cf6 !important;
+}
 
-/* 6. TEMA SAIYAN BLUE MIGATTE NO GOKUI (ULTRA INSTINTO) */
-/* Azul cósmico divino, blanco plateado estelar y aura resplandeciente */
+/* 6. TEMA SAIYAN BLUE MIGATTE NO GOKUI (ULTRA INSTINTO - MODO OSCURO) */
 html[data-theme="saiyan"],
 html[data-theme="saiyan"] body {
   background-color: #020914 !important;
@@ -249,6 +389,7 @@ html[data-theme="saiyan"] nav {
   box-shadow: 0 0 20px rgba(14, 165, 233, 0.2) !important;
 }
 html[data-theme="saiyan"] .bg-slate-900,
+html[data-theme="saiyan"] .bg-slate-900\/95,
 html[data-theme="saiyan"] .bg-slate-900\/90,
 html[data-theme="saiyan"] .bg-slate-900\/80,
 html[data-theme="saiyan"] .bg-slate-900\/60 {
@@ -257,16 +398,25 @@ html[data-theme="saiyan"] .bg-slate-900\/60 {
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.1) !important;
 }
 html[data-theme="saiyan"] .bg-slate-950,
+html[data-theme="saiyan"] .bg-slate-950\/95,
+html[data-theme="saiyan"] .bg-slate-950\/90,
 html[data-theme="saiyan"] .bg-slate-950\/80,
 html[data-theme="saiyan"] .bg-slate-950\/60 {
   background-color: #031024 !important;
   border-color: #0c4a6e !important;
 }
-html[data-theme="saiyan"] .border-slate-800,
-html[data-theme="saiyan"] .border-slate-800\/80 {
+html[data-theme="saiyan"] .bg-slate-800,
+html[data-theme="saiyan"] .bg-slate-800\/80 {
+  background-color: #0a2952 !important;
   border-color: #0284c7 !important;
 }
-html[data-theme="saiyan"] .text-indigo-400 {
+html[data-theme="saiyan"] .border-slate-800,
+html[data-theme="saiyan"] .border-slate-800\/80,
+html[data-theme="saiyan"] .border-slate-700 {
+  border-color: #0284c7 !important;
+}
+html[data-theme="saiyan"] .text-indigo-400,
+html[data-theme="saiyan"] .text-indigo-300 {
   color: #38bdf8 !important;
 }
 html[data-theme="saiyan"] .bg-indigo-600 {
@@ -281,7 +431,7 @@ html[data-theme="saiyan"] .text-amber-400 {
 }
 
 /* 7. TEMA SAIYAN BLUE CELESTIAL (MODO CLARO) */
-/* Cero oscuridad: blanco hielo resplandeciente, azul cian divino (#0284c7), contrastes puros */
+/* Cero oscuridad: blanco nieve, aura cian celeste (#0284c7), contrastes nítidos */
 html[data-theme="saiyan-light"],
 html[data-theme="saiyan-light"] body {
   background-color: #f0f9ff !important;
@@ -308,6 +458,8 @@ html[data-theme="saiyan-light"] .bg-slate-900\/40 {
   box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
 }
 html[data-theme="saiyan-light"] .bg-slate-950,
+html[data-theme="saiyan-light"] .bg-slate-950\/95,
+html[data-theme="saiyan-light"] .bg-slate-950\/90,
 html[data-theme="saiyan-light"] .bg-slate-950\/80,
 html[data-theme="saiyan-light"] .bg-slate-950\/70,
 html[data-theme="saiyan-light"] .bg-slate-950\/60,
@@ -317,10 +469,57 @@ html[data-theme="saiyan-light"] .bg-slate-950\/30 {
   border-color: #bae6fd !important;
   color: #0c4a6e !important;
 }
+html[data-theme="saiyan-light"] .bg-slate-800,
+html[data-theme="saiyan-light"] .bg-slate-800\/80,
+html[data-theme="saiyan-light"] .bg-slate-800\/60 {
+  background-color: #bae6fd !important;
+  color: #0369a1 !important;
+  border-color: #7dd3fc !important;
+}
+html[data-theme="saiyan-light"] .hover\:bg-slate-800:hover,
+html[data-theme="saiyan-light"] .hover\:bg-slate-700:hover {
+  background-color: #7dd3fc !important;
+  color: #0369a1 !important;
+}
+html[data-theme="saiyan-light"] .bg-indigo-950,
+html[data-theme="saiyan-light"] .bg-indigo-950\/90,
+html[data-theme="saiyan-light"] .bg-indigo-950\/80,
+html[data-theme="saiyan-light"] .bg-indigo-950\/60,
+html[data-theme="saiyan-light"] .bg-indigo-950\/40,
+html[data-theme="saiyan-light"] .bg-indigo-950\/30 {
+  background-color: #e0f2fe !important;
+  color: #0284c7 !important;
+  border-color: #bae6fd !important;
+}
+html[data-theme="saiyan-light"] .bg-amber-950,
+html[data-theme="saiyan-light"] .bg-amber-950\/90,
+html[data-theme="saiyan-light"] .bg-amber-950\/80,
+html[data-theme="saiyan-light"] .bg-amber-950\/60,
+html[data-theme="saiyan-light"] .bg-amber-950\/40,
+html[data-theme="saiyan-light"] .bg-amber-950\/30 {
+  background-color: #fef3c7 !important;
+  color: #b45309 !important;
+  border-color: #fde68a !important;
+}
+html[data-theme="saiyan-light"] .bg-emerald-950,
+html[data-theme="saiyan-light"] .bg-emerald-950\/90,
+html[data-theme="saiyan-light"] .bg-emerald-950\/80,
+html[data-theme="saiyan-light"] .bg-emerald-950\/60,
+html[data-theme="saiyan-light"] .bg-emerald-950\/40,
+html[data-theme="saiyan-light"] .bg-emerald-950\/30 {
+  background-color: #dcfce7 !important;
+  color: #15803d !important;
+  border-color: #bbf7d0 !important;
+}
 html[data-theme="saiyan-light"] .border-slate-800,
 html[data-theme="saiyan-light"] .border-slate-800\/90,
 html[data-theme="saiyan-light"] .border-slate-800\/80,
-html[data-theme="saiyan-light"] .border-slate-800\/60 {
+html[data-theme="saiyan-light"] .border-slate-800\/60,
+html[data-theme="saiyan-light"] .border-slate-700,
+html[data-theme="saiyan-light"] .border-indigo-900,
+html[data-theme="saiyan-light"] .border-amber-800,
+html[data-theme="saiyan-light"] .border-emerald-900\/60,
+html[data-theme="saiyan-light"] .border-emerald-900\/30 {
   border-color: #7dd3fc !important;
 }
 html[data-theme="saiyan-light"] .text-white {
@@ -335,7 +534,11 @@ html[data-theme="saiyan-light"] .text-slate-400 {
   color: #0284c7 !important;
 }
 html[data-theme="saiyan-light"] .text-slate-500 {
-  color: #38bdf8 !important;
+  color: #0ea5e9 !important;
+}
+html[data-theme="saiyan-light"] .text-indigo-400,
+html[data-theme="saiyan-light"] .text-indigo-300 {
+  color: #0284c7 !important;
 }
 html[data-theme="saiyan-light"] .bg-indigo-600 {
   background-color: #0284c7 !important;
@@ -344,7 +547,16 @@ html[data-theme="saiyan-light"] .bg-indigo-600 {
 html[data-theme="saiyan-light"] .bg-indigo-600:hover {
   background-color: #0369a1 !important;
 }
-html[data-theme="saiyan-light"] .text-indigo-400 {
-  color: #0284c7 !important;
+html[data-theme="saiyan-light"] input,
+html[data-theme="saiyan-light"] textarea,
+html[data-theme="saiyan-light"] select {
+  background-color: #ffffff !important;
+  color: #0c4a6e !important;
+  border-color: #bae6fd !important;
 }
+html[data-theme="saiyan-light"] input::placeholder,
+html[data-theme="saiyan-light"] textarea::placeholder {
+  color: #7dd3fc !important;
+}
+
 
