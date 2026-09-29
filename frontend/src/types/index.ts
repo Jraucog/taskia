@@ -119,3 +119,11 @@ export interface VisionCard {
   progress: number;
   color: string;
 }
+
+export interface BrianTracyGoal {
+  id: number;
+  cat: string;
+  text: string;
+  date: string;
+}
+
