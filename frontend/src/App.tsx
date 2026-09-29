@@ -7,106 +7,31 @@ import {
   Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
   ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle,
   Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks,
-  Wind, Pause, Target, Info, Clock, Volume2, VolumeX,
-  Search, Award, TrendingUp, Trophy,
-  Palette
+  Wind, Target, Info, Clock,
+  Search, Award, TrendingUp, Trophy
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import type {
+  Habit,
+  CoachProfile,
+  Program,
+  MetricsSummary,
+  ProgramGroup,
+  AppTheme,
+  ThemeOption,
+  Badge,
+  VisionCard
+} from './types';
+import { UserProfileModal } from './components/UserProfileModal';
+import { ProgramPreviewModal } from './components/ProgramPreviewModal';
+import { BreathingModal } from './components/BreathingModal';
+import { VisionCardEditModal } from './components/VisionCardEditModal';
+import { GrillMeModal } from './components/GrillMeModal';
+import { HabitFormModal } from './components/HabitFormModal';
 
 const API_BASE = window.location.hostname.includes('trycloudflare.com')
   ? 'https://asset-discretion-expenditure-willow.trycloudflare.com/api'
   : `http://${window.location.hostname}:8000/api`;
-
-interface DayHistory {
-  date: string;
-  day_name: string;
-  completed: boolean;
-  value: number;
-}
-
-
-interface Habit {
-  id: number;
-  title: string;
-  description: string;
-  habit_type: 'boolean' | 'numeric';
-  target_value: number;
-  unit: string;
-  estimated_minutes?: number;
-  frequency_type?: string;
-  days_of_week?: string;
-  day_offset?: number | null;
-  sla_target_percent: number;
-  reset_on_miss?: boolean;
-  enrollment?: number | null;
-  today_log?: {
-    completed: boolean;
-    value: number;
-    is_in_sla: boolean;
-  } | null;
-  compliance_summary: {
-    completed_last_7_days: number;
-    rate_percent: number;
-    meets_sla: boolean;
-    history?: DayHistory[];
-  };
-}
-
-interface ProgramItem {
-  id: number;
-  title: string;
-  day_offset: number;
-  habit_type: string;
-  target_value: number;
-  unit: string;
-  description: string;
-  estimated_minutes?: number;
-}
-
-interface CoachProfile {
-  id: number;
-  name: string;
-  slug: string;
-  tone: string;
-  tone_display: string;
-  avatar_emoji: string;
-  bio: string;
-  morning_quote: string;
-  midday_reminder: string;
-  evening_warning: string;
-}
-
-interface Program {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  duration_days: number;
-  items: ProgramItem[];
-}
-
-interface MetricsSummary {
-  current_user?: {
-    id: number;
-    username: string;
-    email: string;
-  };
-  total_active_habits: number;
-  scheduled_today_count?: number;
-  completed_today: number;
-  today_compliance_percent: number;
-  habits_meeting_sla_percent: number;
-  healthy_habits: number;
-  at_risk_habits: number;
-}
-
-interface ProgramGroup {
-  name: string;
-  habits: Habit[];
-  completedCount: number;
-  totalCount: number;
-  progressPercent: number;
-}
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -194,7 +119,6 @@ export default function App() {
   const [breathingSoundEnabled, setBreathingSoundEnabled] = useState(true);
 
   // === SISTEMA DE TEMAS Y PERSONALIZACIÓN VISUAL ===
-  type AppTheme = 'dark' | 'light' | 'cyberpunk' | 'emerald' | 'dracula' | 'saiyan' | 'saiyan-light';
   const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
     return (localStorage.getItem('taskia_theme') as AppTheme) || 'dark';
   });
@@ -228,7 +152,7 @@ export default function App() {
     }
   }, [currentTheme]);
 
-  const themesCatalog: { id: AppTheme; name: string; desc: string; icon: string; bgBadge: string; border: string; preview: string }[] = [
+  const themesCatalog: ThemeOption[] = [
     {
       id: 'dark',
       name: 'Oscuro Élite (Slate)',
@@ -305,14 +229,6 @@ export default function App() {
   });
 
   // === MEJORA: Badges / Logros ===
-  interface Badge {
-    id: string;
-    icon: string;
-    title: string;
-    description: string;
-    earned: boolean;
-    earnedDate?: string;
-  }
   const defaultBadgesList: Badge[] = [
     { id: 'first_check', icon: '✅', title: 'Primer Paso', description: 'Completar tu primer hábito del día', earned: false },
     { id: 'perfect_day', icon: '🌟', title: 'Día Perfecto', description: 'Completar el 100% de los hábitos programados', earned: false },
@@ -380,17 +296,6 @@ export default function App() {
   const [previewProgram, setPreviewProgram] = useState<Program | null>(null);
 
   // Vision Board y Grill-Me Interactivo
-  interface VisionCard {
-    id: string;
-    category: string;
-    emoji: string;
-    title: string;
-    why: string;
-    deadline: string;
-    progress: number;
-    color: string;
-  }
-
   const defaultVisionCards: VisionCard[] = [
     {
       id: "v-1",
@@ -2997,801 +2902,85 @@ export default function App() {
 
 
       {/* Modal de Configuración y Perfil de Usuario Organizado en Pestañas */}
-      {showCoachModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full max-h-[88vh] flex flex-col shadow-2xl">
-            {/* Cabecera del Modal */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-base font-bold text-indigo-400">
-                  {currentUser?.username ? currentUser.username.slice(0, 1).toUpperCase() : 'U'}
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                    <span>{currentUser?.username ? `@${currentUser.username}` : 'Mi Perfil'}</span>
-                    <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-mono font-bold px-1.5 py-0.5 rounded-md">
-                      Activo
-                    </span>
-                  </h3>
-                  <p className="text-[11px] text-slate-400 truncate max-w-[200px]">
-                    {currentUser?.email || 'Cuenta personal segura'}
-                  </p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setShowCoachModal(false)} 
-                className="text-slate-400 hover:text-white p-1 rounded-lg text-sm transition"
-              >
-                ✕
-              </button>
-            </div>
+      <UserProfileModal
+        isOpen={showCoachModal}
+        onClose={() => setShowCoachModal(false)}
+        currentUser={currentUser}
+        authToken={authToken}
+        metrics={metrics}
+        badges={badges}
+        coaches={coaches}
+        selectedCoachId={selectedCoachId}
+        currentTheme={currentTheme}
+        themesCatalog={themesCatalog}
+        profileActiveTab={profileActiveTab}
+        setProfileActiveTab={setProfileActiveTab}
+        setCurrentTheme={setCurrentTheme}
+        handleSelectCoach={handleSelectCoach}
+        sendCoachNotification={sendCoachNotification}
+        requestNotificationPermission={requestNotificationPermission}
+        notificationPermission={notificationPermission}
+        handleLogout={handleLogout}
+      />
 
-            {/* Pestañas de Navegación del Perfil */}
-            <div className="grid grid-cols-4 gap-1 p-1 bg-slate-950 rounded-2xl border border-slate-800 my-3">
-              <button
-                type="button"
-                onClick={() => setProfileActiveTab('profile')}
-                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
-                  profileActiveTab === 'profile'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <User className="w-3.5 h-3.5" />
-                <span className="truncate">Cuenta</span>
-              </button>
+      {/* Modal: Previsualizar Plantilla del Catálogo */}
+      <ProgramPreviewModal
+        program={previewProgram}
+        onClose={() => setPreviewProgram(null)}
+        onEnroll={handleEnroll}
+      />
 
-              <button
-                type="button"
-                onClick={() => setProfileActiveTab('theme')}
-                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
-                  profileActiveTab === 'theme'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <Palette className="w-3.5 h-3.5" />
-                <span className="truncate">Temas</span>
-              </button>
+      {/* Modal: Asistente Grill Me Wizard */}
+      <GrillMeModal
+        isOpen={showGrillMeModal}
+        step={grillStep}
+        answers={grillAnswers}
+        onStepChange={setGrillStep}
+        onAnswersChange={(ans) => setGrillAnswers({ commitment: grillAnswers.commitment, ...ans })}
+        onClose={() => setShowGrillMeModal(false)}
+        onSave={(newCard) => {
+          setVisionCards(prev => [newCard, ...prev]);
+          setShowGrillMeModal(false);
+          setActiveTab('vision');
+          triggerCelebration();
+          setIslandMessage('🎯 Nueva meta 3P añadida a tu Vision Board');
+          setIslandExpanded(true);
+          setTimeout(() => setIslandExpanded(false), 4000);
+        }}
+      />
 
-              <button
-                type="button"
-                onClick={() => setProfileActiveTab('coach')}
-                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
-                  profileActiveTab === 'coach'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <Flame className="w-3.5 h-3.5" />
-                <span className="truncate">Coach</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setProfileActiveTab('badges')}
-                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
-                  profileActiveTab === 'badges'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <Award className="w-3.5 h-3.5" />
-                <span className="truncate">Logros</span>
-              </button>
-            </div>
-
-            {/* Contenido Dinámico de la Pestaña Seleccionada */}
-            <div className="overflow-y-auto space-y-3 pr-1 flex-1">
-              
-              {/* PESTAÑA 1: CUENTA Y RESUMEN DE DISCIPLINA */}
-              {profileActiveTab === 'profile' && (
-                <div className="space-y-3">
-                  {/* Tarjetas de Estadísticas Rápidas */}
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-slate-950/80 p-2.5 rounded-2xl border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block uppercase font-bold">Hábitos Sanos</span>
-                      <span className="text-base font-black text-emerald-400 font-mono flex items-center justify-center gap-1 mt-0.5">
-                        <Flame className="w-4 h-4 fill-emerald-400" />
-                        <span>{metrics?.healthy_habits || 0}</span>
-                      </span>
-                    </div>
-
-                    <div className="bg-slate-950/80 p-2.5 rounded-2xl border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block uppercase font-bold">Cumplimiento Hoy</span>
-                      <span className="text-base font-black text-indigo-400 font-mono block mt-0.5">
-                        {metrics?.today_compliance_percent || 0}%
-                      </span>
-                    </div>
-
-                    <div className="bg-slate-950/80 p-2.5 rounded-2xl border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block uppercase font-bold">Logros</span>
-                      <span className="text-base font-black text-amber-400 font-mono block mt-0.5">
-                        {earnedBadgesCount}/{badges.length}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Datos de Usuario y Seguridad */}
-                  <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
-                    <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                      <span className="text-slate-400">Usuario:</span>
-                      <span className="font-bold text-white font-mono">@{currentUser?.username || 'demo'}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                      <span className="text-slate-400">Correo:</span>
-                      <span className="text-slate-200">{currentUser?.email || 'No registrado'}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                      <span className="text-slate-400">Entrenador Actual:</span>
-                      <span className="text-indigo-300 font-semibold flex items-center gap-1">
-                        <span>{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
-                        <span>{coaches.find(c => c.id === selectedCoachId)?.name || 'Taskia'}</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-1">
-                      <span className="text-slate-400">Notificaciones PWA:</span>
-                      <span className={`font-bold ${notificationPermission === 'granted' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                        {notificationPermission === 'granted' ? 'Habilitadas' : 'Pendientes'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Acciones de Cuenta */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (notificationPermission !== 'granted') {
-                          requestNotificationPermission();
-                        } else {
-                          const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
-                          sendCoachNotification(
-                            `🔔 Notificaciones Operativas`,
-                            `¡Tu canal de disciplina con ${activeCoach?.name || 'Taskia'} está 100% activo!`,
-                            activeCoach?.avatar_emoji || '🔥'
-                          );
-                        }
-                      }}
-                      className={`flex-1 border text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 ${
-                        notificationPermission === 'granted'
-                          ? 'bg-emerald-950/50 hover:bg-emerald-950 border-emerald-800/60 text-emerald-300'
-                          : 'bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-md shadow-indigo-600/20'
-                      }`}
-                    >
-                      <Bell className="w-3.5 h-3.5" />
-                      <span>{notificationPermission === 'granted' ? 'Probar Push' : 'Activar Notificaciones'}</span>
-                    </button>
-
-                    {authToken && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowCoachModal(false);
-                          handleLogout();
-                        }}
-                        className="flex-1 bg-red-950/60 hover:bg-red-950 border border-red-800/70 text-red-300 font-semibold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
-                      >
-                        <LogOut className="w-3.5 h-3.5 text-red-400" />
-                        <span>Cerrar Sesión</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* PESTAÑA 2: SELECCIÓN DE TEMA VISUAL */}
-              {profileActiveTab === 'theme' && (
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between px-1">
-                    <span className="text-xs font-bold text-white">Paleta Activa</span>
-                    <span className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800/50">
-                      {themesCatalog.find(t => t.id === currentTheme)?.name}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    {themesCatalog.map((t) => {
-                      const isSelected = currentTheme === t.id;
-                      return (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => setCurrentTheme(t.id)}
-                          className={`p-2.5 rounded-2xl border text-left transition flex flex-col justify-between ${
-                            isSelected
-                              ? 'bg-indigo-950/90 border-indigo-500 shadow-md ring-1 ring-indigo-500'
-                              : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between w-full mb-1">
-                            <span className="text-xl">{t.icon}</span>
-                            {isSelected && <Check className="w-4 h-4 text-indigo-400" />}
-                          </div>
-                          <span className="text-xs font-bold text-white leading-tight block truncate w-full">
-                            {t.name}
-                          </span>
-                          <span className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
-                            {t.desc}
-                          </span>
-                          <div className={`w-full h-1.5 rounded-full mt-2 bg-gradient-to-r ${t.preview}`} />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* PESTAÑA 3: SELECCIÓN DE COACH & TONO MOTIVACIONAL */}
-              {profileActiveTab === 'coach' && (
-                <div className="space-y-3">
-                  <p className="text-[11px] text-slate-400 px-1">
-                    Elige el estilo de voz para tus alertas matutinas y recordatorios diarios:
-                  </p>
-                  {coaches.map(coach => {
-                    const isSelected = coach.id === selectedCoachId;
-                    return (
-                      <div 
-                        key={coach.id}
-                        onClick={() => handleSelectCoach(coach.id)}
-                        className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer ${
-                          isSelected 
-                            ? 'bg-indigo-950/60 border-indigo-500 shadow-md shadow-indigo-500/10' 
-                            : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl">{coach.avatar_emoji}</span>
-                            <div>
-                              <h4 className="text-xs font-bold text-white">{coach.name}</h4>
-                              <span className="text-[10px] text-indigo-400 font-medium">{coach.tone_display}</span>
-                            </div>
-                          </div>
-                          {isSelected && (
-                            <span className="text-[10px] bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <Check className="w-3 h-3" /> Activo
-                            </span>
-                          )}
-                        </div>
-
-                        <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">{coach.bio}</p>
-
-                        <div className="mt-2 pt-2 border-t border-slate-800/80 text-[11px] text-amber-300/90 italic">
-                          "{coach.morning_quote}"
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
-                      sendCoachNotification(
-                        `⚡ ${activeCoach?.name || 'Coach'}: Alerta de Prueba`,
-                        activeCoach?.midday_reminder || '¡Esta es una notificación de disciplina! Tu meta no se negocia.',
-                        activeCoach?.avatar_emoji || '🔥'
-                      );
-                    }}
-                    className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 mt-1"
-                  >
-                    <Bell className="w-3.5 h-3.5 text-amber-400" /> Probar Voz y Sonido del Coach
-                  </button>
-                </div>
-              )}
-
-              {/* PESTAÑA 4: COLECCIÓN DE LOGROS / BADGES */}
-              {profileActiveTab === 'badges' && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between px-1">
-                    <span className="text-xs font-bold text-white">Insignias Desbloqueadas</span>
-                    <span className="text-[11px] font-mono font-bold text-amber-400">
-                      {earnedBadgesCount} de {badges.length}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    {badges.map(badge => (
-                      <div 
-                        key={badge.id}
-                        className={`p-2.5 rounded-2xl text-center border transition flex flex-col items-center justify-between ${
-                          badge.earned 
-                            ? 'bg-amber-950/40 border-amber-800/40 shadow-sm' 
-                            : 'bg-slate-950/60 border-slate-800/60 opacity-40 grayscale'
-                        }`}
-                        title={`${badge.title}: ${badge.description}${badge.earnedDate ? ` (${badge.earnedDate})` : ''}`}
-                      >
-                        <span className="text-2xl block">{badge.icon}</span>
-                        <span className="text-[10px] font-bold text-slate-200 block mt-1 leading-tight line-clamp-1">
-                          {badge.title}
-                        </span>
-                        <span className="text-[9px] text-slate-400 line-clamp-2 mt-0.5 leading-snug">
-                          {badge.description}
-                        </span>
-                        {badge.earnedDate && (
-                          <span className="text-[8px] font-mono text-amber-400/90 mt-1 block">
-                            {badge.earnedDate}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-            {/* Pie del Modal */}
-            <div className="pt-3 border-t border-slate-800 mt-2 flex items-center justify-end">
-              <button 
-                type="button"
-                onClick={() => setShowCoachModal(false)}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================== */}
-      {/* MODAL 1: PREVISUALIZAR PLANTILLA DEL CATÁLOGO */}
-      {/* ======================================================== */}
-      {previewProgram && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
-                  <Eye className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800/50">
-                    {previewProgram.category}
-                  </span>
-                  <h3 className="text-sm font-bold text-white mt-1">{previewProgram.title}</h3>
-                </div>
-              </div>
-              <button onClick={() => setPreviewProgram(null)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
-            </div>
-
-            <p className="text-xs text-slate-300 my-3 leading-relaxed bg-slate-950/60 p-3 rounded-2xl border border-slate-800/60">
-              {previewProgram.description}
-            </p>
-
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-2 px-1">
-              <span className="font-semibold text-white">Estructura de la Plantilla ({previewProgram.items?.length || 0} ítems):</span>
-              <span className="font-mono text-amber-400 font-bold">{previewProgram.duration_days} días</span>
-            </div>
-
-            <div className="overflow-y-auto space-y-2 pr-1 flex-1 mb-3">
-              {previewProgram.items?.map((it, idx) => (
-                <div key={it.id || idx} className="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-slate-800 text-slate-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                      {idx + 1}
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-white">{it.title}</p>
-                      {it.description && <p className="text-[11px] text-slate-400 mt-0.5">{it.description}</p>}
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-[11px] font-mono text-indigo-300 bg-indigo-950/80 border border-indigo-900 px-2 py-0.5 rounded-lg">
-                      {it.target_value} {it.unit}
-                    </span>
-                    {it.estimated_minutes ? (
-                      <span className="text-[10px] font-mono text-slate-400 flex items-center gap-0.5">
-                        <Clock className="w-2.5 h-2.5 text-indigo-400" />
-                        <span>~{it.estimated_minutes}m</span>
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
-              <button 
-                onClick={() => setPreviewProgram(null)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
-              >
-                Cerrar Previa
-              </button>
-              <button 
-                onClick={() => {
-                  const pId = previewProgram.id;
-                  setPreviewProgram(null);
-                  handleEnroll(pId);
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5"
-              >
-                <Play className="w-3.5 h-3.5 fill-white" /> Cargar & Usar Esta Plantilla
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================== */}
-      {/* MODAL 2: ASISTENTE "GRILL ME" PARA DESCUBRIR METAS 3P */}
-      {/* ======================================================== */}
-      {showGrillMeModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-4">
-            
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-800/50">
-                    Grill Me Wizard • Paso {grillStep + 1} de 4
-                  </span>
-                  <h3 className="text-sm font-bold text-white mt-1">Descubridor de Metas 3P</h3>
-                </div>
-              </div>
-              <button onClick={() => setShowGrillMeModal(false)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
-            </div>
-
-            {/* Paso 0: Área de Vida */}
-            {grillStep === 0 && (
-              <div className="space-y-3">
-                <p className="text-xs text-slate-300 font-medium">
-                  1. ¿En qué dimensión de tu vida sientes que necesitas dar un salto cuántico y no puedes postergar más?
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { label: "Cuerpo & Salud", icon: "🦵" },
-                    { label: "Software & Negocio", icon: "💻" },
-                    { label: "Música & Arte", icon: "🎵" },
-                    { label: "Hogar & Entorno", icon: "🏡" }
-                  ].map(item => (
-                    <button
-                      key={item.label}
-                      onClick={() => setGrillAnswers({ ...grillAnswers, area: item.label })}
-                      className={`p-3 rounded-2xl border text-left flex items-center gap-2 transition ${
-                        grillAnswers.area === item.label
-                          ? 'bg-amber-950/60 border-amber-500 text-white font-bold'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
-                      }`}
-                    >
-                      <span className="text-xl">{item.icon}</span>
-                      <span className="text-xs">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Paso 1: Redacción en Fórmula 3P */}
-            {grillStep === 1 && (
-              <div className="space-y-3">
-                <div>
-                  <p className="text-xs text-white font-medium mb-1">
-                    2. Define tu meta en Fórmula 3P (Presente, Positivo, Personal):
-                  </p>
-                  <p className="text-[11px] text-amber-300/80 italic">
-                    Ejemplo: "Yo peso 85 kg con tono muscular atlético..." o "Yo consigo mis primeros 10 clientes de pago..."
-                  </p>
-                </div>
-                <textarea
-                  value={grillAnswers.goal}
-                  onChange={(e) => setGrillAnswers({ ...grillAnswers, goal: e.target.value })}
-                  placeholder="Yo ..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80 h-24"
-                />
-              </div>
-            )}
-
-            {/* Paso 2: Por qué es innegociable */}
-            {grillStep === 2 && (
-              <div className="space-y-3">
-                <div>
-                  <p className="text-xs text-white font-medium mb-1">
-                    3. ¿Por qué esto es vital para ti? ¿Qué pasa si NO lo cumples?
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    La motivación superficial se agota en 3 días. El motivo profundo te hace levantar a las 6 AM sin dudar.
-                  </p>
-                </div>
-                <textarea
-                  value={grillAnswers.why}
-                  onChange={(e) => setGrillAnswers({ ...grillAnswers, why: e.target.value })}
-                  placeholder="Porque quiero libertad total, jugar al fútbol sin dolor y estar orgulloso de mi disciplina..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80 h-24"
-                />
-              </div>
-            )}
-
-            {/* Paso 3: Fecha Límite */}
-            {grillStep === 3 && (
-              <div className="space-y-3">
-                <div>
-                  <p className="text-xs text-white font-medium mb-1">
-                    4. ¿Cuál es tu fecha límite de entrega exacta?
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    Una meta sin fecha es solo un deseo que el cerebro pospone indefinidamente.
-                  </p>
-                </div>
-                <input
-                  type="text"
-                  value={grillAnswers.deadline}
-                  onChange={(e) => setGrillAnswers({ ...grillAnswers, deadline: e.target.value })}
-                  placeholder="ej. 31/05/2027 o 15/12/2026"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80"
-                />
-              </div>
-            )}
-
-            {/* Botones de navegación del Wizard */}
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
-              {grillStep > 0 && (
-                <button
-                  onClick={() => setGrillStep(prev => prev - 1)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
-                >
-                  Atrás
-                </button>
-              )}
-
-              {grillStep < 3 ? (
-                <button
-                  onClick={() => setGrillStep(prev => prev + 1)}
-                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition"
-                >
-                  Siguiente Pregunta →
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    const newCard: VisionCard = {
-                      id: `v-${Date.now()}`,
-                      category: grillAnswers.area,
-                      emoji: grillAnswers.area.includes('Salud') ? '🦵' : grillAnswers.area.includes('Software') ? '💻' : grillAnswers.area.includes('Música') ? '🎵' : '🏡',
-                      title: grillAnswers.goal.trim() || 'Meta sin título',
-                      why: grillAnswers.why.trim() || 'Compromiso de disciplina y excelencia',
-                      deadline: grillAnswers.deadline.trim() || 'Pronto',
-                      progress: 10,
-                      color: grillAnswers.area.includes('Salud') 
-                        ? 'from-emerald-950/60 to-emerald-900/20 border-emerald-500/40' 
-                        : grillAnswers.area.includes('Software')
-                        ? 'from-indigo-950/60 to-indigo-900/20 border-indigo-500/40'
-                        : 'from-amber-950/60 to-amber-900/20 border-amber-500/40'
-                    };
-                    setVisionCards(prev => [newCard, ...prev]);
-                    setShowGrillMeModal(false);
-                    setActiveTab('vision');
-                    triggerCelebration();
-                    setIslandMessage(`🎯 Nueva meta 3P añadida a tu Vision Board`);
-                    setIslandExpanded(true);
-                    setTimeout(() => setIslandExpanded(false), 4000);
-                  }}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-slate-950 font-black text-xs shadow-lg transition"
-                >
-                  ✨ Guardar en mi Vision Board
-                </button>
-              )}
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================== */}
-      {/* MODAL 3: EDITAR TARJETA DEL VISION BOARD */}
-      {/* ======================================================== */}
-      {editingCard && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-3.5">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Edit3 className="w-4 h-4 text-indigo-400" /> Editar Meta del Vision Board
-              </h3>
-              <button onClick={() => setEditingCard(null)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
-            </div>
-
-            <div>
-              <label className="text-[11px] text-slate-400 block mb-1">Título de la Meta (Fórmula 3P)</label>
-              <textarea
-                value={editingCard.title}
-                onChange={(e) => setEditingCard({ ...editingCard, title: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none h-16"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] text-slate-400 block mb-1">El "Por Qué" (Motivo Profundo)</label>
-              <textarea
-                value={editingCard.why}
-                onChange={(e) => setEditingCard({ ...editingCard, why: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none h-16"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Fecha Límite</label>
-                <input
-                  type="text"
-                  value={editingCard.deadline}
-                  onChange={(e) => setEditingCard({ ...editingCard, deadline: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Progreso ({editingCard.progress}%)</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value={editingCard.progress}
-                  onChange={(e) => setEditingCard({ ...editingCard, progress: Number(e.target.value) })}
-                  className="w-full accent-indigo-500 mt-2"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-slate-800 mt-1">
-              <button
-                onClick={() => {
-                  setVisionCards(prev => prev.filter(c => c.id !== editingCard.id));
-                  setEditingCard(null);
-                }}
-                className="text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1 p-2"
-              >
-                <Trash2 className="w-3.5 h-3.5" /> Eliminar
-              </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setEditingCard(null)}
-                  className="px-3 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => {
-                    setVisionCards(prev => prev.map(c => c.id === editingCard.id ? editingCard : c));
-                    setEditingCard(null);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition"
-                >
-                  Guardar Cambios
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
-      {/* ======================================================== */}
-      {/* MODAL / ENTRENADOR VISUAL INTERACTIVO DE RESPIRACIÓN    */}
-      {/* ======================================================== */}
-      {activeBreathingHabit && (
-        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
-            {/* Botones de control superior (Audio y Cerrar) */}
-            <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
-              <button
-                onClick={() => setBreathingSoundEnabled(!breathingSoundEnabled)}
-                className={`p-2 rounded-full transition ${
-                  breathingSoundEnabled ? 'text-indigo-400 bg-indigo-950/80' : 'text-slate-500 hover:text-slate-300'
-                }`}
-                title={breathingSoundEnabled ? "Silenciar campana de respiración" : "Activar campana tibetana suave"}
-              >
-                {breathingSoundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              </button>
-
-              <button
-                onClick={() => {
-                  setActiveBreathingHabit(null);
-                  setBreathingIsRunning(false);
-                }}
-                className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800/60 transition"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Cabecera y Técnica */}
-            <div className="mb-4">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400 bg-indigo-950/80 px-2.5 py-1 rounded-full border border-indigo-800/50">
-                Guía Visual Rítmica
-              </span>
-              <h3 className="text-base font-bold text-white mt-2">
-                {cleanTitle(activeBreathingHabit.title)}
-              </h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-xs">
-                Sigue la expansión de la esfera. Inhala profundamente por la nariz y exhala por la boca.
-              </p>
-            </div>
-
-            {/* Orbe Visual de Respiración con Animaciones de Escala y Resplandor */}
-            <div className="my-6 relative flex items-center justify-center w-56 h-56">
-              {/* Círculo de onda expansiva */}
-              <div 
-                className={`absolute inset-0 rounded-full border-2 border-indigo-500/30 transition-all duration-1000 ${
-                  breathingIsRunning && breathingPhase === 'inhale' ? 'animate-breathe-ripple scale-125 opacity-70' : 'scale-90 opacity-20'
-                }`} 
-              />
-              
-              {/* Esfera central interactiva */}
-              <div 
-                className={`w-36 h-36 rounded-full flex flex-col items-center justify-center shadow-2xl transition-all duration-1000 ease-in-out ${
-                  breathingPhase === 'inhale'
-                    ? 'scale-125 bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-800 shadow-indigo-500/50'
-                    : breathingPhase === 'hold'
-                    ? 'scale-125 bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 shadow-amber-500/50'
-                    : breathingPhase === 'exhale'
-                    ? 'scale-90 bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 shadow-teal-500/40'
-                    : 'scale-85 bg-gradient-to-br from-slate-800 via-slate-850 to-slate-900 shadow-slate-700/30 border border-slate-700'
-                }`}
-              >
-                <span className="text-xs font-black uppercase tracking-wider text-white">
-                  {breathingPhase === 'inhale' && 'Inhala'}
-                  {breathingPhase === 'hold' && 'Retén'}
-                  {breathingPhase === 'exhale' && 'Exhala'}
-                  {breathingPhase === 'hold_empty' && 'Pausa'}
-                </span>
-                <span className="text-3xl font-black font-mono text-white mt-0.5">
-                  {breathingSecondsLeft}s
-                </span>
-              </div>
-            </div>
-
-            {/* Progreso de la sesión y rondas */}
-            <div className="w-full bg-slate-950 p-3 rounded-2xl border border-slate-800/80 mb-5 flex items-center justify-between text-xs">
-              <div className="text-left">
-                <span className="text-[10px] text-slate-400 block uppercase font-bold">Tiempo restante</span>
-                <span className="font-mono font-bold text-white">
-                  {Math.floor(breathingTotalSeconds / 60)}:{(breathingTotalSeconds % 60).toString().padStart(2, '0')}
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] text-slate-400 block uppercase font-bold">Ciclos completados</span>
-                <span className="font-mono font-bold text-indigo-400">
-                  {breathingCompletedRounds} rondas
-                </span>
-              </div>
-            </div>
-
-            {/* Controles del Entrenador */}
-            <div className="flex items-center gap-2 w-full">
-              <button
-                onClick={() => setBreathingIsRunning(!breathingIsRunning)}
-                className={`flex-1 font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md active:scale-95 ${
-                  breathingIsRunning
-                    ? 'bg-amber-600 hover:bg-amber-500 text-white'
-                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
-                }`}
-              >
-                {breathingIsRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white" />}
-                <span>{breathingIsRunning ? 'Pausar Guía' : 'Reanudar Guía'}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  toggleHabit(activeBreathingHabit);
-                  setActiveBreathingHabit(null);
-                  setBreathingIsRunning(false);
-                }}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition flex items-center gap-1.5 shadow-md active:scale-95 shrink-0"
-                title="Marcar como cumplido ahora"
-              >
-                <Check className="w-4 h-4" />
-                <span>Listo</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal: Editar Tarjeta del Vision Board */}
+      <VisionCardEditModal
+        card={editingCard}
+        onClose={() => setEditingCard(null)}
+        onUpdate={(updated) => setEditingCard(updated)}
+        onDelete={(cardId) => {
+          setVisionCards(prev => prev.filter(c => c.id !== cardId));
+          setEditingCard(null);
+        }}
+      />
+      {/* Modal: Entrenador Visual Interactivo de Respiración */}
+      <BreathingModal
+        habit={activeBreathingHabit}
+        isRunning={breathingIsRunning}
+        phase={breathingPhase}
+        secondsLeft={breathingSecondsLeft}
+        totalSeconds={breathingTotalSeconds}
+        completedRounds={breathingCompletedRounds}
+        soundEnabled={breathingSoundEnabled}
+        onToggleSound={() => setBreathingSoundEnabled(!breathingSoundEnabled)}
+        onToggleRunning={() => setBreathingIsRunning(!breathingIsRunning)}
+        onComplete={() => {
+          if (activeBreathingHabit) toggleHabit(activeBreathingHabit);
+          setActiveBreathingHabit(null);
+          setBreathingIsRunning(false);
+        }}
+        onClose={() => {
+          setActiveBreathingHabit(null);
+          setBreathingIsRunning(false);
+        }}
+        cleanTitle={cleanTitle}
+      />
       {/* ======================================================== */}
       {/* MODAL / GUÍA DE EJECUCIÓN DETALLADA DE CUALQUIER TAREA  */}
       {/* ======================================================== */}
@@ -4053,294 +3242,20 @@ export default function App() {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL 4: CREAR / EDITAR MANUALMENTE HÁBITOS Y PLANES   */}
-      {/* ======================================================== */}
-      {showHabitModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-3.5 max-h-[92vh] overflow-y-auto">
-            {/* Header del Modal */}
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                {editingHabit ? <Edit3 className="w-4 h-4 text-indigo-400" /> : <Plus className="w-4 h-4 text-emerald-400" />}
-                {editingHabit ? 'Editar Hábito / Tarea' : 'Crear Nuevo Hábito o Plan'}
-              </h3>
-              <button 
-                onClick={() => {
-                  setShowHabitModal(false);
-                  setEditingHabit(null);
-                }} 
-                className="text-slate-400 hover:text-white text-sm p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Selector de Plan o Categoría */}
-            <div>
-              <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                Carpeta / Plan al que Pertenece
-              </label>
-              <input
-                type="text"
-                list="existing-plans"
-                value={habitFormData.planName}
-                onChange={(e) => setHabitFormData({ ...habitFormData, planName: e.target.value })}
-                placeholder="ej. Rehabilitación Aquiles, Brian Tracy 10 Metas, Hábitos Personales..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-              />
-              <datalist id="existing-plans">
-                {planSummaryList.map(p => (
-                  <option key={p.name} value={p.name} />
-                ))}
-              </datalist>
-              <p className="text-[10px] text-slate-500 mt-1">
-                Escribe un nombre nuevo para crear un nuevo plan, o selecciona uno existente para agruparlo.
-              </p>
-            </div>
-
-            {/* Título de la Tarea / Hábito */}
-            <div>
-              <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                Nombre de la Tarea / Hábito *
-              </label>
-              <input
-                type="text"
-                value={habitFormData.title}
-                onChange={(e) => setHabitFormData({ ...habitFormData, title: e.target.value })}
-                placeholder="ej. Sentadillas con TRX, Escribir 10 Metas 3P, Respiración 4-7-8..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            {/* Descripción / Indicaciones Técnicas */}
-            <div>
-              <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                Descripción o Indicación Técnica
-              </label>
-              <textarea
-                value={habitFormData.description}
-                onChange={(e) => setHabitFormData({ ...habitFormData, description: e.target.value })}
-                placeholder="ej. 3 series de 10 reps controladas en 3-4 segundos de bajada..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 h-20"
-              />
-            </div>
-
-            {/* Tiempo Estimado (minutos) */}
-            <div>
-              <label className="text-[11px] font-bold text-slate-300 block mb-1 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-indigo-400" />
-                <span>Tiempo Estimado para Completarla (minutos) *</span>
-              </label>
-              <div className="flex items-center gap-2 flex-wrap">
-                <input
-                  type="number"
-                  min="1"
-                  max="180"
-                  value={habitFormData.estimated_minutes}
-                  onChange={(e) => setHabitFormData({ ...habitFormData, estimated_minutes: Number(e.target.value) || 5 })}
-                  placeholder="ej. 5, 10, 25..."
-                  className="w-28 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-                />
-                <div className="flex items-center gap-1 flex-wrap">
-                  {[3, 5, 10, 15, 25, 45].map(min => (
-                    <button
-                      key={min}
-                      type="button"
-                      onClick={() => setHabitFormData({ ...habitFormData, estimated_minutes: min })}
-                      className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition ${
-                        habitFormData.estimated_minutes === min
-                          ? 'bg-indigo-600 border-indigo-500 text-white'
-                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      {min}m
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Tipo de Registro (Booleano vs Numérico) */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                  Tipo de Registro
-                </label>
-                <select
-                  value={habitFormData.habit_type}
-                  onChange={(e) => setHabitFormData({ ...habitFormData, habit_type: e.target.value as any })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
-                >
-                  <option value="boolean">Check Sí / No</option>
-                  <option value="numeric">Numérico / Series / Minutos</option>
-                </select>
-              </div>
-
-              {habitFormData.habit_type === 'numeric' ? (
-                <div className="grid grid-cols-2 gap-1.5">
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Meta</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={habitFormData.target_value}
-                      onChange={(e) => setHabitFormData({ ...habitFormData, target_value: Number(e.target.value) || 1 })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Unidad</label>
-                    <input
-                      type="text"
-                      value={habitFormData.unit}
-                      onChange={(e) => setHabitFormData({ ...habitFormData, unit: e.target.value })}
-                      placeholder="series, min, vasos"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">Frecuencia</label>
-                  <select
-                    value={habitFormData.frequency_type}
-                    onChange={(e) => setHabitFormData({ ...habitFormData, frequency_type: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none"
-                  >
-                    <option value="daily">Todos los días</option>
-                    <option value="specific_days">Días específicos</option>
-                  </select>
-                </div>
-              )}
-            </div>
-
-            {/* Selector de Días de la Semana */}
-            <div>
-              <label className="text-[11px] font-bold text-slate-300 block mb-1.5">
-                Días Programados de la Semana
-              </label>
-              <div className="flex items-center justify-between gap-1">
-                {[
-                  { id: '0', label: 'L' },
-                  { id: '1', label: 'M' },
-                  { id: '2', label: 'X' },
-                  { id: '3', label: 'J' },
-                  { id: '4', label: 'V' },
-                  { id: '5', label: 'S' },
-                  { id: '6', label: 'D' }
-                ].map(day => {
-                  const currentDays = habitFormData.days_of_week ? habitFormData.days_of_week.split(',').map(s => s.trim()) : [];
-                  const isSelected = currentDays.includes(day.id);
-
-                  return (
-                    <button
-                      key={day.id}
-                      type="button"
-                      onClick={() => {
-                        let updated: string[];
-                        if (isSelected) {
-                          updated = currentDays.filter(d => d !== day.id);
-                        } else {
-                          updated = [...currentDays, day.id].sort();
-                        }
-                        setHabitFormData({
-                          ...habitFormData,
-                          days_of_week: updated.join(','),
-                          frequency_type: updated.length === 7 ? 'daily' : 'specific_days'
-                        });
-                      }}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition ${
-                        isSelected
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'bg-slate-950 border border-slate-800 text-slate-500 hover:text-slate-300'
-                      }`}
-                    >
-                      {day.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Target SLA Percent */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[11px] font-bold text-slate-300">
-                  Exigencia SLA de Cumplimiento ({habitFormData.sla_target_percent}%)
-                </label>
-                <span className="text-[10px] text-amber-400 font-mono">
-                  {habitFormData.sla_target_percent >= 85 ? '⭐ Alta Disciplina' : 'Balanceado'}
-                </span>
-              </div>
-              <input
-                type="range"
-                min="50"
-                max="100"
-                step="5"
-                value={habitFormData.sla_target_percent}
-                onChange={(e) => setHabitFormData({ ...habitFormData, sla_target_percent: Number(e.target.value) })}
-                className="w-full accent-indigo-500"
-              />
-            </div>
-
-            {/* Configuración de Reinicio Estricto (ej. Reto 21 Días) */}
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-              <label className="flex items-start gap-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={habitFormData.reset_on_miss}
-                  onChange={(e) => setHabitFormData({ ...habitFormData, reset_on_miss: e.target.checked })}
-                  className="mt-0.5 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 accent-indigo-600"
-                />
-                <div>
-                  <span className="text-xs font-bold text-white block">Reinicio estricto si se falla 1 día</span>
-                  <span className="text-[10px] text-slate-400 leading-tight block mt-0.5">
-                    Ideal para retos como Brian Tracy (21 días). Si no se completa en un día programado, el progreso vuelve a 0.
-                  </span>
-                </div>
-              </label>
-            </div>
-
-            {/* Botones de Guardar / Cancelar */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-800 mt-1">
-              {editingHabit ? (
-                <button
-                  type="button"
-                  onClick={() => handleDeleteHabit(editingHabit.id, editingHabit.title)}
-                  className="text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1 p-2"
-                >
-                  <Trash2 className="w-3.5 h-3.5" /> Eliminar
-                </button>
-              ) : (
-                <div />
-              )}
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowHabitModal(false);
-                    setEditingHabit(null);
-                  }}
-                  className="px-3 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveHabit}
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition active:scale-95 flex items-center gap-1.5"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  <span>{editingHabit ? 'Guardar Cambios' : 'Crear Tarea'}</span>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
+      {/* Modal: Crear / Editar Manualmente Hábitos y Planes */}
+      <HabitFormModal
+        isOpen={showHabitModal}
+        editingHabit={editingHabit}
+        formData={habitFormData}
+        planSummaryList={planSummaryList}
+        onFormDataChange={setHabitFormData}
+        onClose={() => {
+          setShowHabitModal(false);
+          setEditingHabit(null);
+        }}
+        onSave={handleSaveHabit}
+        onDelete={handleDeleteHabit}
+      />
     </div>
   );
 }
