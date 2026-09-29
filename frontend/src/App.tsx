@@ -7,7 +7,8 @@ import {
   Timer, Check, Plus, Minus, ChevronDown, ChevronRight,
   ArrowLeft, CheckSquare, Sparkles, BookOpen, HelpCircle,
   Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks,
-  Wind, Pause, Target, Info, Clock, Volume2, VolumeX
+  Wind, Pause, Target, Info, Clock, Volume2, VolumeX,
+  Search, Award, TrendingUp, Trophy
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -188,6 +189,39 @@ export default function App() {
   const [breathingCompletedRounds, setBreathingCompletedRounds] = useState(0);
   const [breathingSoundEnabled, setBreathingSoundEnabled] = useState(true);
 
+  // === MEJORA: Búsqueda rápida ===
+  const [searchQuery, setSearchQuery] = useState('');
+  const [catalogSearchQuery, setCatalogSearchQuery] = useState('');
+
+  // === MEJORA: Racha (Streak) ===
+  const [streakData, setStreakData] = useState<{ current: number; best: number }>(() => {
+    const saved = localStorage.getItem('taskia_streak');
+    return saved ? JSON.parse(saved) : { current: 0, best: 0 };
+  });
+
+  // === MEJORA: Badges / Logros ===
+  interface Badge {
+    id: string;
+    icon: string;
+    title: string;
+    description: string;
+    earned: boolean;
+    earnedDate?: string;
+  }
+  const [badges, setBadges] = useState<Badge[]>(() => {
+    const saved = localStorage.getItem('taskia_badges');
+    return saved ? JSON.parse(saved) : [
+      { id: 'first_check', icon: '✅', title: 'Primer Paso', description: 'Completar tu primer hábito', earned: false },
+      { id: 'perfect_day', icon: '🌟', title: 'Día Perfecto', description: 'Completar el 100% de un día', earned: false },
+      { id: 'week_streak', icon: '🔥', title: 'Semana de Fuego', description: '7 días consecutivos ≥80%', earned: false },
+      { id: 'zen_master', icon: '🧘', title: 'Maestro Zen', description: 'Completar 10 sesiones de respiración', earned: false },
+      { id: 'brian_tracy', icon: '📝', title: 'Discípulo Tracy', description: '21 días consecutivos escribiendo metas', earned: false },
+      { id: 'iron_will', icon: '💪', title: 'Voluntad de Hierro', description: 'Racha de 14 días ≥80%', earned: false },
+      { id: 'centurion', icon: '🏆', title: 'Centurión', description: 'Completar 100 tareas en total', earned: false },
+      { id: 'early_bird', icon: '🌅', title: 'Madrugador', description: 'Completar todo antes del mediodía', earned: false },
+    ];
+  });
+
   // Reproducir campana tibetana suave para guiar la respiración con ojos cerrados
   const playBreathingChime = (phase: 'inhale' | 'hold' | 'exhale' | 'hold_empty') => {
     if (!breathingSoundEnabled) return;
@@ -283,6 +317,65 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('taskia_vision_cards', JSON.stringify(visionCards));
   }, [visionCards]);
+
+  // Persist streak and badges
+  useEffect(() => {
+    localStorage.setItem('taskia_streak', JSON.stringify(streakData));
+  }, [streakData]);
+
+  useEffect(() => {
+    localStorage.setItem('taskia_badges', JSON.stringify(badges));
+  }, [badges]);
+
+  // Check and award badges when habits change
+  useEffect(() => {
+    if (!habits.length) return;
+    const completedToday = habits.filter(h => h.today_log?.completed).length;
+    const totalToday = habits.length;
+    const pctToday = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
+
+    const newBadges = [...badges];
+    let changed = false;
+    const today = new Date().toISOString().split('T')[0];
+
+    // First Check
+    if (!newBadges.find(b => b.id === 'first_check')?.earned && completedToday > 0) {
+      const b = newBadges.find(b => b.id === 'first_check');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // Perfect Day
+    if (!newBadges.find(b => b.id === 'perfect_day')?.earned && pctToday === 100 && totalToday > 0) {
+      const b = newBadges.find(b => b.id === 'perfect_day');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // Week Streak
+    if (!newBadges.find(b => b.id === 'week_streak')?.earned && streakData.current >= 7) {
+      const b = newBadges.find(b => b.id === 'week_streak');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // Iron Will (14 days)
+    if (!newBadges.find(b => b.id === 'iron_will')?.earned && streakData.current >= 14) {
+      const b = newBadges.find(b => b.id === 'iron_will');
+      if (b) { b.earned = true; b.earnedDate = today; changed = true; }
+    }
+
+    // Update streak
+    if (pctToday >= 80 && totalToday > 0) {
+      const lastStreakDate = localStorage.getItem('taskia_last_streak_date');
+      if (lastStreakDate !== today) {
+        localStorage.setItem('taskia_last_streak_date', today);
+        setStreakData(prev => {
+          const newCurrent = prev.current + 1;
+          return { current: newCurrent, best: Math.max(newCurrent, prev.best) };
+        });
+      }
+    }
+
+    if (changed) setBadges(newBadges);
+  }, [habits]);
 
   // Grill-Me Wizard State dentro de la App
   const [showGrillMeModal, setShowGrillMeModal] = useState(false);
@@ -434,7 +527,29 @@ export default function App() {
   useEffect(() => {
     if (restTimer === null || restTimer <= 0) return;
     const interval = setInterval(() => {
-      setRestTimer((prev) => (prev && prev > 1 ? prev - 1 : null));
+      setRestTimer((prev) => {
+        if (prev && prev > 1) return prev - 1;
+        // Timer completado: sonar campana
+        try {
+          const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+          if (AudioCtx) {
+            const ctx = new AudioCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.5);
+          }
+        } catch {}
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          try { navigator.vibrate([150, 50, 150]); } catch {}
+        }
+        return null;
+      });
     }, 1000);
     return () => clearInterval(interval);
   }, [restTimer]);
@@ -864,6 +979,16 @@ export default function App() {
   // Hábitos a mostrar cuando se entra dentro de un plan
   const selectedPlanHabits = selectedPlanName ? (planGroups[selectedPlanName] || []) : [];
 
+  // === MEJORA: Tiempo total estimado del día ===
+  const totalEstimatedMinutes = habits.reduce((sum, h) => sum + (h.estimated_minutes || 5), 0);
+  const completedEstimatedMinutes = habits
+    .filter(h => h.today_log?.completed)
+    .reduce((sum, h) => sum + (h.estimated_minutes || 5), 0);
+  const pendingEstimatedMinutes = totalEstimatedMinutes - completedEstimatedMinutes;
+
+  // Earned badges count
+  const earnedBadgesCount = badges.filter(b => b.earned).length;
+
   // PANTALLA DE INICIO DE SESIÓN OBLIGATORIA (Privacidad de Hábitos y Metas Personales)
   if (!authToken) {
     return (
@@ -992,14 +1117,35 @@ export default function App() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-[11px] font-mono text-slate-300 font-bold">
-              {habits.filter(h => h.today_log?.completed).length}/{habits.length}
-            </span>
-            {restTimer !== null && (
-              <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-400 bg-amber-950/50 px-1.5 py-0.5 rounded-full border border-amber-900/60">
-                <Timer className="w-2.5 h-2.5" />
-                <span>{restTimer}s</span>
+            {/* Circular progress mini */}
+            <div className="relative w-7 h-7">
+              <svg className="w-7 h-7 -rotate-90" viewBox="0 0 28 28">
+                <circle cx="14" cy="14" r="11" fill="none" stroke="rgb(30,41,59)" strokeWidth="2.5" />
+                <circle cx="14" cy="14" r="11" fill="none" stroke={
+                  habits.length > 0 && habits.filter(h => h.today_log?.completed).length === habits.length
+                    ? 'rgb(52,211,153)' : 'rgb(99,102,241)'
+                } strokeWidth="2.5" strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 11}`}
+                  strokeDashoffset={`${2 * Math.PI * 11 * (1 - (habits.length > 0 ? habits.filter(h => h.today_log?.completed).length / habits.length : 0))}`}
+                  className="transition-all duration-700 ease-out"
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white">
+                {habits.length > 0 ? Math.round((habits.filter(h => h.today_log?.completed).length / habits.length) * 100) : 0}
               </span>
+            </div>
+            {restTimer !== null && (
+              <div className="relative w-6 h-6 shrink-0">
+                <svg className="w-6 h-6 -rotate-90" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" fill="none" stroke="rgb(120,53,15)" strokeWidth="2" />
+                  <circle cx="12" cy="12" r="9" fill="none" stroke="rgb(251,191,36)" strokeWidth="2" strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 9}`}
+                    strokeDashoffset={`${2 * Math.PI * 9 * (1 - (restTimer / 60))}`}
+                    className="transition-all duration-1000 ease-linear"
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-[7px] font-black text-amber-300 font-mono">{restTimer}</span>
+              </div>
             )}
             <span className="text-[11px]">{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
           </div>
@@ -1154,7 +1300,7 @@ export default function App() {
                     </h2>
                     <p className="text-xs text-slate-400">
                       {todayViewMode === 'checklist' 
-                        ? `${habits.filter(h => !h.today_log?.completed).length} pendientes de ${habits.length} tareas totales`
+                        ? `${habits.filter(h => !h.today_log?.completed).length} pendientes · ~${pendingEstimatedMinutes} min restantes`
                         : 'Organizado por carpetas y disciplinas'}
                     </p>
                   </div>
@@ -1237,6 +1383,53 @@ export default function App() {
                         </button>
                       </div>
 
+                      {/* === MEJORA: Barra de Búsqueda Rápida === */}
+                      <div className="w-full">
+                        <div className="relative">
+                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Buscar tarea..."
+                            className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-8 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500/60 placeholder:text-slate-600 transition"
+                          />
+                          {searchQuery && (
+                            <button
+                              onClick={() => setSearchQuery('')}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs"
+                            >✕</button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* === MEJORA: Resumen de Tiempo Estimado === */}
+                      {habits.length > 0 && (
+                        <div className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl p-2 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <Clock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between text-[10px] mb-1">
+                                <span className="text-slate-400">Tiempo del día</span>
+                                <span className="font-mono font-bold text-slate-200">{completedEstimatedMinutes} / {totalEstimatedMinutes} min</span>
+                              </div>
+                              <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                                <div 
+                                  className="bg-gradient-to-r from-indigo-500 to-emerald-500 h-full rounded-full transition-all duration-500"
+                                  style={{ width: `${totalEstimatedMinutes > 0 ? Math.round((completedEstimatedMinutes / totalEstimatedMinutes) * 100) : 0}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          {streakData.current > 0 && (
+                            <div className="flex items-center gap-1 bg-amber-950/60 border border-amber-800/50 px-2 py-1 rounded-lg shrink-0">
+                              <Flame className="w-3 h-3 text-amber-400" />
+                              <span className="text-[10px] font-black text-amber-300 font-mono">{streakData.current}d</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between sm:justify-end gap-2">
                         {/* Toggle de Agrupar por Plan */}
                         <button
@@ -1263,6 +1456,10 @@ export default function App() {
                       <div className="space-y-4">
                         {planSummaryList.map(plan => {
                           const planFilteredHabits = plan.habits.filter(h => {
+                            if (searchQuery.trim()) {
+                              const q = searchQuery.toLowerCase();
+                              if (!h.title.toLowerCase().includes(q) && !h.description?.toLowerCase().includes(q)) return false;
+                            }
                             if (todayFilter === 'pending') return !h.today_log?.completed;
                             if (todayFilter === 'completed') return !!h.today_log?.completed;
                             return true;
@@ -1421,6 +1618,10 @@ export default function App() {
                       <div className="space-y-2.5">
                         {habits
                           .filter(h => {
+                            if (searchQuery.trim()) {
+                              const q = searchQuery.toLowerCase();
+                              if (!h.title.toLowerCase().includes(q) && !h.description?.toLowerCase().includes(q)) return false;
+                            }
                             if (todayFilter === 'pending') return !h.today_log?.completed;
                             if (todayFilter === 'completed') return !!h.today_log?.completed;
                             return true;
@@ -1556,10 +1757,26 @@ export default function App() {
                     )}
 
                     {habits.length > 0 && habits.filter(h => !h.today_log?.completed).length === 0 && todayFilter === 'pending' && (
-                      <div className="text-center py-8 bg-slate-900/60 border border-emerald-800/40 rounded-2xl p-4">
-                        <span className="text-2xl block mb-1">🎉</span>
-                        <h4 className="text-sm font-bold text-emerald-400">¡Todo completado por hoy!</h4>
-                        <p className="text-xs text-slate-400 mt-1">Has cumplido el 100% de tus objetivos del día. Disciplina pura.</p>
+                      <div className="text-center py-8 bg-gradient-to-b from-emerald-950/40 to-slate-900/60 border border-emerald-800/40 rounded-2xl p-5">
+                        <span className="text-3xl block mb-2">🎉</span>
+                        <h4 className="text-base font-black text-emerald-400">¡Día Perfecto!</h4>
+                        <p className="text-xs text-slate-300 mt-1.5">Has cumplido el 100% de tus objetivos. Disciplina pura.</p>
+                        <div className="flex items-center justify-center gap-3 mt-3 pt-3 border-t border-emerald-900/40">
+                          <div className="text-center">
+                            <span className="text-sm font-black text-emerald-300 font-mono block">{habits.length}</span>
+                            <span className="text-[9px] text-slate-400 uppercase font-bold">Tareas</span>
+                          </div>
+                          <div className="w-px h-6 bg-slate-800" />
+                          <div className="text-center">
+                            <span className="text-sm font-black text-amber-300 font-mono block">~{totalEstimatedMinutes}m</span>
+                            <span className="text-[9px] text-slate-400 uppercase font-bold">Invertidos</span>
+                          </div>
+                          <div className="w-px h-6 bg-slate-800" />
+                          <div className="text-center">
+                            <span className="text-sm font-black text-indigo-300 font-mono flex items-center gap-0.5 justify-center"><Flame className="w-3 h-3 text-amber-400" />{streakData.current}d</span>
+                            <span className="text-[9px] text-slate-400 uppercase font-bold">Racha</span>
+                          </div>
+                        </div>
                         <button
                           onClick={() => setTodayFilter('all')}
                           className="mt-3 text-xs text-slate-300 hover:text-white underline"
@@ -1911,7 +2128,26 @@ export default function App() {
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-indigo-400" /> Matriz Semanal de SLA
                 </h2>
-                <p className="text-xs text-slate-400">¿Para qué sirve? Mide tu nivel de acuerdo de servicio personal</p>
+                <p className="text-xs text-slate-400">Racha, cumplimiento y acuerdos de servicio personal</p>
+              </div>
+            </div>
+
+            {/* === MEJORA: Dashboard de Racha y Estadísticas === */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-gradient-to-br from-amber-950/60 to-slate-900 border border-amber-800/40 p-3 rounded-2xl text-center">
+                <Flame className="w-5 h-5 text-amber-400 mx-auto mb-1" />
+                <span className="text-xl font-black text-amber-300 font-mono block">{streakData.current}</span>
+                <span className="text-[10px] text-amber-400/80 uppercase font-bold">Racha Actual</span>
+              </div>
+              <div className="bg-gradient-to-br from-indigo-950/60 to-slate-900 border border-indigo-800/40 p-3 rounded-2xl text-center">
+                <Trophy className="w-5 h-5 text-indigo-400 mx-auto mb-1" />
+                <span className="text-xl font-black text-indigo-300 font-mono block">{streakData.best}</span>
+                <span className="text-[10px] text-indigo-400/80 uppercase font-bold">Mejor Racha</span>
+              </div>
+              <div className="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-800/40 p-3 rounded-2xl text-center">
+                <Award className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
+                <span className="text-xl font-black text-emerald-300 font-mono block">{earnedBadgesCount}/{badges.length}</span>
+                <span className="text-[10px] text-emerald-400/80 uppercase font-bold">Logros</span>
               </div>
             </div>
 
@@ -1943,6 +2179,39 @@ export default function App() {
                 </div>
               </div>
             )}
+
+            {/* === MEJORA: Heatmap mini estilo GitHub por hábito === */}
+            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-3">
+              <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5 mb-2">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Heatmap de Consistencia (últimos 7 días)</span>
+              </h4>
+              <div className="space-y-1.5">
+                {habits.slice(0, 8).map(habit => (
+                  <div key={`hm-${habit.id}`} className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-400 font-medium truncate w-24 sm:w-36 shrink-0">{cleanTitle(habit.title)}</span>
+                    <div className="flex items-center gap-0.5 flex-1">
+                      {habit.compliance_summary.history?.map((h, i) => (
+                        <div
+                          key={i}
+                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded-sm transition-all ${
+                            h.completed 
+                              ? 'bg-emerald-500/90 shadow-sm shadow-emerald-500/20' 
+                              : 'bg-slate-800/80'
+                          }`}
+                          title={`${h.date} (${h.day_name}): ${h.completed ? '✓' : '✗'}`}
+                        />
+                      ))}
+                    </div>
+                    <span className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${
+                      habit.compliance_summary.meets_sla ? 'text-emerald-400' : 'text-amber-400'
+                    }`}>
+                      {habit.compliance_summary.rate_percent}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* Tabla Colapsable de Cumplimiento */}
             <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 overflow-x-auto shadow-sm">
@@ -2015,6 +2284,21 @@ export default function App() {
               </span>
             </div>
 
+            {/* === MEJORA: Búsqueda en Catálogo === */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <input
+                type="text"
+                value={catalogSearchQuery}
+                onChange={(e) => setCatalogSearchQuery(e.target.value)}
+                placeholder="Buscar programa o plantilla..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-xs text-white focus:outline-none focus:border-indigo-500/60 placeholder:text-slate-600 transition"
+              />
+              {catalogSearchQuery && (
+                <button onClick={() => setCatalogSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs">✕</button>
+              )}
+            </div>
+
             {/* Barra de Filtros por Categoría */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
               {[
@@ -2051,7 +2335,14 @@ export default function App() {
 
             <div className="space-y-3">
               {programs
-                .filter(p => selectedCatalogCategory === 'all' || p.category.toLowerCase().includes(selectedCatalogCategory.toLowerCase()))
+                .filter(p => {
+                  const matchesCategory = selectedCatalogCategory === 'all' || p.category.toLowerCase().includes(selectedCatalogCategory.toLowerCase());
+                  const matchesSearch = !catalogSearchQuery.trim() || 
+                    p.title.toLowerCase().includes(catalogSearchQuery.toLowerCase()) || 
+                    p.description.toLowerCase().includes(catalogSearchQuery.toLowerCase()) ||
+                    p.category.toLowerCase().includes(catalogSearchQuery.toLowerCase());
+                  return matchesCategory && matchesSearch;
+                })
                 .map((program) => (
                 <div key={program.id} className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between hover:border-slate-700 transition">
                   <div>
@@ -2515,6 +2806,30 @@ export default function App() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* === MEJORA: Sección de Logros / Badges === */}
+            <div className="border-t border-slate-800 pt-3 mt-1">
+              <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5 mb-2">
+                <Award className="w-3.5 h-3.5 text-amber-400" />
+                <span>Mis Logros ({earnedBadgesCount}/{badges.length})</span>
+              </h4>
+              <div className="grid grid-cols-4 gap-1.5">
+                {badges.map(badge => (
+                  <div 
+                    key={badge.id}
+                    className={`p-2 rounded-xl text-center transition ${
+                      badge.earned 
+                        ? 'bg-amber-950/40 border border-amber-800/40' 
+                        : 'bg-slate-950/60 border border-slate-800/60 opacity-40 grayscale'
+                    }`}
+                    title={`${badge.title}: ${badge.description}${badge.earnedDate ? ` (${badge.earnedDate})` : ''}`}
+                  >
+                    <span className="text-lg block">{badge.icon}</span>
+                    <span className="text-[8px] font-bold text-slate-300 block mt-0.5 leading-tight truncate">{badge.title}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="flex items-center gap-2 mt-2">
