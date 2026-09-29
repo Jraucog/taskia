@@ -1271,11 +1271,21 @@ export default function App() {
           <div className="flex items-center gap-1.5">
             {/* Botón de Perfil de Usuario y Coach */}
             <button 
-              onClick={() => setShowCoachModal(true)}
+              onClick={() => {
+                if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+                  requestNotificationPermission();
+                }
+                setShowCoachModal(true);
+              }}
               className="flex items-center gap-1.5 p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl transition"
-              title="Perfil & Entrenador"
+              title="Perfil, Entrenador & Notificaciones"
             >
-              <User className="w-3.5 h-3.5 text-slate-400" />
+              <div className="relative">
+                <User className="w-3.5 h-3.5 text-slate-400" />
+                {notificationPermission !== 'granted' && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                )}
+              </div>
               <span className="text-[11px] font-medium text-slate-300 hidden sm:inline">
                 {currentUser?.username ? `@${currentUser.username}` : 'demo'}
               </span>
@@ -3066,11 +3076,26 @@ export default function App() {
                   <div className="flex items-center gap-2 pt-1">
                     <button
                       type="button"
-                      onClick={requestNotificationPermission}
-                      className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
+                      onClick={() => {
+                        if (notificationPermission !== 'granted') {
+                          requestNotificationPermission();
+                        } else {
+                          const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
+                          sendCoachNotification(
+                            `🔔 Notificaciones Operativas`,
+                            `¡Tu canal de disciplina con ${activeCoach?.name || 'Taskia'} está 100% activo!`,
+                            activeCoach?.avatar_emoji || '🔥'
+                          );
+                        }
+                      }}
+                      className={`flex-1 border text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 ${
+                        notificationPermission === 'granted'
+                          ? 'bg-emerald-950/50 hover:bg-emerald-950 border-emerald-800/60 text-emerald-300'
+                          : 'bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-md shadow-indigo-600/20'
+                      }`}
                     >
-                      <Bell className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{notificationPermission === 'granted' ? 'Notificaciones OK' : 'Activar Notifs'}</span>
+                      <Bell className="w-3.5 h-3.5" />
+                      <span>{notificationPermission === 'granted' ? 'Probar Push' : 'Activar Notificaciones'}</span>
                     </button>
 
                     {authToken && (
