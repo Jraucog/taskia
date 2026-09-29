@@ -194,7 +194,7 @@ export default function App() {
   const [breathingSoundEnabled, setBreathingSoundEnabled] = useState(true);
 
   // === SISTEMA DE TEMAS Y PERSONALIZACIÓN VISUAL ===
-  type AppTheme = 'dark' | 'light' | 'cyberpunk' | 'emerald' | 'dracula' | 'saiyan';
+  type AppTheme = 'dark' | 'light' | 'cyberpunk' | 'emerald' | 'dracula' | 'saiyan' | 'saiyan-light';
   const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
     return (localStorage.getItem('taskia_theme') as AppTheme) || 'dark';
   });
@@ -218,6 +218,9 @@ export default function App() {
     } else if (currentTheme === 'saiyan') {
       document.documentElement.style.backgroundColor = '#020914';
       document.body.style.backgroundColor = '#020914';
+    } else if (currentTheme === 'saiyan-light') {
+      document.documentElement.style.backgroundColor = '#f0f9ff';
+      document.body.style.backgroundColor = '#f0f9ff';
     } else {
       document.documentElement.style.backgroundColor = '#020617';
       document.body.style.backgroundColor = '#020617';
@@ -278,6 +281,15 @@ export default function App() {
       bgBadge: 'bg-sky-950 text-sky-300',
       border: 'border-sky-500',
       preview: 'from-sky-500 via-indigo-600 to-slate-950'
+    },
+    {
+      id: 'saiyan-light',
+      name: 'Saiyan Blue Divino (Modo Claro)',
+      desc: 'Versión luminosa celestial. Fondo blanco hielo (#f0f9ff), acentos celestes puros (#0284c7), destellos cian y plata brillante. Sin oscuridades, máxima claridad divina.',
+      icon: '✨',
+      bgBadge: 'bg-sky-100 text-sky-800',
+      border: 'border-sky-300',
+      preview: 'from-sky-100 via-sky-300 to-sky-500'
     },
   ];
 
@@ -1256,15 +1268,6 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-1.5">
-            {/* Botón de Selector de Tema Visual */}
-            <button
-              onClick={() => setShowThemeModal(true)}
-              className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl transition flex items-center gap-1"
-              title="Cambiar Tema Visual (Oscuro, Claro, Cyberpunk, etc.)"
-            >
-              <Palette className="w-3.5 h-3.5 text-indigo-400" />
-            </button>
-
             {/* Botón de Perfil de Usuario y Coach */}
             <button 
               onClick={() => setShowCoachModal(true)}
@@ -3003,25 +3006,50 @@ export default function App() {
               <button onClick={() => setShowCoachModal(false)} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
             </div>
 
-            {/* Acceso rápido a selector de temas */}
-            <div 
-              onClick={() => { setShowCoachModal(false); setShowThemeModal(true); }}
-              className="bg-slate-950/80 border border-slate-800 hover:border-slate-700 p-2.5 rounded-2xl flex items-center justify-between cursor-pointer transition"
-            >
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-indigo-950 text-indigo-400">
-                  <Palette className="w-4 h-4" />
+            {/* Configuración de Tema Visual (Dentro de Configuración de Usuario) */}
+            <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-indigo-950 text-indigo-400">
+                    <Palette className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white">Tema Visual de la Aplicación</h4>
+                    <p className="text-[10px] text-slate-400">Selecciona el ambiente estético para tu usuario</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white">Tema Visual Activo</h4>
-                  <p className="text-[10px] text-slate-400">
-                    {themesCatalog.find(t => t.id === currentTheme)?.name || 'Oscuro'}
-                  </p>
-                </div>
+                <span className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800/50">
+                  {themesCatalog.find(t => t.id === currentTheme)?.name.split(' ')[0]}
+                </span>
               </div>
-              <span className="text-[11px] text-indigo-400 font-bold px-2 py-0.5 rounded-lg bg-indigo-950/60 border border-indigo-800/40">
-                Cambiar
-              </span>
+
+              {/* Selector de Temas en Cuadrícula Directa */}
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {themesCatalog.map((t) => {
+                  const isSelected = currentTheme === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setCurrentTheme(t.id)}
+                      className={`p-2 rounded-xl border text-left transition flex flex-col justify-between ${
+                        isSelected
+                          ? 'bg-indigo-950/90 border-indigo-500 shadow-md ring-1 ring-indigo-500'
+                          : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full mb-1">
+                        <span className="text-base">{t.icon}</span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-indigo-400" />}
+                      </div>
+                      <span className="text-[11px] font-bold text-white leading-tight block truncate w-full">
+                        {t.name}
+                      </span>
+                      <div className={`w-full h-1.5 rounded-full mt-1.5 bg-gradient-to-r ${t.preview}`} />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="overflow-y-auto space-y-3 my-3 pr-1 flex-1">
