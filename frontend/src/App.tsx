@@ -50,7 +50,7 @@ import { BrianTracyConfirmModal } from './components/BrianTracyConfirmModal';
 import { AuthModal } from './components/AuthModal';
 
 const API_BASE = window.location.hostname.includes('trycloudflare.com')
-  ? 'https://asset-discretion-expenditure-willow.trycloudflare.com/api'
+  ? 'https://hydraulic-government-caps-aquatic.trycloudflare.com/api'
   : `http://${window.location.hostname}:8000/api`;
 
 export default function App() {
