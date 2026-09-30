@@ -8,9 +8,25 @@ import {
   ArrowLeft, CheckSquare, Sparkles, BookOpen,
   Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks,
   Wind, Info, Clock,
-  Search, Award, TrendingUp, Trophy
+  Search, Award, TrendingUp, Trophy,
+  Cloud, CloudOff
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import {
+  getLocalHabits,
+  saveLocalHabits,
+  getLocalPrograms,
+  saveLocalPrograms,
+  getLocalMetrics,
+  saveLocalMetrics,
+  getLocalCoaches,
+  saveLocalCoaches,
+  getPendingSyncQueue,
+  enqueuePendingAction,
+  applyLocalToggle,
+  applyLocalSeriesStep,
+  syncWithBackend
+} from './services/storageSync';
 import type {
   Habit,
   CoachProfile,
@@ -49,10 +65,15 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState('');
   const [authError, setAuthError] = useState('');
 
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [programs, setPrograms] = useState<Program[]>([]);
-  const [metrics, setMetrics] = useState<MetricsSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [habits, setHabits] = useState<Habit[]>(() => getLocalHabits());
+  const [programs, setPrograms] = useState<Program[]>(() => getLocalPrograms());
+  const [metrics, setMetrics] = useState<MetricsSummary | null>(() => getLocalMetrics());
+  const [loading, setLoading] = useState(false);
+
+  // Estado Local-First y Sincronización Offline
+  const [isOnline, setIsOnline] = useState<boolean>(() => typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [pendingSyncCount, setPendingSyncCount] = useState<number>(() => getPendingSyncQueue().length);
   
   // Navegación principal
   const [activeTab, setActiveTab] = useState<'today' | 'calendar' | 'programs' | 'vision' | 'inject'>('today');
@@ -73,7 +94,7 @@ export default function App() {
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
 
   // Estado para Coaches y Motivación
-  const [coaches, setCoaches] = useState<CoachProfile[]>([]);
+  const [coaches, setCoaches] = useState<CoachProfile[]>(() => getLocalCoaches());
   const [showCoachModal, setShowCoachModal] = useState(false);
   const [selectedCoachId, setSelectedCoachId] = useState<number | null>(null);
 
@@ -568,20 +589,80 @@ export default function App() {
     return authToken ? { headers: { Authorization: `Bearer ${authToken}` } } : {};
   };
 
-  const fetchData = async () => {
+  // Escuchar cambios de conectividad de red
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Auto-sincronizar si volvemos a estar online
+      triggerManualSync(false);
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const triggerManualSync = async (notifyFeedback = true) => {
+    setIsSyncing(true);
     try {
-      setLoading(true);
+      const res = await syncWithBackend(API_BASE, getHeaders);
+      setPendingSyncCount(res.remainingCount);
+      setIsOnline(res.serverOnline);
+
+      if (res.serverOnline) {
+        // Si el servidor está online, refrescar datos del backend
+        await fetchData(false);
+      }
+
+      if (notifyFeedback) {
+        if (res.serverOnline) {
+          triggerCelebration();
+          setIslandMessage(res.message);
+        } else {
+          setIslandMessage("Modo Local Activo: El servidor no está respondiendo. Tus cambios se guardan en este dispositivo.");
+        }
+        setIslandExpanded(true);
+        setTimeout(() => setIslandExpanded(false), 4000);
+      }
+    } catch (e) {
+      console.warn("Fallo al intentar sincronizar:", e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const fetchData = async (showLoadingSpinner = true) => {
+    try {
+      if (showLoadingSpinner && habits.length === 0) {
+        setLoading(true);
+      }
       const headers = getHeaders();
       const [habitsRes, programsRes, metricsRes, coachesRes] = await Promise.all([
-        axios.get(`${API_BASE}/habits/today/`, headers),
-        axios.get(`${API_BASE}/programs/`, headers),
-        axios.get(`${API_BASE}/metrics/summary/`, headers),
-        axios.get(`${API_BASE}/coaches/`, headers)
+        axios.get(`${API_BASE}/habits/today/`, { ...headers, timeout: 3500 }),
+        axios.get(`${API_BASE}/programs/`, { ...headers, timeout: 3500 }),
+        axios.get(`${API_BASE}/metrics/summary/`, { ...headers, timeout: 3500 }),
+        axios.get(`${API_BASE}/coaches/`, { ...headers, timeout: 3500 })
       ]);
+
+      // Servidor respondió con éxito: actualizar estado y caché local
+      setIsOnline(true);
       setHabits(habitsRes.data);
+      saveLocalHabits(habitsRes.data);
+
       setPrograms(programsRes.data);
+      saveLocalPrograms(programsRes.data);
+
       setMetrics(metricsRes.data);
+      saveLocalMetrics(metricsRes.data);
+
       setCoaches(coachesRes.data);
+      saveLocalCoaches(coachesRes.data);
 
       if (metricsRes.data?.current_user) {
         setCurrentUser(metricsRes.data.current_user);
@@ -594,9 +675,23 @@ export default function App() {
         setSelectedCoachId(coachesRes.data[0].id);
       }
     } catch (err: any) {
-      console.error("Error al cargar datos:", err);
+      console.warn("No se pudo conectar con el servidor backend (Modo Local/Offline activo):", err.message);
+      setIsOnline(false);
+      
+      // Fallback a almacenamiento local persistente
+      const localH = getLocalHabits();
+      if (localH.length > 0) setHabits(localH);
+
+      const localP = getLocalPrograms();
+      if (localP.length > 0) setPrograms(localP);
+
+      const localM = getLocalMetrics();
+      if (localM) setMetrics(localM);
+
+      const localC = getLocalCoaches();
+      if (localC.length > 0) setCoaches(localC);
+
       if (err.response?.status === 401) {
-        // Token inválido o expirado: resetear sesión limpia
         localStorage.removeItem('taskia_token');
         setAuthToken(null);
         setCurrentUser(null);
@@ -864,17 +959,45 @@ export default function App() {
       return;
     }
 
-    try {
-      const res = await axios.post(`${API_BASE}/habits/${habit.id}/toggle_today/`, {}, getHeaders());
-      if (res.data.completed) {
-        triggerCelebration();
-        setIslandMessage(`¡Hábito cumplido! ${cleanTitle(habit.title)}`);
-        setIslandExpanded(true);
-        setTimeout(() => setIslandExpanded(false), 3500);
+    // 1. Mutación optimista local INMEDIATA (cero latencia, funciona 100% offline)
+    const updatedHabits = applyLocalToggle(habit.id);
+    setHabits(updatedHabits);
+
+    const updatedHabit = updatedHabits.find(h => h.id === habit.id);
+    const isNowCompleted = !!updatedHabit?.today_log?.completed;
+
+    if (isNowCompleted) {
+      triggerCelebration();
+      setIslandMessage(`¡Hábito cumplido! ${cleanTitle(habit.title)}`);
+      setIslandExpanded(true);
+      setTimeout(() => setIslandExpanded(false), 3500);
+    }
+
+    // 2. Encolar acción pendiente para sincronizar cuando el servidor esté disponible
+    enqueuePendingAction({
+      type: 'toggle_today',
+      habitId: habit.id,
+      habitTitle: habit.title,
+      date: new Date().toISOString().split('T')[0],
+    });
+    setPendingSyncCount(getPendingSyncQueue().length);
+
+    // 3. Si hay conectividad, intentar enviar al servidor en background sin bloquear la UI
+    if (isOnline) {
+      try {
+        await axios.post(`${API_BASE}/habits/${habit.id}/toggle_today/`, {}, getHeaders());
+        // Al tener éxito directo, retirar de la cola
+        const queue = getPendingSyncQueue();
+        const lastAction = queue.filter(a => a.type === 'toggle_today' && a.habitId === habit.id).pop();
+        if (lastAction) {
+          const filtered = queue.filter(a => a.id !== lastAction.id);
+          localStorage.setItem('taskia_pending_sync_queue', JSON.stringify(filtered));
+          setPendingSyncCount(filtered.length);
+        }
+      } catch (err: any) {
+        console.warn("Servidor no accesible para toggle_today; guardado localmente en cola:", err.message);
+        setIsOnline(false);
       }
-      fetchData();
-    } catch (err) {
-      console.error("Error al marcar hábito:", err);
     }
   };
 
@@ -897,28 +1020,85 @@ export default function App() {
 
   const confirmBrianTracyCheck = async () => {
     if (!confirmingHabit) return;
-    try {
-      await axios.post(`${API_BASE}/habits/${confirmingHabit.id}/toggle_today/`, {}, getHeaders());
-      triggerCelebration();
-      setIslandMessage(`🔥 ¡Día de Brian Tracy desbloqueado! Racha sostenida.`);
-      setIslandExpanded(true);
-      setTimeout(() => setIslandExpanded(false), 4000);
-      setConfirmingHabit(null);
-      fetchData();
-    } catch (err) {
-      console.error("Error al confirmar día:", err);
+
+    // Mutación optimista local
+    const updatedHabits = applyLocalToggle(confirmingHabit.id);
+    setHabits(updatedHabits);
+    triggerCelebration();
+    setIslandMessage(`🔥 ¡Día de Brian Tracy desbloqueado! Racha sostenida.`);
+    setIslandExpanded(true);
+    setTimeout(() => setIslandExpanded(false), 4000);
+
+    const habitId = confirmingHabit.id;
+    const habitTitle = confirmingHabit.title;
+    setConfirmingHabit(null);
+
+    enqueuePendingAction({
+      type: 'toggle_today',
+      habitId,
+      habitTitle,
+      date: new Date().toISOString().split('T')[0],
+    });
+    setPendingSyncCount(getPendingSyncQueue().length);
+
+    if (isOnline) {
+      try {
+        await axios.post(`${API_BASE}/habits/${habitId}/toggle_today/`, {}, getHeaders());
+        const queue = getPendingSyncQueue();
+        const lastAction = queue.filter(a => a.type === 'toggle_today' && a.habitId === habitId).pop();
+        if (lastAction) {
+          const filtered = queue.filter(a => a.id !== lastAction.id);
+          localStorage.setItem('taskia_pending_sync_queue', JSON.stringify(filtered));
+          setPendingSyncCount(filtered.length);
+        }
+      } catch (err: any) {
+        console.warn("Servidor no accesible para confirmBrianTracyCheck; guardado local:", err.message);
+        setIsOnline(false);
+      }
     }
   };
 
   const logSeriesStep = async (habitId: number, stepDelta: number) => {
-    try {
-      await axios.post(`${API_BASE}/habits/${habitId}/toggle_today/`, { step: stepDelta }, getHeaders());
-      if (stepDelta > 0) {
-        setRestTimer(45);
+    // 1. Mutación optimista local inmediata
+    const updatedHabits = applyLocalSeriesStep(habitId, stepDelta);
+    setHabits(updatedHabits);
+    if (stepDelta > 0) {
+      setRestTimer(45);
+    }
+
+    const currentHabit = updatedHabits.find(h => h.id === habitId);
+    if (currentHabit && currentHabit.today_log?.completed) {
+      triggerCelebration();
+      setIslandMessage(`🏆 ¡Objetivo de series alcanzado! ${cleanTitle(currentHabit.title)}`);
+      setIslandExpanded(true);
+      setTimeout(() => setIslandExpanded(false), 3500);
+    }
+
+    // 2. Encolar acción pendiente
+    enqueuePendingAction({
+      type: 'step_series',
+      habitId,
+      step: stepDelta,
+      habitTitle: currentHabit?.title,
+      date: new Date().toISOString().split('T')[0],
+    });
+    setPendingSyncCount(getPendingSyncQueue().length);
+
+    // 3. Intentar sincronización si está online
+    if (isOnline) {
+      try {
+        await axios.post(`${API_BASE}/habits/${habitId}/toggle_today/`, { step: stepDelta }, getHeaders());
+        const queue = getPendingSyncQueue();
+        const lastAction = queue.filter(a => a.type === 'step_series' && a.habitId === habitId).pop();
+        if (lastAction) {
+          const filtered = queue.filter(a => a.id !== lastAction.id);
+          localStorage.setItem('taskia_pending_sync_queue', JSON.stringify(filtered));
+          setPendingSyncCount(filtered.length);
+        }
+      } catch (err: any) {
+        console.warn("Servidor no accesible para logSeriesStep; guardado localmente:", err.message);
+        setIsOnline(false);
       }
-      fetchData();
-    } catch (err) {
-      console.error("Error al registrar serie:", err);
     }
   };
 
@@ -1007,31 +1187,79 @@ export default function App() {
       days_of_week: habitFormData.days_of_week,
       sla_target_percent: Number(habitFormData.sla_target_percent) || 85
     };
-    // Guardar preferencia de reinicio por hábito en localStorage
+
     if (editingHabit) {
       localStorage.setItem(`taskia_reset_on_miss_${editingHabit.id}`, String(habitFormData.reset_on_miss));
     }
 
-    try {
-      if (editingHabit) {
-        await axios.patch(`${API_BASE}/habits/${editingHabit.id}/`, payload, getHeaders());
-        setIslandMessage(`✏️ Hábito "${habitFormData.title}" actualizado con éxito.`);
-      } else {
-        await axios.post(`${API_BASE}/habits/`, payload, getHeaders());
-        setIslandMessage(`✨ Nuevo hábito "${habitFormData.title}" añadido al plan.`);
-        triggerCelebration();
+    // Actualización local inmediata
+    if (editingHabit) {
+      const updated = habits.map(h => h.id === editingHabit.id ? { ...h, ...payload } : h);
+      setHabits(updated);
+      saveLocalHabits(updated);
+      setIslandMessage(`✏️ Hábito "${habitFormData.title}" actualizado.`);
+    } else {
+      const tempId = Date.now();
+      const newLocalHabit: Habit = {
+        id: tempId,
+        title: payload.title,
+        description: payload.description,
+        habit_type: payload.habit_type,
+        target_value: payload.target_value,
+        unit: payload.unit,
+        estimated_minutes: payload.estimated_minutes,
+        frequency_type: payload.frequency_type,
+        days_of_week: payload.days_of_week,
+        sla_target_percent: payload.sla_target_percent,
+        reset_on_miss: habitFormData.reset_on_miss,
+        today_log: { completed: false, value: 0, is_in_sla: false },
+        compliance_summary: { rate_percent: 0, meets_sla: false, completed_last_7_days: 0 }
+      };
+      const updated = [...habits, newLocalHabit];
+      setHabits(updated);
+      saveLocalHabits(updated);
+      setIslandMessage(`✨ Nuevo hábito "${habitFormData.title}" añadido al plan.`);
+      triggerCelebration();
+    }
+
+    setIslandExpanded(true);
+    setTimeout(() => setIslandExpanded(false), 3500);
+    setShowHabitModal(false);
+    const wasEditing = editingHabit;
+    setEditingHabit(null);
+    if (selectedDetailHabit && wasEditing && selectedDetailHabit.id === wasEditing.id) {
+      setSelectedDetailHabit(null);
+    }
+
+    // Encolar y enviar al servidor si está disponible
+    enqueuePendingAction({
+      type: 'save_habit',
+      habitId: wasEditing?.id,
+      habitTitle: payload.title,
+      payload,
+      date: new Date().toISOString().split('T')[0],
+    });
+    setPendingSyncCount(getPendingSyncQueue().length);
+
+    if (isOnline) {
+      try {
+        if (wasEditing) {
+          await axios.patch(`${API_BASE}/habits/${wasEditing.id}/`, payload, getHeaders());
+        } else {
+          await axios.post(`${API_BASE}/habits/`, payload, getHeaders());
+        }
+        // Desencolar acción directa exitosa
+        const queue = getPendingSyncQueue();
+        const lastAction = queue.filter(a => a.type === 'save_habit').pop();
+        if (lastAction) {
+          const filtered = queue.filter(a => a.id !== lastAction.id);
+          localStorage.setItem('taskia_pending_sync_queue', JSON.stringify(filtered));
+          setPendingSyncCount(filtered.length);
+        }
+      } catch (err: any) {
+        console.warn("Servidor offline para saveHabit; guardado en cola local:", err.message);
+        setIsOnline(false);
       }
-      setIslandExpanded(true);
-      setTimeout(() => setIslandExpanded(false), 3500);
-      setShowHabitModal(false);
-      setEditingHabit(null);
-      if (selectedDetailHabit && editingHabit && selectedDetailHabit.id === editingHabit.id) {
-        setSelectedDetailHabit(null);
-      }
-      fetchData();
-    } catch (err: any) {
-      console.error("Error guardando hábito:", err);
-      alert(`Error al guardar: ${err.response?.data ? JSON.stringify(err.response.data) : err.message}`);
     }
   };
 
@@ -1040,18 +1268,41 @@ export default function App() {
       return;
     }
 
-    try {
-      await axios.delete(`${API_BASE}/habits/${habitId}/`, getHeaders());
-      setIslandMessage(`🗑️ Hábito eliminado.`);
-      setIslandExpanded(true);
-      setTimeout(() => setIslandExpanded(false), 3000);
-      if (selectedDetailHabit && selectedDetailHabit.id === habitId) {
-        setSelectedDetailHabit(null);
+    // Eliminación local inmediata
+    const updated = habits.filter(h => h.id !== habitId);
+    setHabits(updated);
+    saveLocalHabits(updated);
+
+    setIslandMessage(`🗑️ Hábito eliminado.`);
+    setIslandExpanded(true);
+    setTimeout(() => setIslandExpanded(false), 3000);
+    if (selectedDetailHabit && selectedDetailHabit.id === habitId) {
+      setSelectedDetailHabit(null);
+    }
+
+    // Encolar para backend
+    enqueuePendingAction({
+      type: 'delete_habit',
+      habitId,
+      habitTitle,
+      date: new Date().toISOString().split('T')[0],
+    });
+    setPendingSyncCount(getPendingSyncQueue().length);
+
+    if (isOnline) {
+      try {
+        await axios.delete(`${API_BASE}/habits/${habitId}/`, getHeaders());
+        const queue = getPendingSyncQueue();
+        const lastAction = queue.filter(a => a.type === 'delete_habit' && a.habitId === habitId).pop();
+        if (lastAction) {
+          const filtered = queue.filter(a => a.id !== lastAction.id);
+          localStorage.setItem('taskia_pending_sync_queue', JSON.stringify(filtered));
+          setPendingSyncCount(filtered.length);
+        }
+      } catch (err: any) {
+        console.warn("Servidor offline para deleteHabit; encolado local:", err.message);
+        setIsOnline(false);
       }
-      fetchData();
-    } catch (err: any) {
-      console.error("Error eliminando hábito:", err);
-      alert(`Error al eliminar: ${err.response?.data ? JSON.stringify(err.response.data) : err.message}`);
     }
   };
 
@@ -1311,7 +1562,51 @@ export default function App() {
               </button>
             )}
 
-            <button onClick={fetchData} className="p-1.5 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition">
+            {/* Indicador y Botón de Sincronización Local-First */}
+            <button
+              onClick={() => triggerManualSync(true)}
+              disabled={isSyncing}
+              className={`flex items-center gap-1 px-2 py-1 rounded-xl border text-[11px] font-semibold transition ${
+                !isOnline
+                  ? 'bg-amber-950/70 border-amber-800/80 text-amber-300 hover:bg-amber-900/60'
+                  : pendingSyncCount > 0
+                    ? 'bg-indigo-950/80 border-indigo-700 text-indigo-300 hover:bg-indigo-900/70'
+                    : 'bg-slate-900 border-slate-800 text-emerald-400 hover:border-emerald-800/60'
+              }`}
+              title={
+                !isOnline
+                  ? `Modo Local Offline (${pendingSyncCount} cambios pendientes). Toca para sincronizar si encendiste el servidor.`
+                  : pendingSyncCount > 0
+                    ? `${pendingSyncCount} cambios pendientes por sincronizar. Toca para enviar ahora.`
+                    : 'Conectado y sincronizado con el servidor.'
+              }
+            >
+              {isSyncing ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
+              ) : !isOnline ? (
+                <CloudOff className="w-3.5 h-3.5 text-amber-400" />
+              ) : (
+                <Cloud className="w-3.5 h-3.5 text-emerald-400" />
+              )}
+              <span className="hidden sm:inline">
+                {isSyncing
+                  ? 'Sincronizando...'
+                  : !isOnline
+                    ? 'Modo Local'
+                    : 'En línea'}
+              </span>
+              {pendingSyncCount > 0 && (
+                <span className="bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full ml-0.5">
+                  {pendingSyncCount}
+                </span>
+              )}
+            </button>
+
+            <button 
+              onClick={() => fetchData(true)} 
+              className="p-1.5 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition"
+              title="Recargar datos del servidor"
+            >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
