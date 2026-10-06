@@ -19,6 +19,9 @@ export interface Habit {
   sla_target_percent: number;
   reset_on_miss?: boolean;
   enrollment?: number | null;
+  owner_username?: string;
+  is_shared?: boolean;
+  shared_with_usernames?: string[];
   today_log?: {
     completed: boolean;
     value: number;

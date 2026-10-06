@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  Clock, Target, BookOpen, Wind, Timer, Edit3, Trash2, Minus, Plus, Check 
+  Clock, Target, BookOpen, Wind, Timer, Edit3, Trash2, Minus, Plus, Check, Users 
 } from 'lucide-react';
 import type { Habit } from '../types';
 
@@ -12,6 +12,7 @@ interface HabitDetailModalProps {
   onStartBreathingSession: (habit: Habit) => void;
   onSetRestTimer: (seconds: number) => void;
   onOpenEditHabitModal: (habit: Habit) => void;
+  onOpenShareModal: (habit: Habit) => void;
   onDeleteHabit: (habitId: number, title: string) => void;
   onLogSeriesStep: (habitId: number, step: number) => void;
   onToggleHabit: (habit: Habit) => void;
@@ -27,6 +28,7 @@ export const HabitDetailModal: React.FC<HabitDetailModalProps> = ({
   onStartBreathingSession,
   onSetRestTimer,
   onOpenEditHabitModal,
+  onOpenShareModal,
   onDeleteHabit,
   onLogSeriesStep,
   onToggleHabit,
@@ -236,12 +238,20 @@ export const HabitDetailModal: React.FC<HabitDetailModalProps> = ({
           <span className="text-[11px] text-slate-400">Administración de la tarea:</span>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => onOpenShareModal(habit)}
+              className="px-2.5 py-1.5 rounded-xl bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 font-semibold text-xs flex items-center gap-1.5 transition"
+              title="Compartir con otro usuario (ej. lista de compras, metas en común)"
+            >
+              <Users className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Compartir {habit.is_shared ? `(${habit.shared_with_usernames?.length || 0})` : ''}</span>
+            </button>
+            <button
               onClick={() => onOpenEditHabitModal(habit)}
               className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 font-semibold text-xs flex items-center gap-1.5 transition"
               title="Editar parámetros, metas o textos de esta tarea"
             >
               <Edit3 className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Editar Tarea</span>
+              <span>Editar</span>
             </button>
             <button
               onClick={() => onDeleteHabit(habit.id, habit.title)}

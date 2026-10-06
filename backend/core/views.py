@@ -144,7 +144,12 @@ class HabitViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Habit.objects.filter(user=self.request.user, active=True).order_by('-created_at')
+        user = self.request.user
+        from django.db.models import Q
+        return Habit.objects.filter(
+            Q(user=user) | Q(shared_with=user),
+            active=True
+        ).distinct().order_by('-created_at')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -153,16 +158,18 @@ class HabitViewSet(viewsets.ModelViewSet):
     def today(self, request):
         """
         Retorna EXCLUSIVAMENTE los hábitos programados para el día de hoy
-        (o aquellos que hayan sido completados hoy).
-        Si el parámetro ?all=true está presente, retorna todos los hábitos activos.
+        (tanto propios como compartidos).
         """
         user = request.user
-        habits = Habit.objects.filter(user=user, active=True)
+        from django.db.models import Q
+        habits = Habit.objects.filter(
+            Q(user=user) | Q(shared_with=user),
+            active=True
+        ).distinct()
         today = datetime.date.today()
         show_all = request.query_params.get('all', 'false').lower() == 'true'
 
         if not show_all:
-            # Filtrar por los que tocan hoy o ya tienen registro hoy
             today_completed_ids = HabitLog.objects.filter(
                 habit__in=habits, date=today, completed=True
             ).values_list('habit_id', flat=True)
@@ -180,16 +187,15 @@ class HabitViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def toggle_today(self, request, pk=None):
         habit = self.get_object()
-        # Verify ownership
-        if habit.user != request.user:
-            return Response({'error': 'No autorizado'}, status=status.HTTP_403_FORBIDDEN)
+        # Verify ownership or shared permission
+        if habit.user != request.user and not habit.shared_with.filter(id=request.user.id).exists():
+            return Response({'error': 'No autorizado para modificar este hábito'}, status=status.HTTP_403_FORBIDDEN)
 
         today = datetime.date.today()
         target_date = request.data.get('date', str(today))
         log, created = HabitLog.objects.get_or_create(habit=habit, date=target_date)
 
         if 'step' in request.data:
-            # Incrementar una serie (ej. 1 de 3)
             step_delta = float(request.data['step'])
             log.value = max(0.0, round(log.value + step_delta, 1))
             log.completed = (log.value >= habit.target_value)
@@ -209,6 +215,41 @@ class HabitViewSet(viewsets.ModelViewSet):
             "completed": log.completed,
             "value": log.value,
             "is_in_sla": log.is_in_sla
+        })
+
+    @action(detail=True, methods=['post'])
+    def share(self, request, pk=None):
+        """
+        Comparte un hábito/lista con otro usuario por su nombre de usuario o correo.
+        """
+        habit = self.get_object()
+        if habit.user != request.user:
+            return Response({'error': 'Solo el creador puede compartir este hábito'}, status=status.HTTP_403_FORBIDDEN)
+
+        target_identifier = request.data.get('username', '').strip()
+        if not target_identifier:
+            return Response({'error': 'Debes especificar el nombre de usuario a compartir'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from django.db.models import Q
+            target_user = User.objects.get(Q(username__iexact=target_identifier) | Q(email__iexact=target_identifier))
+        except User.DoesNotExist:
+            return Response({'error': f"Usuario '{target_identifier}' no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        if target_user == request.user:
+            return Response({'error': 'Ya eres el creador de este hábito'}, status=status.HTTP_400_BAD_REQUEST)
+
+        action_type = request.data.get('action', 'add') # 'add' or 'remove'
+        if action_type == 'remove':
+            habit.shared_with.remove(target_user)
+            msg = f"Se dejó de compartir con {target_user.username}"
+        else:
+            habit.shared_with.add(target_user)
+            msg = f"Hábito compartido exitosamente con {target_user.username}"
+
+        return Response({
+            'message': msg,
+            'shared_with': list(habit.shared_with.values_list('username', flat=True))
         })
 
 @api_view(['GET'])

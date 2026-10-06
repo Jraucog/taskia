@@ -90,16 +90,28 @@ class HabitSerializer(serializers.ModelSerializer):
     today_log = serializers.SerializerMethodField()
     compliance_summary = serializers.SerializerMethodField()
     is_scheduled_today = serializers.SerializerMethodField()
+    owner_username = serializers.CharField(source='user.username', read_only=True)
+    shared_with_usernames = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='username',
+        source='shared_with'
+    )
+    is_shared = serializers.SerializerMethodField()
 
     class Meta:
         model = Habit
         fields = [
-            'id', 'user', 'enrollment', 'title', 'description', 'habit_type',
+            'id', 'user', 'owner_username', 'enrollment', 'title', 'description', 'habit_type',
             'target_value', 'unit', 'estimated_minutes', 'frequency_type', 'days_of_week', 'day_offset',
             'weekly_target', 'sla_target_percent', 'active', 'created_at',
-            'today_log', 'compliance_summary', 'is_scheduled_today'
+            'today_log', 'compliance_summary', 'is_scheduled_today',
+            'shared_with_usernames', 'is_shared'
         ]
         read_only_fields = ['user', 'enrollment', 'created_at']
+
+    def get_is_shared(self, obj):
+        return obj.shared_with.exists()
 
     def get_is_scheduled_today(self, obj):
         return obj.is_scheduled_on(datetime.date.today())

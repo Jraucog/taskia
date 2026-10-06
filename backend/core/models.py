@@ -51,6 +51,7 @@ class Habit(models.Model):
         ('weekly_quota', 'Cuota semanal'),
     ]
     user = models.ForeignKey(User, related_name='habits', on_delete=models.CASCADE)
+    shared_with = models.ManyToManyField(User, related_name='shared_habits', blank=True, help_text="Usuarios con quienes se comparte este hábito/lista")
     enrollment = models.ForeignKey(ProgramEnrollment, related_name='habits', on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)

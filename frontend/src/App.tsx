@@ -8,7 +8,7 @@ import {
   ArrowLeft, CheckSquare, BookOpen,
   Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, ListChecks,
   Wind, Info, Clock,
-  Search,
+  Search, Users,
   Cloud, CloudOff
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -48,6 +48,7 @@ import { HabitDetailModal } from './components/HabitDetailModal';
 import { GoalsReferenceModal } from './components/GoalsReferenceModal';
 import { BrianTracyConfirmModal } from './components/BrianTracyConfirmModal';
 import { AuthModal } from './components/AuthModal';
+import { ShareModal } from './components/ShareModal';
 import { VisionView } from './views/VisionView';
 import { CalendarView } from './views/CalendarView';
 import { ProgramsView } from './views/ProgramsView';
@@ -495,6 +496,9 @@ export default function App() {
   // Modal para editar tarjeta individual del Vision Board
   const [editingCard, setEditingCard] = useState<VisionCard | null>(null);
 
+  // Modal para compartir hábito/tarea con otros usuarios
+  const [shareModalHabit, setShareModalHabit] = useState<Habit | null>(null);
+
   // Modal para Crear o Editar Hábitos / Planes Manualmente
   const [showHabitModal, setShowHabitModal] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
@@ -702,6 +706,49 @@ export default function App() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleShareHabit = async (habitId: number, targetUsername: string, actionType: 'add' | 'remove') => {
+    try {
+      const headers = getHeaders();
+      const res = await axios.post(`${API_BASE}/habits/${habitId}/share/`, {
+        username: targetUsername,
+        action: actionType
+      }, headers);
+
+      // Actualizar localmente el hábito en el estado
+      setHabits(prev => prev.map(h => {
+        if (h.id === habitId) {
+          return {
+            ...h,
+            shared_with_usernames: res.data.shared_with,
+            is_shared: res.data.shared_with.length > 0
+          };
+        }
+        return h;
+      }));
+
+      // Si el modal de detalle o compartir tiene este hábito, actualizarlo
+      if (shareModalHabit && shareModalHabit.id === habitId) {
+        setShareModalHabit(prev => prev ? {
+          ...prev,
+          shared_with_usernames: res.data.shared_with,
+          is_shared: res.data.shared_with.length > 0
+        } : null);
+      }
+      if (selectedDetailHabit && selectedDetailHabit.id === habitId) {
+        setSelectedDetailHabit(prev => prev ? {
+          ...prev,
+          shared_with_usernames: res.data.shared_with,
+          is_shared: res.data.shared_with.length > 0
+        } : null);
+      }
+
+      return { ok: true, message: res.data.message };
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || 'Error al conectar con el servidor';
+      return { ok: false, message: msg };
     }
   };
 
@@ -2488,6 +2535,17 @@ export default function App() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    setShareModalHabit(habit);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 hover:text-white transition flex items-center gap-1 text-[11px]"
+                                  title="Compartir con otro usuario (ej. lista de compras con tu esposa)"
+                                >
+                                  <Users className="w-3 h-3 text-indigo-400" />
+                                  <span className="hidden sm:inline">Compartir</span>
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     openEditHabitModal(habit);
                                   }}
                                   className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1 text-[11px]"
@@ -2828,11 +2886,21 @@ export default function App() {
         onStartBreathingSession={startBreathingSession}
         onSetRestTimer={setRestTimer}
         onOpenEditHabitModal={openEditHabitModal}
+        onOpenShareModal={(h) => setShareModalHabit(h)}
         onDeleteHabit={handleDeleteHabit}
         onLogSeriesStep={logSeriesStep}
         onToggleHabit={toggleHabit}
         getPlanNameFromHabit={getPlanNameFromHabit}
         cleanTitle={cleanTitle}
+      />
+
+      {/* Modal: Compartir Tarea / Lista con otros usuarios */}
+      <ShareModal
+        isOpen={!!shareModalHabit}
+        habit={shareModalHabit}
+        currentUsername={currentUser?.username || 'Joshua'}
+        onClose={() => setShareModalHabit(null)}
+        onShare={handleShareHabit}
       />
 
       {/* Modal: Crear / Editar Manualmente Hábitos y Planes */}
