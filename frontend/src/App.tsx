@@ -1570,10 +1570,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans w-full max-w-full overflow-x-hidden safe-top safe-bottom pb-28 md:pb-12">
-      {/* Top Header Responsivo - Minimalista y Sofisticado */}
-      {/* Top Header Limpio y Minimalista (Sin saturación visual) */}
-      <header className="border-b border-slate-800/80 bg-slate-950/95 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-4 py-2.5 w-full">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans w-full max-w-full overflow-x-hidden pb-28 md:pb-12">
+      {/* Top Header Responsivo - Minimalista y Sofisticado (Ajustado con safe-top en PWA Standalone) */}
+      <header className="border-b border-slate-800/80 bg-slate-950/95 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-4 py-2.5 w-full safe-top pwa-standalone-header shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-xl">
@@ -2132,26 +2131,26 @@ export default function App() {
                                                 <button
                                                   onClick={() => logSeriesStep(habit.id, -1)}
                                                   disabled={currentVal <= 0}
-                                                  className="p-1 rounded-lg text-slate-400 hover:text-white disabled:opacity-30"
+                                                  className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white disabled:opacity-30 active:scale-95 transition"
                                                 >
-                                                  <Minus className="w-3 h-3" />
+                                                  <Minus className="w-3.5 h-3.5" />
                                                 </button>
-                                                <span className="text-xs font-mono font-bold px-1 text-slate-200">
+                                                <span className="text-xs font-mono font-bold px-1.5 text-slate-200 tabular-nums">
                                                   {currentVal}/{targetVal}
                                                 </span>
                                                 <button
                                                   onClick={() => logSeriesStep(habit.id, 1)}
-                                                  className={`px-2 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition ${
+                                                  className={`min-h-[34px] px-2.5 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition active:scale-95 ${
                                                     isCompleted ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
                                                   }`}
                                                 >
-                                                  <Plus className="w-3 h-3" />
+                                                  <Plus className="w-3.5 h-3.5" />
                                                 </button>
                                               </div>
                                             ) : (
                                               <button
                                                 onClick={() => toggleHabit(habit)}
-                                                className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition active:scale-95 ${
+                                                className={`min-h-[38px] px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 select-none ${
                                                   isCompleted
                                                     ? 'bg-slate-800 text-emerald-400 border border-emerald-900/60'
                                                     : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
@@ -2812,47 +2811,47 @@ export default function App() {
 
       </main>
 
-      {/* Bottom Navigation Bar Limpia y Ordenada (4 Secciones Esenciales) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-3 py-2 safe-bottom shadow-2xl">
+      {/* Bottom Navigation Bar Limpia, Táctil y Ergonómica (4 Secciones Esenciales con Hit Area de 48px) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/90 px-2 sm:px-3 pt-1.5 pb-2 safe-bottom pwa-standalone-nav shadow-2xl">
         <div className="max-w-md mx-auto grid grid-cols-4 gap-1">
           <button 
             onClick={() => { setActiveTab('today'); setSelectedPlanName(null); }}
-            className={`flex flex-col items-center gap-1 py-1.5 px-2 rounded-xl transition active:scale-95 ${
-              activeTab === 'today' ? 'bg-indigo-950/60 text-indigo-400 font-bold border border-indigo-800/50' : 'text-slate-400 hover:text-slate-200'
+            className={`min-h-[46px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
+              activeTab === 'today' ? 'bg-indigo-950/70 text-indigo-300 font-bold border border-indigo-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <Dumbbell className="w-4 h-4" />
-            <span className="text-[10px] tracking-tight">Hoy</span>
+            <span className="text-[10px] tracking-tight leading-none">Hoy</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('calendar')}
-            className={`flex flex-col items-center gap-1 py-1.5 px-2 rounded-xl transition active:scale-95 ${
-              activeTab === 'calendar' ? 'bg-indigo-950/60 text-indigo-400 font-bold border border-indigo-800/50' : 'text-slate-400 hover:text-slate-200'
+            className={`min-h-[46px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
+              activeTab === 'calendar' ? 'bg-indigo-950/70 text-indigo-300 font-bold border border-indigo-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <Calendar className="w-4 h-4" />
-            <span className="text-[10px] tracking-tight">Racha & SLA</span>
+            <span className="text-[10px] tracking-tight leading-none">Racha & SLA</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('vision')}
-            className={`flex flex-col items-center gap-1 py-1.5 px-2 rounded-xl transition active:scale-95 ${
-              activeTab === 'vision' ? 'bg-amber-950/60 text-amber-400 font-bold border border-amber-800/50' : 'text-slate-400 hover:text-slate-200'
+            className={`min-h-[46px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
+              activeTab === 'vision' ? 'bg-amber-950/70 text-amber-300 font-bold border border-amber-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <Compass className="w-4 h-4" />
-            <span className="text-[10px] tracking-tight">Vision Board</span>
+            <span className="text-[10px] tracking-tight leading-none">Vision Board</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('programs')}
-            className={`flex flex-col items-center gap-1 py-1.5 px-2 rounded-xl transition active:scale-95 ${
-              activeTab === 'programs' || activeTab === 'inject' ? 'bg-indigo-950/60 text-indigo-400 font-bold border border-indigo-800/50' : 'text-slate-400 hover:text-slate-200'
+            className={`min-h-[46px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
+              activeTab === 'programs' || activeTab === 'inject' ? 'bg-indigo-950/70 text-indigo-300 font-bold border border-indigo-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span className="text-[10px] tracking-tight">Catálogo</span>
+            <span className="text-[10px] tracking-tight leading-none">Catálogo</span>
           </button>
         </div>
       </nav>

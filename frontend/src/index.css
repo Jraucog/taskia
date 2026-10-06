@@ -4,22 +4,53 @@
   color-scheme: dark;
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 html, body {
   width: 100%;
   max-width: 100vw;
+  min-height: 100%;
   overflow-x: hidden;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Safe area insets for iOS notches and gesture bars */
+/* Tipografía y números tabulares según Make Interfaces Feel Better */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* Safe area insets for mobile screens (iOS notch, Dynamic Island & gesture bar) */
 .safe-top {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: max(env(safe-area-inset-top, 0px), 8px);
 }
 
 .safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
+}
+
+/* Ajustes específicos para cuando corre en modo PWA Standalone (Pantalla de inicio) */
+@media all and (display-mode: standalone) {
+  .pwa-standalone-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 6px);
+  }
+  .pwa-standalone-nav {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  }
 }
 
 @keyframes floatSlow {
