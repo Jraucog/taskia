@@ -2787,8 +2787,8 @@
   "fields": {
     "habit": 62,
     "date": "2026-09-28",
-    "value": 1.0,
-    "completed": true,
+    "value": 0.0,
+    "completed": false,
     "notes": "",
     "created_at": "2026-09-28T20:14:44.547Z"
   }
@@ -2799,10 +2799,22 @@
   "fields": {
     "habit": 63,
     "date": "2026-09-28",
-    "value": 25.0,
-    "completed": true,
+    "value": 0.0,
+    "completed": false,
     "notes": "",
     "created_at": "2026-09-28T20:15:01.988Z"
+  }
+},
+{
+  "model": "core.habitlog",
+  "pk": 22,
+  "fields": {
+    "habit": 62,
+    "date": "2026-09-30",
+    "value": 0.0,
+    "completed": false,
+    "notes": "",
+    "created_at": "2026-09-30T12:29:12.165Z"
   }
 },
 {
@@ -2855,6 +2867,19 @@
       "demo_user"
     ],
     "coach": 1,
+    "notifications_enabled": true,
+    "push_subscription": {},
+    "intensity_level": 3
+  }
+},
+{
+  "model": "core.usercoachpreference",
+  "pk": 2,
+  "fields": {
+    "user": [
+      "Joshua"
+    ],
+    "coach": 2,
     "notifications_enabled": true,
     "push_subscription": {},
     "intensity_level": 3
