@@ -86,3 +86,44 @@ class PlanAndHabitSharingTests(TestCase):
         maria_today = self.client2.get('/api/habits/today/')
         m_ids = [h['id'] for h in maria_today.data]
         self.assertIn(new_habit_id, m_ids)
+
+    def test_sequential_program_auto_reset_on_miss(self):
+        from core.models import Program, ProgramItem, ProgramEnrollment
+        # Crear programa secuencial de 21 días
+        program = Program.objects.create(title='Reto 21 Días Test', duration_days=21)
+        for d in range(21):
+            ProgramItem.objects.create(
+                program=program,
+                title=f'Dia {d + 1}',
+                day_offset=d,
+                habit_type='boolean'
+            )
+
+        # Inscribir usuario con start_date hace 3 días (debió haber completado Día 1, 2 y 3)
+        past_start = datetime.date.today() - datetime.timedelta(days=3)
+        enrollment = ProgramEnrollment.objects.create(
+            user=self.user1,
+            program=program,
+            start_date=past_start,
+            active=True
+        )
+        for item in program.items.all():
+            Habit.objects.create(
+                user=self.user1,
+                enrollment=enrollment,
+                title=f'[{program.title}] {item.title}',
+                day_offset=item.day_offset,
+                target_value=1.0,
+                habit_type='boolean'
+            )
+
+        # Como NO completó el Día 1 ni el Día 2, al consultar /today/, el programa DEBE reiniciarse automáticamente a hoy
+        res = self.client1.get('/api/habits/today/')
+        self.assertEqual(res.status_code, 200)
+
+        enrollment.refresh_from_db()
+        self.assertEqual(enrollment.start_date, datetime.date.today())
+
+        # Debe estar programado el Día 1 hoy
+        today_titles = [h['title'] for h in res.data]
+        self.assertIn(f'[{program.title}] Dia 1', today_titles)

@@ -13,14 +13,8 @@ from .serializers import (
     HabitLogSerializer, ProgramEnrollmentSerializer,
     CoachProfileSerializer, UserCoachPreferenceSerializer
 )
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 import datetime
-
-def get_request_user(request):
-    """Obtiene el usuario autenticado por token o sesión, o cae al usuario demo."""
-    if request.user and request.user.is_authenticated:
-        return request.user
-    user, _ = User.objects.get_or_create(username='demo_user', defaults={'email': 'demo@taskia.app'})
-    return user
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -74,17 +68,17 @@ def current_user_view(request):
 
     return Response(UserSerializer(user).data)
 
-class CoachProfileViewSet(viewsets.ModelViewSet):
+class CoachProfileViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CoachProfile.objects.all().order_by('id')
     serializer_class = CoachProfileSerializer
     permission_classes = [AllowAny]
 
-class ProgramViewSet(viewsets.ModelViewSet):
+class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Program.objects.all().order_by('-created_at')
     serializer_class = ProgramSerializer
     permission_classes = [AllowAny]
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def inject(self, request):
         """
         Endpoint para inyectar programas por API externamente.
@@ -182,14 +176,39 @@ class HabitViewSet(viewsets.ModelViewSet):
         """
         Retorna EXCLUSIVAMENTE los hábitos programados para el día de hoy
         (tanto propios como compartidos).
+        Regla de Oro: Si un reto secuencial de N días (ej. 21 Días Brian Tracy)
+        tuvo un día anterior sin completar, se reinicia automáticamente el ciclo al día 1.
         """
         user = request.user
+        today = datetime.date.today()
+
+        # Validación de Disciplina Estricta: Reinicio de programas secuenciales si se falló un día
+        enrollments = ProgramEnrollment.objects.filter(user=user, active=True)
+        for enrollment in enrollments:
+            prog_habits = Habit.objects.filter(enrollment=enrollment, active=True, day_offset__isnull=False)
+            if not prog_habits.exists():
+                continue
+
+            current_prog_day = (today - enrollment.start_date).days
+            if current_prog_day > 0:
+                should_reset = False
+                for day_idx in range(current_prog_day):
+                    target_prog_date = enrollment.start_date + datetime.timedelta(days=day_idx)
+                    day_habit = prog_habits.filter(day_offset=day_idx).first()
+                    if day_habit:
+                        is_done = HabitLog.objects.filter(habit=day_habit, date=target_prog_date, completed=True).exists()
+                        if not is_done:
+                            should_reset = True
+                            break
+                if should_reset:
+                    enrollment.start_date = today
+                    enrollment.save()
+
         from django.db.models import Q
         habits = Habit.objects.filter(
             Q(user=user) | Q(shared_with=user),
             active=True
         ).distinct()
-        today = datetime.date.today()
         show_all = request.query_params.get('all', 'false').lower() == 'true'
 
         if not show_all:
