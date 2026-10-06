@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   CheckCircle2, Circle, Flame, Zap, 
-  Layers, Play, RefreshCw,
+  Layers, RefreshCw,
   User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
   Check, Plus, Minus, ChevronDown, ChevronRight,
-  ArrowLeft, CheckSquare, Sparkles, BookOpen,
-  Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, Eye, ListChecks,
+  ArrowLeft, CheckSquare, BookOpen,
+  Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, ListChecks,
   Wind, Info, Clock,
-  Search, Award, TrendingUp, Trophy,
+  Search,
   Cloud, CloudOff
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -48,10 +48,14 @@ import { HabitDetailModal } from './components/HabitDetailModal';
 import { GoalsReferenceModal } from './components/GoalsReferenceModal';
 import { BrianTracyConfirmModal } from './components/BrianTracyConfirmModal';
 import { AuthModal } from './components/AuthModal';
+import { VisionView } from './views/VisionView';
+import { CalendarView } from './views/CalendarView';
+import { ProgramsView } from './views/ProgramsView';
 
-const API_BASE = window.location.hostname.includes('trycloudflare.com')
-  ? 'https://hydraulic-government-caps-aquatic.trycloudflare.com/api'
-  : `http://${window.location.hostname}:8000/api`;
+const API_BASE = import.meta.env.VITE_API_URL 
+  || (window.location.hostname.includes('trycloudflare.com')
+    ? 'https://management-hose-patches-duck.trycloudflare.com/api'
+    : `http://${window.location.hostname}:8000/api`);
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -2579,390 +2583,47 @@ export default function App() {
         {/* PESTAÑA 2: MATRIZ SEMANAL & SLA */}
         {/* ======================================================== */}
         {activeTab === 'calendar' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-indigo-400" /> Matriz Semanal de SLA
-                </h2>
-                <p className="text-xs text-slate-400">Racha, cumplimiento y acuerdos de servicio personal</p>
-              </div>
-            </div>
-
-            {/* === MEJORA: Dashboard de Racha y Estadísticas === */}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-gradient-to-br from-amber-950/60 to-slate-900 border border-amber-800/40 p-3 rounded-2xl text-center">
-                <Flame className="w-5 h-5 text-amber-400 mx-auto mb-1" />
-                <span className="text-xl font-black text-amber-300 font-mono block">{streakData.current}</span>
-                <span className="text-[10px] text-amber-400/80 uppercase font-bold">Racha Actual</span>
-              </div>
-              <div className="bg-gradient-to-br from-indigo-950/60 to-slate-900 border border-indigo-800/40 p-3 rounded-2xl text-center">
-                <Trophy className="w-5 h-5 text-indigo-400 mx-auto mb-1" />
-                <span className="text-xl font-black text-indigo-300 font-mono block">{streakData.best}</span>
-                <span className="text-[10px] text-indigo-400/80 uppercase font-bold">Mejor Racha</span>
-              </div>
-              <div className="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-800/40 p-3 rounded-2xl text-center">
-                <Award className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
-                <span className="text-xl font-black text-emerald-300 font-mono block">{earnedBadgesCount}/{badges.length}</span>
-                <span className="text-[10px] text-emerald-400/80 uppercase font-bold">Logros</span>
-              </div>
-            </div>
-
-            {/* Explicación Pedagógica del SLA */}
-            <div className="bg-gradient-to-r from-indigo-950/40 via-slate-900 to-indigo-950/30 border border-indigo-900/40 p-3.5 rounded-2xl">
-              <h3 className="text-xs font-bold text-indigo-300 flex items-center gap-1.5 mb-1">
-                🛡️ ¿Qué es tu SLA (Service Level Agreement)?
-              </h3>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                El SLA no te pide perfección irreal del 100% todos los días; define un <strong>piso mínimo de cumplimiento (ej. 85%)</strong>. Si mantienes tus hábitos en verde dentro de la semana, tu sistema es sostenible y previene recaídas o abandono.
-              </p>
-            </div>
-
-            {/* Tarjeta Métricas Resumen */}
-            {metrics && (
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold">Cumplimiento Hoy</span>
-                  <div className="text-lg font-black text-white mt-0.5">
-                    {metrics.completed_today} / {metrics.scheduled_today_count ?? habits.length}
-                  </div>
-                  <span className="text-[11px] text-indigo-400 font-semibold">{metrics.today_compliance_percent}%</span>
-                </div>
-
-                <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold">Salud Global SLA</span>
-                  <div className="text-lg font-black text-emerald-400 mt-0.5">{metrics.habits_meeting_sla_percent}%</div>
-                  <span className="text-[11px] text-slate-400">{metrics.healthy_habits} en meta</span>
-                </div>
-              </div>
-            )}
-
-            {/* === MEJORA: Heatmap mini estilo GitHub por hábito === */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-3">
-              <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5 mb-2">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Heatmap de Consistencia (últimos 7 días)</span>
-              </h4>
-              <div className="space-y-1.5">
-                {habits.slice(0, 8).map(habit => (
-                  <div key={`hm-${habit.id}`} className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-400 font-medium truncate w-24 sm:w-36 shrink-0">{cleanTitle(habit.title)}</span>
-                    <div className="flex items-center gap-0.5 flex-1">
-                      {habit.compliance_summary.history?.map((h, i) => (
-                        <div
-                          key={i}
-                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded-sm transition-all ${
-                            h.completed 
-                              ? 'bg-emerald-500/90 shadow-sm shadow-emerald-500/20' 
-                              : 'bg-slate-800/80'
-                          }`}
-                          title={`${h.date} (${h.day_name}): ${h.completed ? '✓' : '✗'}`}
-                        />
-                      ))}
-                    </div>
-                    <span className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${
-                      habit.compliance_summary.meets_sla ? 'text-emerald-400' : 'text-amber-400'
-                    }`}>
-                      {habit.compliance_summary.rate_percent}%
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Tabla Colapsable de Cumplimiento */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 overflow-x-auto shadow-sm">
-              <table className="w-full text-left text-xs min-w-[280px]">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400">
-                    <th className="pb-2 font-semibold">Tarea</th>
-                    <th className="pb-2 text-center font-semibold">7 Días</th>
-                    <th className="pb-2 text-right font-semibold">SLA</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {habits.map((habit) => (
-                    <tr key={habit.id} className="hover:bg-slate-800/20">
-                      <td className="py-2.5 pr-2">
-                        <div className="font-semibold text-white max-w-[130px] sm:max-w-[200px] truncate">
-                          {cleanTitle(habit.title)}
-                        </div>
-                      </td>
-
-                      <td className="py-2.5 px-1 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          {habit.compliance_summary.history?.map((h, i) => (
-                            <div 
-                              key={i} 
-                              className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold ${
-                                h.completed 
-                                  ? 'bg-emerald-500 text-slate-950 font-black' 
-                                  : 'bg-slate-800 text-slate-500'
-                              }`}
-                              title={`${h.date}: ${h.completed ? 'Cumplido' : 'Pendiente'}`}
-                            >
-                              {h.day_name.slice(0, 1)}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-
-                      <td className="py-2.5 pl-2 text-right">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                          habit.compliance_summary.meets_sla 
-                            ? 'bg-emerald-950 text-emerald-400' 
-                            : 'bg-amber-950 text-amber-400'
-                        }`}>
-                          {habit.compliance_summary.rate_percent}%
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <CalendarView
+            habits={habits}
+            metrics={metrics}
+            streakData={streakData}
+            badges={badges}
+            earnedBadgesCount={earnedBadgesCount}
+            cleanTitle={cleanTitle}
+          />
         )}
 
         {/* ======================================================== */}
         {/* PESTAÑA 3: CATÁLOGO DE PLANES Y PLANTILLAS */}
         {/* ======================================================== */}
         {activeTab === 'programs' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-indigo-400" /> Catálogo de Programas
-                </h2>
-                <p className="text-xs text-slate-400">Explora o previsualiza plantillas antes de activarlas</p>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setActiveTab('inject')}
-                  className="text-[10px] font-mono bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2 py-1 rounded-xl flex items-center gap-1 transition"
-                  title="Inyector de Programas JSON"
-                >
-                  <Zap className="w-3 h-3 text-emerald-400" />
-                  <span>API JSON</span>
-                </button>
-                <span className="text-[10px] font-mono bg-indigo-950 text-indigo-300 border border-indigo-800/60 px-2 py-1 rounded-xl">
-                  {programs.length}
-                </span>
-              </div>
-            </div>
-
-            {/* === MEJORA: Búsqueda en Catálogo === */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-              <input
-                type="text"
-                value={catalogSearchQuery}
-                onChange={(e) => setCatalogSearchQuery(e.target.value)}
-                placeholder="Buscar programa o plantilla..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-xs text-white focus:outline-none focus:border-indigo-500/60 placeholder:text-slate-600 transition"
-              />
-              {catalogSearchQuery && (
-                <button onClick={() => setCatalogSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs">✕</button>
-              )}
-            </div>
-
-            {/* Barra de Filtros por Categoría */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-              {[
-                { id: 'all', label: 'Todas las Plantillas' },
-                { id: 'Respiración', label: '🫁 Respiración & Estrés' },
-                { id: 'Fuerza', label: '🦵 TRX & Aquiles' },
-                { id: 'Disciplina', label: '✍️ Brian Tracy (Fórmula 3P)' },
-                { id: 'Software', label: '💻 Software & 100M' },
-                { id: 'Sueño', label: '🌙 Sueño & Circadiano' },
-                { id: 'Nutrición', label: '🥗 Nutrición & 85kg' },
-                { id: 'Música', label: '🎵 Producción Musical' },
-                { id: 'Hogar', label: '🏡 Hogar & Proyectos' },
-                { id: 'Desarrollo', label: '🌅 Mañanas SAVERS' },
-                { id: 'Foco', label: '⚡ Desintoxicación Dopamina' }
-              ].map((categoryItem) => {
-                const cat = categoryItem.id;
-                const label = categoryItem.label;
-                const isSelected = selectedCatalogCategory === cat;
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCatalogCategory(cat)}
-                    className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition border ${
-                      isSelected
-                        ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="space-y-3">
-              {programs
-                .filter(p => {
-                  const matchesCategory = selectedCatalogCategory === 'all' || p.category.toLowerCase().includes(selectedCatalogCategory.toLowerCase());
-                  const matchesSearch = !catalogSearchQuery.trim() || 
-                    p.title.toLowerCase().includes(catalogSearchQuery.toLowerCase()) || 
-                    p.description.toLowerCase().includes(catalogSearchQuery.toLowerCase()) ||
-                    p.category.toLowerCase().includes(catalogSearchQuery.toLowerCase());
-                  return matchesCategory && matchesSearch;
-                })
-                .map((program) => (
-                <div key={program.id} className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between hover:border-slate-700 transition">
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800/50">
-                        {program.category}
-                      </span>
-                      <span className="text-xs text-slate-400 font-mono">{program.duration_days} días</span>
-                    </div>
-                    <h3 className="font-bold text-sm text-white">{program.title}</h3>
-                    <p className="text-xs text-slate-400 mt-1 mb-3">{program.description}</p>
-                    
-                    {/* Botón para colapsar / expandir lista de ejercicios */}
-                    <button 
-                      onClick={() => toggleBlockCollapse(`prog_${program.id}`)}
-                      className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 mb-3"
-                    >
-                      {collapsedBlocks[`prog_${program.id}`] ? 'Ocultar desglose' : `Ver ${program.items?.length || 0} hábitos/ítems incluidos`}
-                      {collapsedBlocks[`prog_${program.id}`] ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                    </button>
-
-                    {collapsedBlocks[`prog_${program.id}`] && (
-                      <div className="space-y-1.5 mb-3 max-h-52 overflow-y-auto pr-1">
-                        {program.items?.map((it, idx) => (
-                          <div key={it.id || idx} className="text-[11px] bg-slate-950/80 border border-slate-800/60 p-2.5 rounded-xl text-slate-300 flex items-start justify-between gap-2">
-                            <div>
-                              <p className="font-medium text-white">{it.title}</p>
-                              {it.description && <p className="text-[10px] text-slate-400 mt-0.5">{it.description}</p>}
-                            </div>
-                            <div className="flex flex-col items-end gap-1 shrink-0">
-                              <span className="text-[10px] text-amber-400 font-mono font-bold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
-                                {it.target_value} {it.unit}
-                              </span>
-                              {it.estimated_minutes ? (
-                                <span className="text-[9px] font-mono text-slate-400 flex items-center gap-0.5">
-                                  <Clock className="w-2.5 h-2.5 text-indigo-400" />
-                                  <span>~{it.estimated_minutes}m</span>
-                                </span>
-                              ) : null}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
-                    <button 
-                      onClick={() => setPreviewProgram(program)}
-                      className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-indigo-400" /> Ver Plantilla
-                    </button>
-
-                    <button 
-                      onClick={() => handleEnroll(program.id)}
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md active:scale-95"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-white" /> Inscribirme
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ProgramsView
+            programs={programs}
+            catalogSearchQuery={catalogSearchQuery}
+            setCatalogSearchQuery={setCatalogSearchQuery}
+            selectedCatalogCategory={selectedCatalogCategory}
+            setSelectedCatalogCategory={setSelectedCatalogCategory}
+            collapsedBlocks={collapsedBlocks}
+            toggleBlockCollapse={toggleBlockCollapse}
+            setPreviewProgram={setPreviewProgram}
+            handleEnroll={handleEnroll}
+            onNavigateInject={() => setActiveTab('inject')}
+          />
         )}
 
         {/* ======================================================== */}
         {/* PESTAÑA 4: VISION BOARD Y GRILL-ME INTERACTIVO */}
         {/* ======================================================== */}
         {activeTab === 'vision' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-amber-400" /> Mi Vision Board Personal
-                </h2>
-                <p className="text-xs text-slate-400">Metas maestras, horizonte temporal y por qué lo haces</p>
-              </div>
-
-              <button 
-                onClick={() => {
-                  setGrillStep(0);
-                  setGrillAnswers({ area: 'Cuerpo & Salud', goal: '', why: '', deadline: '', commitment: '90%' });
-                  setShowGrillMeModal(true);
-                }}
-                className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 active:scale-95"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Grill Me
-              </button>
-            </div>
-
-            {/* Banner explicativo del Vision Board */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-3 flex items-start gap-2.5">
-              <span className="text-base">🎯</span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                El Vision Board conecta tus hábitos diarios con tus metas trascendentales de vida. Toca cualquier tarjeta para editarla o usa el botón <strong>"Grill Me"</strong> para que el asistente te entreviste y formule una nueva meta precisa con la fórmula 3P.
-              </p>
-            </div>
-
-            {/* Cuadrícula o lista de Tarjetas del Vision Board */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {visionCards.map((card) => (
-                <div 
-                  key={card.id} 
-                  className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-4 rounded-2xl flex flex-col justify-between shadow-sm relative group transition"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-2xl">{card.emoji}</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800">
-                          📅 {card.deadline}
-                        </span>
-                        <button 
-                          onClick={() => setEditingCard(card)}
-                          className="p-1 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-slate-300 transition"
-                          title="Editar Meta"
-                        >
-                          <Edit3 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <span className="text-[9px] uppercase font-bold tracking-wider text-slate-400">
-                      {card.category}
-                    </span>
-                    <h3 className="font-bold text-sm text-slate-100 mt-0.5 leading-snug">
-                      {card.title}
-                    </h3>
-
-                    <p className="text-[11px] text-slate-400 mt-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed italic">
-                      "{card.why}"
-                    </p>
-                  </div>
-
-                  <div className="mt-3 pt-2.5 border-t border-slate-800/60">
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-                      <span>Progreso estimado:</span>
-                      <span className="font-mono font-bold text-slate-300">{card.progress}%</span>
-                    </div>
-                    <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800">
-                      <div 
-                        className="bg-slate-400 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${card.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-          </div>
+          <VisionView
+            visionCards={visionCards}
+            onOpenGrillMe={() => {
+              setGrillStep(0);
+              setGrillAnswers({ area: 'Cuerpo & Salud', goal: '', why: '', deadline: '', commitment: '90%' });
+              setShowGrillMeModal(true);
+            }}
+            onEditCard={(card) => setEditingCard(card)}
+          />
         )}
 
         {/* ======================================================== */}
