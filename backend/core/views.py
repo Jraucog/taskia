@@ -252,6 +252,55 @@ class HabitViewSet(viewsets.ModelViewSet):
             'shared_with': list(habit.shared_with.values_list('username', flat=True))
         })
 
+    @action(detail=False, methods=['post'])
+    def share_plan(self, request):
+        """
+        Comparte un plan COMPLETO (todas las tareas que lo componen) con otro usuario.
+        Ejemplo: Compartir la lista completa del 'Supermercado' o 'Rutina TRX'.
+        """
+        plan_name = request.data.get('plan_name', '').strip()
+        target_identifier = request.data.get('username', '').strip()
+        action_type = request.data.get('action', 'add') # 'add' or 'remove'
+
+        if not plan_name or not target_identifier:
+            return Response({'error': 'Debes indicar plan_name y username'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from django.db.models import Q
+            target_user = User.objects.get(Q(username__iexact=target_identifier) | Q(email__iexact=target_identifier))
+        except User.DoesNotExist:
+            return Response({'error': f"Usuario '{target_identifier}' no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        if target_user == request.user:
+            return Response({'error': 'Ya eres el creador de este plan'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Buscar todos los hábitos del creador asociados al plan
+        # Ya sea por título "[Plan]..." o por inscripción directa
+        from django.db.models import Q
+        habits = Habit.objects.filter(
+            user=request.user,
+            active=True
+        ).filter(
+            Q(title__startswith=f"[{plan_name}]") | Q(enrollment__program__title=plan_name)
+        )
+
+        if not habits.exists():
+            return Response({'error': f"No se encontraron tareas bajo el plan '{plan_name}'"}, status=status.HTTP_404_NOT_FOUND)
+
+        for habit in habits:
+            if action_type == 'remove':
+                habit.shared_with.remove(target_user)
+            else:
+                habit.shared_with.add(target_user)
+
+        action_word = "dejó de compartir" if action_type == 'remove' else "compartió"
+        return Response({
+            'message': f"El plan '{plan_name}' ({habits.count()} tareas) se {action_word} con {target_user.username}",
+            'plan_name': plan_name,
+            'target_user': target_user.username,
+            'updated_tasks_count': habits.count()
+        })
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def sla_metrics_summary(request):

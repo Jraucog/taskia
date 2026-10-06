@@ -4,34 +4,47 @@ import type { Habit } from '../types';
 
 interface ShareModalProps {
   isOpen: boolean;
-  habit: Habit | null;
+  habit?: Habit | null;
+  planName?: string | null;
   currentUsername: string;
   onClose: () => void;
   onShare: (habitId: number, targetUsername: string, action: 'add' | 'remove') => Promise<{ ok: boolean; message?: string }>;
+  onSharePlan?: (planName: string, targetUsername: string, action: 'add' | 'remove') => Promise<{ ok: boolean; message?: string }>;
 }
 
 export const ShareModal: React.FC<ShareModalProps> = ({
   isOpen,
   habit,
+  planName,
   currentUsername,
   onClose,
-  onShare
+  onShare,
+  onSharePlan
 }) => {
   const [usernameInput, setUsernameInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  if (!isOpen || !habit) return null;
+  if (!isOpen || (!habit && !planName)) return null;
 
-  const isOwner = !habit.owner_username || habit.owner_username === currentUsername;
-  const sharedList = habit.shared_with_usernames || [];
+  const targetTitle = planName ? `Plan Completo: ${planName}` : (habit?.title || '');
+  const owner = habit?.owner_username || currentUsername;
+  const isOwner = !habit || !habit.owner_username || habit.owner_username === currentUsername;
+  const sharedList = habit?.shared_with_usernames || [];
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!usernameInput.trim()) return;
     setIsLoading(true);
     setFeedback(null);
-    const res = await onShare(habit.id, usernameInput.trim(), 'add');
+    let res: { ok: boolean; message?: string };
+    if (planName && onSharePlan) {
+      res = await onSharePlan(planName, usernameInput.trim(), 'add');
+    } else if (habit) {
+      res = await onShare(habit.id, usernameInput.trim(), 'add');
+    } else {
+      res = { ok: false, message: 'Destino no especificado' };
+    }
     setIsLoading(false);
     if (res.ok) {
       setFeedback({ type: 'success', text: res.message || 'Compartido con éxito' });
@@ -44,7 +57,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const handleRemove = async (uname: string) => {
     setIsLoading(true);
     setFeedback(null);
-    const res = await onShare(habit.id, uname, 'remove');
+    let res: { ok: boolean; message?: string };
+    if (planName && onSharePlan) {
+      res = await onSharePlan(planName, uname, 'remove');
+    } else if (habit) {
+      res = await onShare(habit.id, uname, 'remove');
+    } else {
+      res = { ok: false, message: 'Destino no especificado' };
+    }
     setIsLoading(false);
     if (res.ok) {
       setFeedback({ type: 'success', text: res.message || 'Usuario removido' });
@@ -59,15 +79,15 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Users className="w-4 h-4 text-indigo-400" />
-            <span>Compartir Tarea / Lista</span>
+            <span>{planName ? 'Compartir Plan Completo' : 'Compartir Tarea'}</span>
           </h3>
           <button onClick={onClose} className="text-slate-500 hover:text-white text-xs">✕</button>
         </div>
 
         <div className="bg-slate-950 p-3 rounded-xl border border-slate-800/80 mb-4">
-          <p className="text-xs font-semibold text-white truncate">{habit.title}</p>
+          <p className="text-xs font-semibold text-white truncate">{targetTitle}</p>
           <p className="text-[10px] text-slate-400 mt-0.5">
-            Creado por: <span className="text-indigo-400 font-medium">@{habit.owner_username || currentUsername}</span>
+            {planName ? 'Todas las tareas de este plan se compartirán' : `Creado por: @${owner}`}
           </p>
         </div>
 

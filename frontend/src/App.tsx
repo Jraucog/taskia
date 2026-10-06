@@ -496,8 +496,9 @@ export default function App() {
   // Modal para editar tarjeta individual del Vision Board
   const [editingCard, setEditingCard] = useState<VisionCard | null>(null);
 
-  // Modal para compartir hábito/tarea con otros usuarios
+  // Modal para compartir hábito/tarea o plan completo con otros usuarios
   const [shareModalHabit, setShareModalHabit] = useState<Habit | null>(null);
+  const [shareModalPlanName, setShareModalPlanName] = useState<string | null>(null);
 
   // Modal para Crear o Editar Hábitos / Planes Manualmente
   const [showHabitModal, setShowHabitModal] = useState(false);
@@ -745,6 +746,24 @@ export default function App() {
         } : null);
       }
 
+      return { ok: true, message: res.data.message };
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || 'Error al conectar con el servidor';
+      return { ok: false, message: msg };
+    }
+  };
+
+  const handleSharePlan = async (planName: string, targetUsername: string, actionType: 'add' | 'remove') => {
+    try {
+      const headers = getHeaders();
+      const res = await axios.post(`${API_BASE}/habits/share_plan/`, {
+        plan_name: planName,
+        username: targetUsername,
+        action: actionType
+      }, headers);
+
+      // Refrescar los hábitos desde el backend para actualizar estado de compartir en todas las tareas del plan
+      await fetchData(false);
       return { ok: true, message: res.data.message };
     } catch (err: any) {
       const msg = err.response?.data?.error || err.message || 'Error al conectar con el servidor';
@@ -2330,6 +2349,17 @@ export default function App() {
                             </div>
 
                             <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                title="Compartir este plan con otro usuario"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShareModalPlanName(plan.name);
+                                }}
+                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600/40 text-slate-400 hover:text-indigo-200 transition"
+                              >
+                                <Users className="w-3.5 h-3.5" />
+                              </button>
                               <span className={`text-xs font-black font-mono px-2 py-0.5 rounded-lg ${
                                 isAllDone ? 'bg-emerald-950 text-emerald-400' : 'bg-slate-950 text-amber-400'
                               }`}>
@@ -2388,9 +2418,19 @@ export default function App() {
                 {/* Banner de Cabecera del Plan Activo con Estadísticas de Reto */}
                 <div className="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 border border-amber-800/50 px-2 py-0.5 rounded-full">
-                      Plan Activo
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 border border-amber-800/50 px-2 py-0.5 rounded-full">
+                        Plan Activo
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShareModalPlanName(selectedPlanName)}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-300 hover:text-white bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/50 px-2.5 py-0.5 rounded-full transition"
+                      >
+                        <Users className="w-3 h-3 text-indigo-400" />
+                        Compartir Plan
+                      </button>
+                    </div>
                     <span className="text-xs font-mono font-bold text-amber-400">
                       {selectedPlanHabits.filter(h => h.today_log?.completed).length} / {selectedPlanHabits.length} días
                     </span>
@@ -2896,11 +2936,16 @@ export default function App() {
 
       {/* Modal: Compartir Tarea / Lista con otros usuarios */}
       <ShareModal
-        isOpen={!!shareModalHabit}
+        isOpen={!!shareModalHabit || !!shareModalPlanName}
         habit={shareModalHabit}
+        planName={shareModalPlanName}
         currentUsername={currentUser?.username || 'Joshua'}
-        onClose={() => setShareModalHabit(null)}
+        onClose={() => {
+          setShareModalHabit(null);
+          setShareModalPlanName(null);
+        }}
         onShare={handleShareHabit}
+        onSharePlan={handleSharePlan}
       />
 
       {/* Modal: Crear / Editar Manualmente Hábitos y Planes */}
