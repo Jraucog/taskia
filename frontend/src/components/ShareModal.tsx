@@ -6,6 +6,8 @@ interface ShareModalProps {
   isOpen: boolean;
   habit?: Habit | null;
   planName?: string | null;
+  planSharedWith?: string[];
+  planOwner?: string;
   currentUsername: string;
   onClose: () => void;
   onShare: (habitId: number, targetUsername: string, action: 'add' | 'remove') => Promise<{ ok: boolean; message?: string }>;
@@ -16,6 +18,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   isOpen,
   habit,
   planName,
+  planSharedWith,
+  planOwner,
   currentUsername,
   onClose,
   onShare,
@@ -28,9 +32,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   if (!isOpen || (!habit && !planName)) return null;
 
   const targetTitle = planName ? `Plan Completo: ${planName}` : (habit?.title || '');
-  const owner = habit?.owner_username || currentUsername;
-  const isOwner = !habit || !habit.owner_username || habit.owner_username === currentUsername;
-  const sharedList = habit?.shared_with_usernames || [];
+  const owner = planName ? (planOwner || currentUsername) : (habit?.owner_username || currentUsername);
+  const isOwner = planName 
+    ? (!planOwner || planOwner === currentUsername)
+    : (!habit || !habit.owner_username || habit.owner_username === currentUsername);
+  
+  // Lista de compartidos: si es plan, usamos planSharedWith; si es hábito, habit.shared_with_usernames
+  const sharedList = planName ? (planSharedWith || []) : (habit?.shared_with_usernames || []);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,8 +171,27 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           </>
         ) : (
           <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/60 text-xs text-slate-300">
-            <p>Esta tarea fue compartida contigo por <strong>@{habit.owner_username}</strong>.</p>
-            <p className="text-[11px] text-slate-400 mt-1">Cualquier cambio que realices o marques se actualizará en tiempo real para ambos.</p>
+            <p>Este {planName ? 'plan' : 'hábito'} fue compartido contigo por <strong>@{owner}</strong>.</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Cualquier ítem que marques o agregues se sincronizará automáticamente para que ambos lo vean.
+            </p>
+            {sharedList.length > 0 && (
+              <div className="mt-3 pt-2 border-t border-slate-800/80">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block mb-1">
+                  Participantes del plan:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="text-[11px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full text-indigo-300 font-medium">
+                    👑 @{owner} (Creador)
+                  </span>
+                  {sharedList.map(u => (
+                    <span key={u} className="text-[11px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full text-emerald-300 font-medium">
+                      @{u}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

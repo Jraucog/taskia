@@ -152,7 +152,30 @@ class HabitViewSet(viewsets.ModelViewSet):
         ).distinct().order_by('-created_at')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        habit = serializer.save(user=self.request.user)
+        # Robustez: Si el hábito pertenece a un plan (ej. "[Supermercado] Manzanas"),
+        # heredar automáticamente los colaboradores (shared_with) que ya tiene dicho plan
+        import re
+        match = re.match(r'^\[(.*?)\]', habit.title)
+        if match:
+            plan_name = match.group(1).strip()
+            from django.db.models import Q
+            sibling = Habit.objects.filter(
+                Q(user=self.request.user) | Q(shared_with=self.request.user),
+                active=True
+            ).filter(
+                Q(title__startswith=f"[{plan_name}]") | Q(enrollment__program__title=plan_name)
+            ).exclude(id=habit.id).first()
+            if sibling:
+                # Si el usuario actual es el dueño o colaborador, asociar todos los usuarios compartidos
+                collaborators = list(sibling.shared_with.all())
+                # Si el creador del nuevo item es un colaborador y no el dueño original del plan,
+                # asegurar que el dueño original también esté en shared_with (o como owner)
+                if sibling.user != self.request.user and sibling.user not in collaborators:
+                    collaborators.append(sibling.user)
+                for colab in collaborators:
+                    if colab != self.request.user:
+                        habit.shared_with.add(colab)
 
     @action(detail=False, methods=['get'])
     def today(self, request):
@@ -274,15 +297,15 @@ class HabitViewSet(viewsets.ModelViewSet):
         if target_user == request.user:
             return Response({'error': 'Ya eres el creador de este plan'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Buscar todos los hábitos del creador asociados al plan
-        # Ya sea por título "[Plan]..." o por inscripción directa
+        # Buscar todos los hábitos asociados al plan accesibles por el usuario
+        # (ya sea que sea el dueño original o colaborador)
         from django.db.models import Q
         habits = Habit.objects.filter(
-            user=request.user,
+            Q(user=request.user) | Q(shared_with=request.user),
             active=True
         ).filter(
             Q(title__startswith=f"[{plan_name}]") | Q(enrollment__program__title=plan_name)
-        )
+        ).distinct()
 
         if not habits.exists():
             return Response({'error': f"No se encontraron tareas bajo el plan '{plan_name}'"}, status=status.HTTP_404_NOT_FOUND)
@@ -291,14 +314,22 @@ class HabitViewSet(viewsets.ModelViewSet):
             if action_type == 'remove':
                 habit.shared_with.remove(target_user)
             else:
-                habit.shared_with.add(target_user)
+                if habit.user != target_user:
+                    habit.shared_with.add(target_user)
+
+        # Calcular todos los usuarios que actualmente tienen acceso compartido a este plan
+        plan_shared_users = set()
+        for h in habits:
+            for u in h.shared_with.all():
+                plan_shared_users.add(u.username)
 
         action_word = "dejó de compartir" if action_type == 'remove' else "compartió"
         return Response({
             'message': f"El plan '{plan_name}' ({habits.count()} tareas) se {action_word} con {target_user.username}",
             'plan_name': plan_name,
             'target_user': target_user.username,
-            'updated_tasks_count': habits.count()
+            'updated_tasks_count': habits.count(),
+            'shared_with': sorted(list(plan_shared_users))
         })
 
 @api_view(['GET'])

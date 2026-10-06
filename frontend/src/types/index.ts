@@ -89,6 +89,8 @@ export interface ProgramGroup {
   completedCount: number;
   totalCount: number;
   progressPercent: number;
+  sharedWith?: string[];
+  isShared?: boolean;
 }
 
 export type AppTheme = 'dark' | 'light' | 'cyberpunk' | 'emerald' | 'dracula' | 'saiyan' | 'saiyan-light';

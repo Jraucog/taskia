@@ -611,9 +611,28 @@ export default function App() {
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    // Sincronización en segundo plano: al volver a enfocar la pestaña (visibilitychange)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) {
+        fetchData(false);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Polling periódico cada 20s para que listas compartidas (ej. supermercado con la esposa)
+    // se actualicen automáticamente sin tener que recargar la página manualmente
+    const pollInterval = setInterval(() => {
+      if (document.visibilityState === 'visible' && navigator.onLine) {
+        fetchData(false);
+      }
+    }, 20000);
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(pollInterval);
     };
   }, []);
 
@@ -1270,6 +1289,18 @@ export default function App() {
       setIslandMessage(`✏️ Hábito "${habitFormData.title}" actualizado.`);
     } else {
       const tempId = Date.now();
+      // Si el plan ya tiene colaboradores compartidos, heredarlos inmediatamente en el estado local
+      const planNameVal = habitFormData.planName.trim();
+      let inheritedSharedWith: string[] = [];
+      let inheritedOwner = currentUser?.username || 'Joshua';
+      if (planNameVal) {
+        const sibling = habits.find(h => getPlanNameFromHabit(h).toLowerCase() === planNameVal.toLowerCase());
+        if (sibling) {
+          inheritedSharedWith = sibling.shared_with_usernames || [];
+          if (sibling.owner_username) inheritedOwner = sibling.owner_username;
+        }
+      }
+
       const newLocalHabit: Habit = {
         id: tempId,
         title: payload.title,
@@ -1282,6 +1313,9 @@ export default function App() {
         days_of_week: payload.days_of_week,
         sla_target_percent: payload.sla_target_percent,
         reset_on_miss: habitFormData.reset_on_miss,
+        owner_username: inheritedOwner,
+        shared_with_usernames: inheritedSharedWith,
+        is_shared: inheritedSharedWith.length > 0,
         today_log: { completed: false, value: 0, is_in_sla: false },
         compliance_summary: { rate_percent: 0, meets_sla: false, completed_last_7_days: 0 }
       };
@@ -1402,12 +1436,22 @@ export default function App() {
   const planSummaryList: ProgramGroup[] = Object.keys(planGroups).map(name => {
     const list = planGroups[name];
     const completed = list.filter(h => h.today_log?.completed).length;
+    // Extraer lista única de usuarios con quienes está compartido este plan
+    const sharedUsersSet = new Set<string>();
+    list.forEach(h => {
+      (h.shared_with_usernames || []).forEach(u => sharedUsersSet.add(u));
+    });
+    const sharedWith = Array.from(sharedUsersSet);
+    const isShared = sharedWith.length > 0 || list.some(h => h.is_shared);
+
     return {
       name,
       habits: list,
       totalCount: list.length,
       completedCount: completed,
-      progressPercent: list.length > 0 ? Math.round((completed / list.length) * 100) : 0
+      progressPercent: list.length > 0 ? Math.round((completed / list.length) * 100) : 0,
+      sharedWith,
+      isShared
     };
   });
 
@@ -2341,7 +2385,15 @@ export default function App() {
                                 {isAllDone ? <CheckSquare className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
                               </div>
                               <div>
-                                <h3 className="font-bold text-sm text-white line-clamp-1">{plan.name}</h3>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h3 className="font-bold text-sm text-white line-clamp-1">{plan.name}</h3>
+                                  {plan.isShared && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 font-medium px-2 py-0.5 rounded-full">
+                                      <Users className="w-2.5 h-2.5" />
+                                      <span>Compartido {plan.sharedWith && plan.sharedWith.length > 0 ? `(${plan.sharedWith.map(u => `@${u}`).join(', ')})` : ''}</span>
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-xs text-slate-400 mt-0.5">
                                   {plan.completedCount} de {plan.totalCount} completadas hoy
                                 </p>
@@ -2356,7 +2408,11 @@ export default function App() {
                                   e.stopPropagation();
                                   setShareModalPlanName(plan.name);
                                 }}
-                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600/40 text-slate-400 hover:text-indigo-200 transition"
+                                className={`p-1.5 rounded-lg transition ${
+                                  plan.isShared 
+                                    ? 'bg-emerald-950/80 border border-emerald-800 text-emerald-300 hover:bg-emerald-900' 
+                                    : 'bg-slate-800 hover:bg-indigo-600/40 text-slate-400 hover:text-indigo-200'
+                                }`}
                               >
                                 <Users className="w-3.5 h-3.5" />
                               </button>
@@ -2939,6 +2995,8 @@ export default function App() {
         isOpen={!!shareModalHabit || !!shareModalPlanName}
         habit={shareModalHabit}
         planName={shareModalPlanName}
+        planSharedWith={shareModalPlanName ? planSummaryList.find(p => p.name === shareModalPlanName)?.sharedWith : undefined}
+        planOwner={shareModalPlanName ? planSummaryList.find(p => p.name === shareModalPlanName)?.habits[0]?.owner_username : undefined}
         currentUsername={currentUser?.username || 'Joshua'}
         onClose={() => {
           setShareModalHabit(null);

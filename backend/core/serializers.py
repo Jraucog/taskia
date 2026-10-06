@@ -87,6 +87,7 @@ class HabitLogSerializer(serializers.ModelSerializer):
         fields = ['id', 'habit', 'date', 'value', 'completed', 'is_in_sla', 'notes']
 
 class HabitSerializer(serializers.ModelSerializer):
+    active = serializers.BooleanField(default=True)
     today_log = serializers.SerializerMethodField()
     compliance_summary = serializers.SerializerMethodField()
     is_scheduled_today = serializers.SerializerMethodField()
