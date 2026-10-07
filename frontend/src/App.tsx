@@ -1090,23 +1090,28 @@ export default function App() {
 
     // 2. Disparar notificación de sistema si los permisos están concedidos
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      const notificationOptions: any = {
+        body,
+        icon: '/taskia/pwa-192x192.png',
+        badge: '/taskia/pwa-192x192.png',
+        tag: 'taskia-coach-reminder',
+        data: { url: '/taskia/' },
+        vibrate: [150, 60, 150]
+      };
+
       if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
         navigator.serviceWorker.ready.then((reg) => {
-          reg.showNotification(title, {
-            body,
-            icon: '/pwa-192x192.png',
-            badge: '/pwa-192x192.png'
-          });
+          reg.showNotification(title, notificationOptions);
         }).catch(() => {
           try {
-            new Notification(title, { body, icon: '/pwa-192x192.png' });
+            new Notification(title, notificationOptions);
           } catch (e) {
             console.log("Fallback notification", e);
           }
         });
       } else {
         try {
-          new Notification(title, { body, icon: '/pwa-192x192.png' });
+          new Notification(title, notificationOptions);
         } catch (e) {
           console.log("Direct notification", e);
         }
@@ -2056,16 +2061,34 @@ export default function App() {
         </div>
       </header>
 
-      {/* Alerta Flotante Estilo Notificación de Sistema (In-App Push Banner) */}
+      {/* Alerta Flotante Estilo Notificación de Sistema (In-App Push Banner con Acción Táctica) */}
       {activeAlert && (
         <div className="fixed top-3 left-3 right-3 z-50 max-w-md mx-auto animate-bounce-short">
-          <div className="bg-slate-900 border border-slate-700 text-white rounded-2xl p-3 shadow-2xl flex items-start gap-2.5 backdrop-blur-md">
+          <div 
+            onClick={() => {
+              haptics.tap();
+              setActiveAlert(null);
+              setShowFocusModal(true);
+            }}
+            className="bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white rounded-2xl p-3 shadow-2xl flex items-start gap-2.5 backdrop-blur-md cursor-pointer transition active:scale-98"
+          >
             <span className="text-xl shrink-0 mt-0.5">{activeAlert.emoji}</span>
             <div className="flex-1">
-              <h4 className="text-xs font-bold text-white">{activeAlert.title}</h4>
+              <div className="flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-white">{activeAlert.title}</h4>
+                <span className="text-[9px] font-mono bg-indigo-900/80 text-indigo-300 px-1.5 py-0.2 rounded">Toca para actuar</span>
+              </div>
               <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">{activeAlert.body}</p>
             </div>
-            <button onClick={() => setActiveAlert(null)} className="text-slate-500 hover:text-white text-xs p-1">✕</button>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveAlert(null);
+              }} 
+              className="text-slate-500 hover:text-white text-xs p-1 min-h-[32px] min-w-[32px] flex items-center justify-center"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}
