@@ -1450,8 +1450,55 @@ export default function App() {
       setActiveTab('today');
       setSelectedPlanName(null);
     } catch (err) {
-      console.error("Error al inscribir programa:", err);
-      alert("Error al inscribirse en el programa.");
+      console.warn("Backend no disponible o error al inscribir online, aplicando inscripción local:", err);
+      // Soporte Local-First Offline: si el backend no responde, instanciar los hábitos localmente
+      const targetProg = programs.find(p => p.id === programId);
+      if (targetProg && targetProg.items && targetProg.items.length > 0) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const newHabits: Habit[] = targetProg.items.map((it, idx) => {
+          const habitTitle = `[${targetProg.title}] ${it.title}`;
+          return {
+            id: Date.now() + idx,
+            title: habitTitle,
+            description: it.description || '',
+            habit_type: (it.habit_type as 'boolean' | 'numeric') || 'boolean',
+            target_value: it.target_value || 1,
+            unit: it.unit || '',
+            estimated_minutes: it.estimated_minutes || 10,
+            sla_target_percent: 85,
+            frequency_type: 'daily',
+            day_offset: it.day_offset ?? null,
+            owner_username: currentUser?.username || 'Usuario',
+            today_log: {
+              completed: false,
+              value: 0,
+              is_in_sla: false,
+            },
+            compliance_summary: {
+              completed_last_7_days: 0,
+              rate_percent: 0,
+              meets_sla: false,
+              history: [
+                { date: todayStr, day_name: 'Hoy', completed: false, value: 0 }
+              ]
+            }
+          };
+        });
+        
+        // Evitar duplicar hábitos si ya existen con el mismo título
+        const currentTitles = new Set(habits.map(h => h.title));
+        const toAdd = newHabits.filter(h => !currentTitles.has(h.title));
+        const updatedHabits = [...habits, ...toAdd];
+        setHabits(updatedHabits);
+        saveLocalHabits(updatedHabits);
+        
+        alert(`¡Inscrito con éxito en "${targetProg.title}"! Se añadieron ${toAdd.length} hábitos a tu panel.`);
+        setActiveTab('today');
+        setSelectedPlanName(null);
+        setPreviewProgram(null);
+      } else {
+        alert("Error al inscribirse en el programa.");
+      }
     }
   };
 

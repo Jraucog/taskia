@@ -72,6 +72,7 @@ export const ProgramsView: React.FC<ProgramsViewProps> = ({
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
         {[
           { id: 'all', label: 'Todas las Plantillas' },
+          { id: 'Idiomas', label: '🇬🇧 Inglés & Método Anki' },
           { id: 'Respiración', label: '🫁 Respiración & Estrés' },
           { id: 'Fuerza', label: '🦵 TRX & Aquiles' },
           { id: 'Disciplina', label: '✍️ Brian Tracy (Fórmula 3P)' },

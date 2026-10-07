@@ -8,6 +8,9 @@
 
 import axios from 'axios';
 import type { Habit, Program, MetricsSummary, CoachProfile } from '../types';
+import defaultProgramsData from './defaultPrograms.json';
+
+export const DEFAULT_PROGRAMS: Program[] = defaultProgramsData as unknown as Program[];
 
 export interface PendingAction {
   id: string;
@@ -53,9 +56,23 @@ export const saveLocalHabits = (habits: Habit[]) => {
 export const getLocalPrograms = (): Program[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.PROGRAMS);
-    return raw ? JSON.parse(raw) : [];
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Asegurarse de que si se añadieron nuevos programas por defecto (como Inglés Anki), estén incluidos
+        const existingIds = new Set(parsed.map((p: Program) => p.id));
+        const missingDefaults = DEFAULT_PROGRAMS.filter(dp => !existingIds.has(dp.id));
+        if (missingDefaults.length > 0) {
+          const merged = [...parsed, ...missingDefaults];
+          saveLocalPrograms(merged);
+          return merged;
+        }
+        return parsed;
+      }
+    }
+    return DEFAULT_PROGRAMS;
   } catch {
-    return [];
+    return DEFAULT_PROGRAMS;
   }
 };
 

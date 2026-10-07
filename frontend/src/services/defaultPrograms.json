@@ -1,0 +1,750 @@
+[
+  {
+    "id": 1,
+    "title": "Plan de Acondicionamiento 30 Días",
+    "description": "Programa progresivo de fuerza, movilidad y cardio para formar el hábito deportivo.",
+    "category": "Fitness & Salud",
+    "duration_days": 30,
+    "items": [
+      {
+        "id": 1,
+        "title": "Correr o Caminata Rápida (minutos)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 30.0,
+        "unit": "min",
+        "description": "Cardio moderado continuo",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 2,
+        "title": "Sesión de Fuerza / Calistenia (series)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 4.0,
+        "unit": "series",
+        "description": "Flexiones, sentadillas y fondos",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 3,
+        "title": "Estiramientos y Movilidad",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "10 min de estiramientos post entreno",
+        "estimated_minutes": 5
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Entrenamiento de Fuerza & Acondicionamiento TRX",
+    "description": "Programa progresivo de fuerza funcional con peso corporal y correas de suspensión TRX.",
+    "category": "Fuerza & Condición Física",
+    "duration_days": 30,
+    "items": [
+      {
+        "id": 4,
+        "title": "1. Dorsiflexión dinámica de tobillo en pared",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 2.0,
+        "unit": "series",
+        "description": "2 series x 10 reps por pierna (Movilidad y Activación)",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 5,
+        "title": "2. Sentadilla búlgara en suspensión TRX",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 3.0,
+        "unit": "series",
+        "description": "3 series x 8-10 reps por pierna (bajada excéntrica 3-4s)",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 6,
+        "title": "3. Pistol squat asistida TRX",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 3.0,
+        "unit": "series",
+        "description": "3 series x 8 reps por pierna (Cadera y Cuádriceps)",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 7,
+        "title": "4. Curl de isquiotibiales en suspensión + puente TRX",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 3.0,
+        "unit": "series",
+        "description": "3 series x 10-12 reps (Cadena Posterior)",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 8,
+        "title": "5. Peso muerto rumano a una pierna asistido TRX",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 3.0,
+        "unit": "series",
+        "description": "3 series x 10 reps por pierna (Estabilidad de Apoyo)",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 9,
+        "title": "6. Elevación de talón a 1 pierna en escalón TRX",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 4.0,
+        "unit": "series",
+        "description": "3-4 series x 10-12 reps (3s subida, 1s pausa, 3-4s bajada excéntrica Aquiles)",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 10,
+        "title": "7. Sentadilla isométrica en pared c/ talones elevados",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 3.0,
+        "unit": "series",
+        "description": "3 series x 35-40s (Enfoque Sóleo)",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 11,
+        "title": "8. Plancha Saw con pies en suspensión TRX",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 3.0,
+        "unit": "series",
+        "description": "3 series x 10 reps lentas (Core / Anti-rotación)",
+        "estimated_minutes": 5
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Desafio 21 Dias del Cuaderno de Brian Tracy",
+    "description": "Reto cerrado de 21 dias continuos. Escribir 10 metas diarias a mano sin mirar el dia anterior. Si fallas un dia, reinicio a 0/21.",
+    "category": "Disciplina & Mentalidad",
+    "duration_days": 21,
+    "items": [
+      {
+        "id": 12,
+        "title": "Dia 1 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 13,
+        "title": "Dia 2 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 1,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 14,
+        "title": "Dia 3 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 2,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 15,
+        "title": "Dia 4 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 3,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 16,
+        "title": "Dia 5 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 4,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 17,
+        "title": "Dia 6 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 5,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 18,
+        "title": "Dia 7 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 6,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 19,
+        "title": "Dia 8 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 7,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 20,
+        "title": "Dia 9 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 8,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 21,
+        "title": "Dia 10 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 9,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 22,
+        "title": "Dia 11 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 10,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 23,
+        "title": "Dia 12 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 11,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 24,
+        "title": "Dia 13 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 12,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 25,
+        "title": "Dia 14 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 13,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 26,
+        "title": "Dia 15 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 14,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 27,
+        "title": "Dia 16 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 15,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 28,
+        "title": "Dia 17 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 16,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 29,
+        "title": "Dia 18 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 17,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 30,
+        "title": "Dia 19 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 18,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 31,
+        "title": "Dia 20 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 19,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 32,
+        "title": "Dia 21 - Escribir 10 Metas a Mano (Formula 3P)",
+        "day_offset": 20,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "registro",
+        "description": "A primera hora sin mirar el dia anterior. Formula 3P: Presente, Positivo, Personal. Regla: si fallas un dia, reinicio a 0/21.",
+        "estimated_minutes": 5
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Mañanas Milagrosas & Enfoque Profundo (SAVERS)",
+    "description": "Estructura matutina de alto impacto: Silencio, Afirmaciones, Visualización, Ejercicio, Lectura y Escritura.",
+    "category": "Desarrollo Personal",
+    "duration_days": 30,
+    "items": [
+      {
+        "id": 33,
+        "title": "Silencio y Meditación (10 min)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 10.0,
+        "unit": "min",
+        "description": "Respiración consciente o meditación guiada",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 34,
+        "title": "Visualización de Metas 100M",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "5 minutos viendo tu Vision Board y objetivos",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 35,
+        "title": "Lectura de Crecimiento (páginas)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 10.0,
+        "unit": "págs",
+        "description": "Libro de negocios, disciplina o filosofía",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 36,
+        "title": "Escritura & Journaling Diario",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "10 metas diarias de Brian Tracy a mano",
+        "estimated_minutes": 5
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Desintoxicación Dopamina & Productividad",
+    "description": "Reset neurocognitivo para recuperar foco, eliminar procrastinación en redes y producir software de calidad.",
+    "category": "Foco & Disciplina",
+    "duration_days": 14,
+    "items": [
+      {
+        "id": 37,
+        "title": "Cero Redes Sociales antes de las 12:00",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Protege tus mañanas de la distracción",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 38,
+        "title": "Bloque Deep Work Software / MVP (horas)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 2.0,
+        "unit": "hrs",
+        "description": "Programación pura sin interrupciones",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 39,
+        "title": "Caminar 8.000 pasos en naturaleza / sol",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 8000.0,
+        "unit": "pasos",
+        "description": "Regulación del cortisol y claridad mental",
+        "estimated_minutes": 5
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Respiración Táctica & Alivio del Estrés Diario",
+    "description": "Protocolo neurobiológico de respiración consciente para reducir cortisol, resetear el sistema nervioso autónomo y mantener claridad mental ante alta presión.",
+    "category": "Respiración",
+    "duration_days": 21,
+    "items": [
+      {
+        "id": 40,
+        "title": "Respiración Cuadrada (Box Breathing 4-4-4-4)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 1.0,
+        "unit": "sesión",
+        "description": "Inhala 4s, retén 4s, exhala 4s, retén vacío 4s. 5 minutos para calmar el ritmo cardíaco y enfocar la mente.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 41,
+        "title": "Suspiro Fisiológico Cíclico (Dr. Huberman)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 25.0,
+        "unit": "ciclos",
+        "description": "Doble inhalación profunda por la nariz + exhalación prolongada y lenta por la boca. 25 repeticiones para desactivar ansiedad inmediata.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 42,
+        "title": "Respiración 4-7-8 al finalizar la jornada laboral",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 4.0,
+        "unit": "ciclos",
+        "description": "Inhala en 4s, retén 7s, exhala suavemente en 8s por la boca. Estimula el nervio vago y facilita desconexión y sueño reparador.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 43,
+        "title": "Pausa de Coherencia Cardíaca (5s Inhala / 5s Exhala)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 5.0,
+        "unit": "minutos",
+        "description": "Cadencia rítmica de 6 respiraciones por minuto durante 5 minutos a mitad del día laboral para restaurar equilibrio emocional.",
+        "estimated_minutes": 5
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Higiene del Sueño & Ritmo Circadiano Óptimo",
+    "description": "Protocolo neurocientífico para optimizar el sueño profundo (REM y No-REM), acelerar la recuperación muscular y despertar con energía.",
+    "category": "Sueño & Recuperación",
+    "duration_days": 21,
+    "items": [
+      {
+        "id": 44,
+        "title": "Luz solar matutina directa (10-15 min)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 15.0,
+        "unit": "min",
+        "description": "Mirar hacia la luz natural sin gafas de sol antes de las 9:00 para fijar el reloj circadiano",
+        "estimated_minutes": 15
+      },
+      {
+        "id": 45,
+        "title": "Corte absoluto de cafeína antes de las 14:00",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Evitar adenosina residual que bloquea la arquitectura del sueño nocturno",
+        "estimated_minutes": 1
+      },
+      {
+        "id": 46,
+        "title": "Ducha tibia y magnesio bisglicinato (30 min antes)",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Bajar la temperatura central del cuerpo e inducir la liberación natural de melatonina",
+        "estimated_minutes": 15
+      },
+      {
+        "id": 47,
+        "title": "Cero pantallas y luz azul 60 min antes de dormir",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Dormitorio a oscuras (19-20°C) sin teléfono móvil junto a la cama",
+        "estimated_minutes": 60
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Protocolo de Nutrición Saludable & Composición Corporal",
+    "description": "Pautas nutricionales limpias, hidratación de 3 litros diarios y hábitos alimenticios sostenibles.",
+    "category": "Nutrición & Salud",
+    "duration_days": 30,
+    "items": [
+      {
+        "id": 48,
+        "title": "Ingesta proteica mínima 1.8g/kg (150-160g diarios)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 155.0,
+        "unit": "gramos",
+        "description": "Huevos, pollo, carnes magras o pescado distribuidos en 3-4 comidas",
+        "estimated_minutes": 10
+      },
+      {
+        "id": 49,
+        "title": "Hidratación con electrolitos (3 Litros de agua diarios)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 3.0,
+        "unit": "litros",
+        "description": "Agua con pizca de sal marina al despertar para transporte de nutrientes y volumen celular",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 50,
+        "title": "Ventana de ayuno intermitente 14/10",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Cenar antes de las 21:00 y desayunar a las 11:00 para desinflamar el tracto digestivo y tendones",
+        "estimated_minutes": 1
+      },
+      {
+        "id": 51,
+        "title": "Cero ultraprocesados ni azúcar refinada en jornada laboral",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Mantener glucosa plana sin picos de insulina que generen somnolencia vespertina",
+        "estimated_minutes": 1
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Sprint de Productividad & Trabajo Profundo",
+    "description": "Estructura de bloques de enfoque profundo (Deep Work) sin distracciones para avanzar en tus proyectos clave.",
+    "category": "Productividad & Enfoque",
+    "duration_days": 30,
+    "items": [
+      {
+        "id": 52,
+        "title": "Bloque de Programación Profunda / Deep Work (2 horas)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 2.0,
+        "unit": "horas",
+        "description": "Sin notificaciones, teléfono en otra habitación. Desarrollar features nucleares del MVP",
+        "estimated_minutes": 120
+      },
+      {
+        "id": 53,
+        "title": "Commit y Verificación de Calidad en Git",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Subir código limpio, probado y documentado al repositorio diario",
+        "estimated_minutes": 10
+      },
+      {
+        "id": 54,
+        "title": "Contacto o Feedback de 1 Potencial Cliente / Usuario",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Validar dolor real de mercado y propuesta de valor antes de sobre-diseñar",
+        "estimated_minutes": 20
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Hábito Creativo Diario & Expresión Artística",
+    "description": "30 a 45 minutos diarios dedicados a tu arte, instrumento, escritura o proyecto creativo personal.",
+    "category": "Creatividad & Pasión",
+    "duration_days": 30,
+    "items": [
+      {
+        "id": 55,
+        "title": "Sesión en DAW / Beatmaking (40 min)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 40.0,
+        "unit": "min",
+        "description": "Composición de estructura, baterías, bajo, melodías principales y puente",
+        "estimated_minutes": 40
+      },
+      {
+        "id": 56,
+        "title": "Diseño Sonoro & Selección de Timbres Únicos",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Elegir sintetizadores, texturas y percusiones con carácter distintivo",
+        "estimated_minutes": 15
+      },
+      {
+        "id": 57,
+        "title": "Escucha Crítica & Referenciación A/B en Distintos Altavoces",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Probar balance estéreo y frecuencias bajas en audífonos, monitores y celular",
+        "estimated_minutes": 15
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "title": "Plan de Organización & Mejoras del Hogar",
+    "description": "Hábitos y tareas ordenadas para la gestión de proyectos, mantención y confort de tu casa.",
+    "category": "Hogar & Organización",
+    "duration_days": 21,
+    "items": [
+      {
+        "id": 58,
+        "title": "Gestión de Cotizaciones y Contacto de Proveedores",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Comparar perfiles PVC, cristales Low-E, garantías y tiempos de instalación",
+        "estimated_minutes": 25
+      },
+      {
+        "id": 59,
+        "title": "Presupuesto y Planificación Financiera del Hogar",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Asignar fondos mensuales para compras de materiales sin desviar capital operativo",
+        "estimated_minutes": 15
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "title": "Inglés Táctico & Repetición Espaciada (Método Anki)",
+    "description": "Dominio progresivo del inglés mediante repetición espaciada (SRS), active recall de flashcards, shadowing y consumo inmersivo diario. 30 días para consolidar fluidez y vocabulario técnico.",
+    "category": "Idiomas & Aprendizaje",
+    "duration_days": 30,
+    "items": [
+      {
+        "id": 60,
+        "title": "Anki SRS: 20 Flashcards Nuevas de Vocabulario & Phrasal Verbs",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 20.0,
+        "unit": "cards",
+        "description": "Aprender y retener 20 tarjetas nuevas con oraciones de contexto en Anki.",
+        "estimated_minutes": 15
+      },
+      {
+        "id": 61,
+        "title": "Anki SRS: Repaso Diario de Tarjetas Vencidas (Due Cards)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 50.0,
+        "unit": "cards",
+        "description": "Completar la cola diaria de tarjetas vencidas sin posponer según el algoritmo SRS de Anki.",
+        "estimated_minutes": 15
+      },
+      {
+        "id": 62,
+        "title": "Técnica de Shadowing & Pronunciación (10 min)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 10.0,
+        "unit": "min",
+        "description": "Repetir en voz alta inmediatamente detrás de un audio nativo o podcast imitando entonación y acento.",
+        "estimated_minutes": 10
+      },
+      {
+        "id": 63,
+        "title": "Inmersión Auditiva Activa (Podcast / YouTube en Inglés)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 20.0,
+        "unit": "min",
+        "description": "Escucha sin subtítulos en español (tecnología, negocios, entrevistas o audiolibros).",
+        "estimated_minutes": 20
+      },
+      {
+        "id": 64,
+        "title": "Active Recall: Escribir 3 Oraciones Propias con Vocabulario del Día",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 3.0,
+        "unit": "oraciones",
+        "description": "Escribir oraciones de tu vida real usando las palabras aprendidas hoy para consolidar memoria episódica.",
+        "estimated_minutes": 5
+      }
+    ]
+  }
+]
