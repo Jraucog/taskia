@@ -37,16 +37,18 @@ export const ProgramsView: React.FC<ProgramsViewProps> = ({
           <p className="text-xs text-slate-400">Explora o previsualiza plantillas antes de activarlas</p>
         </div>
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={onNavigateInject}
-            className="text-[10px] font-mono bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2 py-1 rounded-xl flex items-center gap-1 transition"
-            title="Inyector de Programas JSON"
-          >
-            <Zap className="w-3 h-3 text-emerald-400" />
-            <span>API JSON</span>
-          </button>
+          {onNavigateInject && (
+            <button
+              onClick={onNavigateInject}
+              className="text-[10px] font-mono bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 px-2 py-1 rounded-xl flex items-center gap-1 transition"
+              title="Herramienta avanzada: Inyector de Programas JSON"
+            >
+              <Zap className="w-3 h-3 text-emerald-400" />
+              <span className="hidden sm:inline">Avanzado</span>
+            </button>
+          )}
           <span className="text-[10px] font-mono bg-indigo-950 text-indigo-300 border border-indigo-800/60 px-2 py-1 rounded-xl">
-            {programs.length}
+            {programs.length} plantillas
           </span>
         </div>
       </div>

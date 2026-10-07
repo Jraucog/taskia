@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   CheckCircle2, Circle, Flame, Zap, 
-  Layers, RefreshCw,
+  Layers, RefreshCw, Sparkles,
   User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
   Check, Plus, Minus, ChevronDown, ChevronRight,
   ArrowLeft, CheckSquare, BookOpen,
@@ -36,7 +36,8 @@ import type {
   AppTheme,
   ThemeOption,
   Badge,
-  VisionCard
+  VisionCard,
+  BrianTracyGoal
 } from './types';
 import { UserProfileModal } from './components/UserProfileModal';
 import { ProgramPreviewModal } from './components/ProgramPreviewModal';
@@ -332,8 +333,8 @@ export default function App() {
   // Modal para inspeccionar plantilla en el Catálogo antes de inscribir
   const [previewProgram, setPreviewProgram] = useState<Program | null>(null);
 
-  // Vision Board y Grill-Me Interactivo
-  const defaultVisionCards: VisionCard[] = [
+  // Tarjetas del Vision Board de Joshua (preservadas para su cuenta)
+  const joshuaVisionCards: VisionCard[] = [
     {
       id: "v-1",
       category: "Salud y Tren Inferior",
@@ -376,14 +377,87 @@ export default function App() {
     }
   ];
 
+  // Tarjetas de Vision Board universales y aspiracionales para nuevos usuarios
+  const universalVisionCards: VisionCard[] = [
+    {
+      id: "uv-1",
+      category: "Salud & Energía",
+      emoji: "⚡",
+      title: "Condición Física de Alto Rendimiento & Salud Integral",
+      why: "Vivir con energía desbordante, claridad mental y longevidad activa.",
+      deadline: "31/12/2026",
+      progress: 50,
+      color: "from-emerald-950/60 to-emerald-900/20 border-emerald-500/40"
+    },
+    {
+      id: "uv-2",
+      category: "Finanzas & Libertad",
+      emoji: "📈",
+      title: "Fondo de Libertad Financiera e Inversiones Estratégicas",
+      why: "Tener tranquilidad, autonomía de tiempo y respaldo sólido para mi futuro.",
+      deadline: "31/12/2027",
+      progress: 35,
+      color: "from-indigo-950/60 to-indigo-900/20 border-indigo-500/40"
+    },
+    {
+      id: "uv-3",
+      category: "Carrera & Impacto",
+      emoji: "🚀",
+      title: "Maestría Profesional & Proyectos de Alto Impacto",
+      why: "Desarrollar mi máximo potencial, liderar con el ejemplo y aportar valor tangible.",
+      deadline: "30/06/2027",
+      progress: 45,
+      color: "from-amber-950/60 to-amber-900/20 border-amber-500/40"
+    },
+    {
+      id: "uv-4",
+      category: "Paz Mental & Relaciones",
+      emoji: "🧘",
+      title: "Equilibrio Emocional, Presencia Familiar y Sabiduría",
+      why: "Cultivar relaciones profundas y vivir con serenidad interior cada día.",
+      deadline: "31/12/2026",
+      progress: 60,
+      color: "from-purple-950/60 to-purple-900/20 border-purple-500/40"
+    }
+  ];
+
   const [visionCards, setVisionCards] = useState<VisionCard[]>(() => {
-    const saved = localStorage.getItem('taskia_vision_cards');
-    return saved ? JSON.parse(saved) : defaultVisionCards;
+    const userKey = currentUser?.username ? `taskia_vision_cards_${currentUser.username.toLowerCase()}` : 'taskia_vision_cards';
+    const saved = localStorage.getItem(userKey);
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* fallback */ }
+    }
+    // Si ya existía un guardado previo en 'taskia_vision_cards', respetarlo para Joshua
+    const legacySaved = localStorage.getItem('taskia_vision_cards');
+    if (legacySaved) {
+      try { return JSON.parse(legacySaved); } catch { /* fallback */ }
+    }
+    const isJoshuaUser = currentUser?.username?.toLowerCase().includes('joshua') || !currentUser?.username;
+    return isJoshuaUser ? joshuaVisionCards : universalVisionCards;
   });
 
+  // Actualizar tarjetas al cambiar de usuario
   useEffect(() => {
-    localStorage.setItem('taskia_vision_cards', JSON.stringify(visionCards));
-  }, [visionCards]);
+    const userKey = currentUser?.username ? `taskia_vision_cards_${currentUser.username.toLowerCase()}` : 'taskia_vision_cards';
+    const saved = localStorage.getItem(userKey);
+    if (saved) {
+      try {
+        setVisionCards(JSON.parse(saved));
+        return;
+      } catch { /* fallback */ }
+    }
+    const isJoshuaUser = currentUser?.username?.toLowerCase().includes('joshua');
+    setVisionCards(isJoshuaUser ? joshuaVisionCards : universalVisionCards);
+  }, [currentUser?.username]);
+
+  useEffect(() => {
+    const userKey = currentUser?.username ? `taskia_vision_cards_${currentUser.username.toLowerCase()}` : 'taskia_vision_cards';
+    localStorage.setItem(userKey, JSON.stringify(visionCards));
+    // Mantener sincronizado legacy para compatibilidad
+    if (currentUser?.username?.toLowerCase().includes('joshua') || !currentUser?.username) {
+      localStorage.setItem('taskia_vision_cards', JSON.stringify(visionCards));
+    }
+  }, [visionCards, currentUser?.username]);
 
   // Persist streak and badges
   useEffect(() => {
@@ -560,7 +634,8 @@ export default function App() {
   };
 
 
-  const brianTracy10Goals = [
+  // Metas por defecto de Joshua (preservadas intactas para su cuenta)
+  const joshua10Goals: BrianTracyGoal[] = [
     { id: 1, text: "Yo peso 91 kg con energía y constancia diaria para el 31 de octubre de 2026.", date: "31/10/2026", cat: "Físico" },
     { id: 2, text: "Yo cumplo mi rutina de 3 entrenamientos semanales más 1 partido de fútbol cada semana.", date: "Semanal", cat: "Deporte" },
     { id: 3, text: "Yo camino un mínimo de 8.000 pasos diarios durante mi jornada laboral de lunes a viernes.", date: "Lunes a Viernes", cat: "Salud" },
@@ -572,6 +647,62 @@ export default function App() {
     { id: 9, text: "Yo lanzo mi primer single oficial terminado y masterizado en plataformas para el 30 de abril de 2027.", date: "30/04/2027", cat: "Música" },
     { id: 10, text: "Yo genero mis primeros clientes de pago monetizando mi software para el 31 de mayo de 2027 (camino a los 100M anuales).", date: "31/05/2027", cat: "Negocios" },
   ];
+
+  // Plantilla universal y profesional para nuevos usuarios
+  const universal10Goals: BrianTracyGoal[] = [
+    { id: 1, text: "Yo mantengo mi peso óptimo con energía, fuerza y vitalidad todos los días.", date: "31/12/2026", cat: "Salud" },
+    { id: 2, text: "Yo entreno un mínimo de 4 días a la semana con intensidad y foco absoluto.", date: "Semanal", cat: "Deporte" },
+    { id: 3, text: "Yo duermo 7 a 8 horas diarias de sueño reparador y despierto con alta claridad mental.", date: "Diario", cat: "Salud" },
+    { id: 4, text: "Yo incremento mis ingresos mensuales ahorrando e invirtiendo el 20% de mis ganancias.", date: "31/12/2026", cat: "Finanzas" },
+    { id: 5, text: "Yo cumplo con excelencia mis proyectos estratégicos entregando valor medible cada mes.", date: "Mensual", cat: "Carrera" },
+    { id: 6, text: "Yo leo un libro de crecimiento y aplico sus lecciones clave cada mes.", date: "Mensual", cat: "Desarrollo" },
+    { id: 7, text: "Yo dedico tiempo de calidad presente y sin distracciones a mi familia y seres queridos.", date: "Semanal", cat: "Familia" },
+    { id: 8, text: "Yo mantengo mi hogar y espacio de trabajo ordenados, limpios y armoniosos.", date: "Diario", cat: "Hogar" },
+    { id: 9, text: "Yo gestiono mi tiempo con serenidad priorizando siempre lo importante sobre lo urgente.", date: "Diario", cat: "Enfoque" },
+    { id: 10, text: "Yo construyo libertad financiera viviendo con propósito, gratitud y disciplina inquebrantable.", date: "31/12/2027", cat: "Visión" },
+  ];
+
+  // Metas de Brian Tracy gestionadas dinámicamente por usuario
+  const [userGoals, setUserGoals] = useState<BrianTracyGoal[]>(() => {
+    const userKey = currentUser?.username ? `taskia_goals_${currentUser.username.toLowerCase()}` : 'taskia_goals_default';
+    const saved = localStorage.getItem(userKey);
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* fallback */ }
+    }
+    const isJoshuaUser = currentUser?.username?.toLowerCase().includes('joshua') || !currentUser?.username;
+    return isJoshuaUser ? joshua10Goals : universal10Goals;
+  });
+
+  // Actualizar metas al cambiar de usuario
+  useEffect(() => {
+    const userKey = currentUser?.username ? `taskia_goals_${currentUser.username.toLowerCase()}` : 'taskia_goals_default';
+    const saved = localStorage.getItem(userKey);
+    if (saved) {
+      try {
+        setUserGoals(JSON.parse(saved));
+        return;
+      } catch { /* fallback */ }
+    }
+    const isJoshuaUser = currentUser?.username?.toLowerCase().includes('joshua');
+    setUserGoals(isJoshuaUser ? joshua10Goals : universal10Goals);
+  }, [currentUser?.username]);
+
+  const handleUpdateGoals = (newGoals: BrianTracyGoal[]) => {
+    setUserGoals(newGoals);
+    const userKey = currentUser?.username ? `taskia_goals_${currentUser.username.toLowerCase()}` : 'taskia_goals_default';
+    localStorage.setItem(userKey, JSON.stringify(newGoals));
+    setIslandMessage('🎯 10 Metas actualizadas y guardadas con éxito.');
+    setIslandExpanded(true);
+    setTimeout(() => setIslandExpanded(false), 3000);
+  };
+
+  const handleResetGoalsToDefault = () => {
+    const isJoshuaUser = currentUser?.username?.toLowerCase().includes('joshua');
+    const defaultTemplate = isJoshuaUser ? joshua10Goals : universal10Goals;
+    setUserGoals(defaultTemplate);
+    const userKey = currentUser?.username ? `taskia_goals_${currentUser.username.toLowerCase()}` : 'taskia_goals_default';
+    localStorage.setItem(userKey, JSON.stringify(defaultTemplate));
+  };
 
 
   const [jsonPayload, setJsonPayload] = useState(JSON.stringify({
@@ -1310,7 +1441,7 @@ export default function App() {
       // Si el plan ya tiene colaboradores compartidos, heredarlos inmediatamente en el estado local
       const planNameVal = habitFormData.planName.trim();
       let inheritedSharedWith: string[] = [];
-      let inheritedOwner = currentUser?.username || 'Joshua';
+      let inheritedOwner = currentUser?.username || 'Usuario';
       if (planNameVal) {
         const sibling = habits.find(h => getPlanNameFromHabit(h).toLowerCase() === planNameVal.toLowerCase());
         if (sibling) {
@@ -2333,14 +2464,32 @@ export default function App() {
                     )}
 
                     {habits.length === 0 && (
-                      <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-4">
-                        <p className="text-xs text-slate-400">No tienes hábitos cargados para hoy.</p>
-                        <button 
-                          onClick={() => setActiveTab('programs')}
-                          className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
-                        >
-                          Explorar Catálogo de Programas
-                        </button>
+                      <div className="text-center py-12 px-6 bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl max-w-lg mx-auto">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 text-indigo-400 mx-auto flex items-center justify-center border border-indigo-500/20 mb-3">
+                          <Dumbbell className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-sm font-bold text-white mb-1">¡Bienvenido a tu Espacio de Disciplina!</h3>
+                        <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+                          Aún no tienes hábitos registrados para hoy. Puedes activar un plan estructurado desde el catálogo o crear tu propio primer hábito.
+                        </p>
+                        <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
+                          <button 
+                            type="button"
+                            onClick={() => setActiveTab('programs')}
+                            className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl transition shadow-md shadow-indigo-600/20 flex items-center gap-1.5"
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Explorar Catálogo de Planes</span>
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => openCreateHabitModal()}
+                            className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Crear Hábito Propio</span>
+                          </button>
+                        </div>
                       </div>
                     )}
 
@@ -2559,7 +2708,7 @@ export default function App() {
                         className="w-full bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold text-xs py-2 px-3 rounded-xl border border-amber-500/30 flex items-center justify-center gap-2 transition shadow-sm"
                       >
                         <BookOpen className="w-4 h-4 text-amber-400" />
-                        <span>Ver Mis 10 Metas Oficiales de Referencia (Fórmula 3P)</span>
+                        <span>Ver y Personalizar Mis 10 Metas (Fórmula 3P)</span>
                       </button>
                     </div>
                   )}
@@ -2905,8 +3054,10 @@ export default function App() {
       {/* Modal de 10 Metas Oficiales de Referencia */}
       <GoalsReferenceModal
         isOpen={showGoalsModal}
-        goals={brianTracy10Goals}
+        goals={userGoals}
         onClose={() => setShowGoalsModal(false)}
+        onUpdateGoals={handleUpdateGoals}
+        onResetToDefault={handleResetGoalsToDefault}
       />
 
       {/* Modal / Pregunta de Control Diaria para Brian Tracy */}
