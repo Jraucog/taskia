@@ -59,7 +59,14 @@ const API_BASE = import.meta.env.VITE_API_URL
     : `http://${window.location.hostname}:8000/api`);
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    try {
+      const saved = localStorage.getItem('taskia_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('taskia_token'));
   
   // Auth Form State
@@ -694,6 +701,11 @@ export default function App() {
 
       if (metricsRes.data?.current_user) {
         setCurrentUser(metricsRes.data.current_user);
+        try {
+          localStorage.setItem('taskia_user', JSON.stringify(metricsRes.data.current_user));
+        } catch (e) {
+          console.error(e);
+        }
         if (metricsRes.data.current_user.coach_preference?.coach) {
           setSelectedCoachId(metricsRes.data.current_user.coach_preference.coach);
         } else if (coachesRes.data.length > 0) {
@@ -719,8 +731,9 @@ export default function App() {
       const localC = getLocalCoaches();
       if (localC.length > 0) setCoaches(localC);
 
-      if (err.response?.status === 401) {
+      if (err.response?.status === 401 && authToken) {
         localStorage.removeItem('taskia_token');
+        localStorage.removeItem('taskia_user');
         setAuthToken(null);
         setCurrentUser(null);
       }
@@ -915,6 +928,9 @@ export default function App() {
       const res = await axios.post(endpoint, payload);
       const token = res.data.tokens.access;
       localStorage.setItem('taskia_token', token);
+      if (res.data.user) {
+        localStorage.setItem('taskia_user', JSON.stringify(res.data.user));
+      }
       setAuthToken(token);
       setCurrentUser(res.data.user);
       setShowAuthModal(false);
@@ -925,7 +941,9 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('taskia_token');
+    localStorage.removeItem('taskia_user');
     setAuthToken(null);
+    setCurrentUser(null);
     fetchData();
   };
 
@@ -2459,6 +2477,7 @@ export default function App() {
                 {/* Botón de Volver / Breadcrumb móvil */}
                 <div className="flex items-center justify-between pb-2 border-b border-slate-800">
                   <button 
+                    type="button"
                     onClick={() => setSelectedPlanName(null)}
                     className="flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 active:scale-95 transition"
                   >
@@ -2535,6 +2554,7 @@ export default function App() {
                       </p>
 
                       <button 
+                        type="button"
                         onClick={() => setShowGoalsModal(true)}
                         className="w-full bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold text-xs py-2 px-3 rounded-xl border border-amber-500/30 flex items-center justify-center gap-2 transition shadow-sm"
                       >
@@ -2547,6 +2567,7 @@ export default function App() {
                   <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
                     <span className="text-xs text-slate-400">¿Quieres ajustar las tareas de este plan?</span>
                     <button
+                      type="button"
                       onClick={() => openCreateHabitModal(selectedPlanName)}
                       className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
                     >
@@ -2598,11 +2619,11 @@ export default function App() {
 
                           <div className="flex items-center gap-2 shrink-0">
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                              habit.compliance_summary.meets_sla 
+                              habit.compliance_summary?.meets_sla 
                                 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' 
                                 : 'bg-amber-950 text-amber-400 border border-amber-800/60'
                             }`}>
-                              SLA {habit.compliance_summary.rate_percent}%
+                              SLA {habit.compliance_summary?.rate_percent ?? 0}%
                             </span>
                             {isCollapsed ? <ChevronRight className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
                           </div>
@@ -2620,6 +2641,7 @@ export default function App() {
 
                             <div className="flex items-center justify-between mb-3 bg-slate-900/60 p-2 rounded-xl border border-slate-800/60 text-xs">
                               <button
+                                type="button"
                                 onClick={() => setSelectedDetailHabit(habit)}
                                 className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition"
                               >
@@ -2628,6 +2650,7 @@ export default function App() {
 
                               <div className="flex items-center gap-1">
                                 <button
+                                  type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setShareModalHabit(habit);
@@ -2639,6 +2662,7 @@ export default function App() {
                                   <span className="hidden sm:inline">Compartir</span>
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     openEditHabitModal(habit);
@@ -2650,6 +2674,7 @@ export default function App() {
                                   <span className="hidden sm:inline">Editar</span>
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteHabit(habit.id, habit.title);
@@ -2674,6 +2699,7 @@ export default function App() {
 
                                 <div className="flex items-center gap-1.5">
                                   <button 
+                                    type="button"
                                     onClick={() => logSeriesStep(habit.id, -1)}
                                     disabled={currentVal <= 0}
                                     className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white disabled:opacity-40"
@@ -2683,6 +2709,7 @@ export default function App() {
                                   </button>
 
                                   <button 
+                                    type="button"
                                     onClick={() => logSeriesStep(habit.id, 1)}
                                     className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition ${
                                       isCompleted 
@@ -2699,6 +2726,7 @@ export default function App() {
                               <div className="flex items-center justify-end gap-2">
                               {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
                                 <button
+                                  type="button"
                                   onClick={() => startBreathingSession(habit)}
                                   className="bg-indigo-950 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
                                   title="Iniciar Guía Visual Rítmica Interactiva"
@@ -2709,6 +2737,7 @@ export default function App() {
                               )}
 
                               <button 
+                                type="button"
                                 onClick={() => toggleHabit(habit)}
                                 className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 ${
                                   isCompleted 
