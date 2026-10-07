@@ -1662,7 +1662,7 @@ export default function App() {
                   required
                   value={authUsername}
                   onChange={(e) => setAuthUsername(e.target.value)}
-                  placeholder="ej. joshua" 
+                  placeholder="ej. tu_usuario" 
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -3176,7 +3176,7 @@ export default function App() {
         planName={shareModalPlanName}
         planSharedWith={shareModalPlanName ? planSummaryList.find(p => p.name === shareModalPlanName)?.sharedWith : undefined}
         planOwner={shareModalPlanName ? planSummaryList.find(p => p.name === shareModalPlanName)?.habits[0]?.owner_username : undefined}
-        currentUsername={currentUser?.username || 'Joshua'}
+        currentUsername={currentUser?.username || 'Usuario'}
         onClose={() => {
           setShareModalHabit(null);
           setShareModalPlanName(null);
