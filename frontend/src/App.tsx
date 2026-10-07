@@ -50,6 +50,7 @@ import { GoalsReferenceModal } from './components/GoalsReferenceModal';
 import { BrianTracyConfirmModal } from './components/BrianTracyConfirmModal';
 import { AuthModal } from './components/AuthModal';
 import { ShareModal } from './components/ShareModal';
+import { TacticalFocusSessionModal } from './components/TacticalFocusSessionModal';
 import { VisionView } from './views/VisionView';
 import { CalendarView } from './views/CalendarView';
 import { ProgramsView } from './views/ProgramsView';
@@ -141,6 +142,9 @@ export default function App() {
   // Estado de Dynamic Island
   const [islandExpanded, setIslandExpanded] = useState(false);
   const [islandMessage, setIslandMessage] = useState<string | null>(null);
+
+  // Modo Estación de Enfoque Táctico
+  const [showFocusModal, setShowFocusModal] = useState(false);
 
   // Estado para modal de 10 Metas Oficiales de Referencia y Pregunta de Control
   const [showGoalsModal, setShowGoalsModal] = useState(false);
@@ -2096,32 +2100,59 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* === MEJORA: Resumen de Tiempo Estimado === */}
-                      {habits.length > 0 && (
-                        <div className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl p-2 flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <Clock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between text-[10px] mb-1">
-                                <span className="text-slate-400">Tiempo del día</span>
-                                <span className="font-mono font-bold text-slate-200">{completedEstimatedMinutes} / {totalEstimatedMinutes} min</span>
-                              </div>
-                              <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                                <div 
-                                  className="bg-gradient-to-r from-indigo-500 to-emerald-500 h-full rounded-full transition-all duration-500"
-                                  style={{ width: `${totalEstimatedMinutes > 0 ? Math.round((completedEstimatedMinutes / totalEstimatedMinutes) * 100) : 0}%` }}
-                                />
-                              </div>
+                    {/* Barra de Acciones Clave: Modo Enfoque Táctico y Escudo SLA */}
+                    <div className="flex items-center justify-between gap-2 p-2.5 bg-gradient-to-r from-indigo-950/70 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-2xl shadow-sm">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 ${
+                          (metrics?.habits_meeting_sla_percent ?? 100) >= 80 
+                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80' 
+                            : 'bg-amber-950 text-amber-300 border border-amber-800/80'
+                        }`}>
+                          <span>🛡️ Escudo SLA</span>
+                          <span>{metrics?.habits_meeting_sla_percent ?? 100}%</span>
+                        </span>
+                        <span className="text-[11px] text-slate-300 truncate hidden sm:inline">
+                          {(metrics?.habits_meeting_sla_percent ?? 100) >= 80 ? 'Sistema saludable' : 'Hábitos en riesgo'}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowFocusModal(true)}
+                        className="bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-black px-3.5 py-1.5 rounded-xl shadow-md shadow-emerald-900/30 transition flex items-center gap-1.5 active:scale-95 shrink-0"
+                        title="Abrir estación guiada de ejecución paso a paso con timer"
+                      >
+                        <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                        <span>Sesión de Enfoque</span>
+                      </button>
+                    </div>
+
+                    {/* === MEJORA: Resumen de Tiempo Estimado === */}
+                    {habits.length > 0 && (
+                      <div className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl p-2 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <Clock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between text-[10px] mb-1">
+                              <span className="text-slate-400">Tiempo del día</span>
+                              <span className="font-mono font-bold text-slate-200">{completedEstimatedMinutes} / {totalEstimatedMinutes} min</span>
+                            </div>
+                            <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-indigo-500 to-emerald-500 h-full rounded-full transition-all duration-500"
+                                style={{ width: `${totalEstimatedMinutes > 0 ? Math.round((completedEstimatedMinutes / totalEstimatedMinutes) * 100) : 0}%` }}
+                              />
                             </div>
                           </div>
-                          {streakData.current > 0 && (
-                            <div className="flex items-center gap-1 bg-amber-950/60 border border-amber-800/50 px-2 py-1 rounded-lg shrink-0">
-                              <Flame className="w-3 h-3 text-amber-400" />
-                              <span className="text-[10px] font-black text-amber-300 font-mono">{streakData.current}d</span>
-                            </div>
-                          )}
                         </div>
-                      )}
+                        {streakData.current > 0 && (
+                          <div className="flex items-center gap-1 bg-amber-950/60 border border-amber-800/50 px-2 py-1 rounded-lg shrink-0">
+                            <Flame className="w-3 h-3 text-amber-400" />
+                            <span className="text-[10px] font-black text-amber-300 font-mono">{streakData.current}d</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                       <div className="flex items-center justify-between sm:justify-end gap-2">
                         {/* Toggle de Agrupar por Plan */}
@@ -2948,6 +2979,7 @@ export default function App() {
         {activeTab === 'vision' && (
           <VisionView
             visionCards={visionCards}
+            habits={habits}
             onOpenGrillMe={() => {
               setGrillStep(0);
               setGrillAnswers({ area: 'Cuerpo & Salud', goal: '', why: '', deadline: '', commitment: '90%' });
@@ -3198,6 +3230,17 @@ export default function App() {
         }}
         onSave={handleSaveHabit}
         onDelete={handleDeleteHabit}
+      />
+
+      {/* Modal: Estación Táctica de Enfoque con Cronómetro Solfeggio */}
+      <TacticalFocusSessionModal
+        isOpen={showFocusModal}
+        habits={habits}
+        onClose={() => setShowFocusModal(false)}
+        onToggleHabit={toggleHabit}
+        onLogSeriesStep={logSeriesStep}
+        onStartBreathing={startBreathingSession}
+        cleanTitle={cleanTitle}
       />
     </div>
   );
