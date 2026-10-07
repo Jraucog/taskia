@@ -13,6 +13,7 @@ export interface Habit {
   target_value: number;
   unit: string;
   estimated_minutes?: number;
+  reminder_time?: string | null; // Formato HH:mm (ej. "18:00")
   frequency_type?: string;
   days_of_week?: string;
   day_offset?: number | null;

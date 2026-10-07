@@ -139,6 +139,17 @@ html, body {
   animation: soundWave 0.9s ease-in-out infinite 0.3s;
 }
 
+@keyframes habitHighlightPulse {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); transform: scale(1.02); }
+  50% { box-shadow: 0 0 25px 4px rgba(245, 158, 11, 0.4); transform: scale(1.02); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); transform: scale(1); }
+}
+
+.animate-habit-highlight {
+  animation: habitHighlightPulse 1.8s ease-in-out 3;
+  border-color: #f59e0b !important;
+}
+
 /* Mobile Touch Ergonomics: Target min 44px-48px touch bounding box */
 .touch-target {
   min-height: 48px;

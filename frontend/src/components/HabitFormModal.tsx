@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit3, Plus, Clock, Check, Trash2 } from 'lucide-react';
+import { Edit3, Plus, Clock, Check, Trash2, Bell } from 'lucide-react';
 import type { Habit } from '../types';
 
 export interface HabitFormData {
@@ -10,6 +10,7 @@ export interface HabitFormData {
   target_value: number;
   unit: string;
   estimated_minutes: number;
+  reminder_time: string; // Formato "HH:mm" o ""
   frequency_type: string;
   days_of_week: string;
   sla_target_percent: number;
@@ -141,7 +142,57 @@ export const HabitFormModal: React.FC<HabitFormModalProps> = ({
           </div>
         </div>
 
-        {/* Tipo de Registro (Booleano vs Numérico) */}
+        {/* Hora Programada de Recordatorio Diaria (Opcional) */}
+        <div className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+              <Bell className="w-3.5 h-3.5 text-amber-400" />
+              <span>Hora de Recordatorio Fijo (Notificación Coach)</span>
+            </label>
+            {formData.reminder_time && (
+              <button
+                type="button"
+                onClick={() => onFormDataChange({ ...formData, reminder_time: '' })}
+                className="text-[10px] text-slate-400 hover:text-red-400 underline"
+              >
+                Quitar alarma
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <input
+              type="time"
+              value={formData.reminder_time || ''}
+              onChange={(e) => onFormDataChange({ ...formData, reminder_time: e.target.value })}
+              className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+            />
+            <div className="flex items-center gap-1 flex-wrap">
+              {[
+                { time: '07:00', label: '07:00 AM' },
+                { time: '13:00', label: '01:00 PM' },
+                { time: '18:00', label: '06:00 PM' },
+                { time: '21:00', label: '09:00 PM' }
+              ].map(preset => (
+                <button
+                  key={preset.time}
+                  type="button"
+                  onClick={() => onFormDataChange({ ...formData, reminder_time: preset.time })}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition ${
+                    formData.reminder_time === preset.time
+                      ? 'bg-amber-600 border-amber-500 text-white'
+                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <span className="text-[10px] text-slate-400 mt-1 block">
+            A esta hora exacta, tu coach te enviará un recordatorio al móvil para entrar directo a cumplir esta tarea.
+          </span>
+        </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="text-[11px] font-bold text-slate-300 block mb-1">

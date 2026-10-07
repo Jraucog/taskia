@@ -598,6 +598,7 @@ export default function App() {
     target_value: 1,
     unit: '',
     estimated_minutes: 5,
+    reminder_time: '',
     frequency_type: 'daily',
     days_of_week: '0,1,2,3,4,5,6',
     sla_target_percent: 85,
@@ -605,7 +606,24 @@ export default function App() {
   });
 
   // Sistema de notificación/alerta en pantalla (In-App Coach Banners & Push Simulation)
-  const [activeAlert, setActiveAlert] = useState<{ title: string; body: string; emoji: string } | null>(null);
+  const [activeAlert, setActiveAlert] = useState<{ title: string; body: string; emoji: string; habitId?: number } | null>(null);
+  const [highlightedHabitId, setHighlightedHabitId] = useState<number | null>(null);
+
+  const focusAndHighlightHabit = (habitId: number) => {
+    setActiveTab('today');
+    setSelectedPlanName(null);
+    setHighlightedHabitId(habitId);
+    setTimeout(() => {
+      const el = document.getElementById(`habit-card-${habitId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 200);
+    // Remover el efecto de pulsado después de 5.5s
+    setTimeout(() => {
+      setHighlightedHabitId(prev => (prev === habitId ? null : prev));
+    }, 5500);
+  };
 
   const playNotificationTone = () => {
     try {
@@ -628,15 +646,15 @@ export default function App() {
     }
   };
 
-  const showInAppNotification = (title: string, body: string, emoji = '🔥') => {
+  const showInAppNotification = (title: string, body: string, emoji = '🔥', habitId?: number) => {
     playNotificationTone();
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try { navigator.vibrate([100, 50, 100]); } catch { /* ignore */ }
     }
-    setActiveAlert({ title, body, emoji });
+    setActiveAlert({ title, body, emoji, habitId });
     setTimeout(() => {
       setActiveAlert(null);
-    }, 6000);
+    }, 7000);
   };
 
 
@@ -1031,7 +1049,70 @@ export default function App() {
     return () => clearInterval(interval);
   }, [activeBreathingHabit, breathingIsRunning, breathingPhase, breathingSoundEnabled]);
 
-  // Recordatorios periódicos del Coach (cada 45 minutos si quedan hábitos pendientes)
+  // === MOTOR DE RECORDATORIOS PROGRAMADOS POR HÁBITO (HORA FIJA + VOZ DEL COACH) ===
+  useEffect(() => {
+    // Almacén de disparos de hoy para garantizar disparo único por día sin saturar
+    const checkScheduledReminders = () => {
+      const now = new Date();
+      const currentHours = now.getHours().toString().padStart(2, '0');
+      const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+      const currentTimeStr = `${currentHours}:${currentMinutes}`;
+      const todayStr = now.toISOString().split('T')[0];
+
+      // Días de la semana en JS: 0 es Domingo, pero en Taskia 0 es Lunes, 6 es Domingo
+      // Ajustar día según convención de la app (0=Lun, 6=Dom)
+      const jsDay = now.getDay();
+      const taskiaDay = jsDay === 0 ? 6 : jsDay - 1;
+
+      habits.forEach(habit => {
+        if (!habit.reminder_time) return;
+        if (habit.today_log?.completed) return; // Si ya se completó, no molestar
+
+        // Verificar si aplica hoy según días programados
+        if (habit.days_of_week) {
+          const scheduledDays = habit.days_of_week.split(',').map(s => s.trim());
+          if (!scheduledDays.includes(String(taskiaDay))) return;
+        }
+
+        // Si la hora programada coincide con el minuto actual
+        if (habit.reminder_time === currentTimeStr) {
+          const firedKey = `taskia_reminder_fired_${habit.id}_${todayStr}`;
+          const alreadyFired = localStorage.getItem(firedKey);
+          if (!alreadyFired) {
+            localStorage.setItem(firedKey, 'true');
+
+            const activeCoach = coaches.find(c => c.id === selectedCoachId) || coaches[0];
+            const coachName = activeCoach ? activeCoach.name : 'Entrenador Taskia';
+            const habitTitleClean = cleanTitle(habit.title);
+
+            let coachToneMessage = `Son las ${habit.reminder_time}. Hora de cumplir tu compromiso: "${habitTitleClean}". Toca para registrarlo.`;
+            if (activeCoach?.slug === 'goggins' || activeCoach?.name.toLowerCase().includes('goggins')) {
+              coachToneMessage = `Son las ${habit.reminder_time}. No negocies con la mente: "${habitTitleClean}". ¡Párate y hazlo ya!`;
+            } else if (activeCoach?.slug === 'brian-tracy' || activeCoach?.name.toLowerCase().includes('tracy')) {
+              coachToneMessage = `Hora fijada (${habit.reminder_time}): Trágate ese sapo con "${habitTitleClean}". Tu futuro te lo agradecerá.`;
+            } else if (activeCoach?.slug === 'kobe' || activeCoach?.name.toLowerCase().includes('kobe')) {
+              coachToneMessage = `Mamba Mentality (${habit.reminder_time}): Haz lo que prometiste cuando dijiste que lo harías: "${habitTitleClean}".`;
+            }
+
+            sendCoachNotification(
+              `⏰ ${coachName}: ${habitTitleClean}`,
+              coachToneMessage,
+              activeCoach?.avatar_emoji || '🔥',
+              habit.id
+            );
+          }
+        }
+      });
+    };
+
+    // Chequear de inmediato y cada 25 segundos para no perder el minuto exacto
+    checkScheduledReminders();
+    const scheduleInterval = setInterval(checkScheduledReminders, 25000);
+
+    return () => clearInterval(scheduleInterval);
+  }, [habits, coaches, selectedCoachId]);
+
+  // Recordatorios periódicos generales del Coach (cada 45 minutos si quedan hábitos pendientes)
   useEffect(() => {
     const reminderInterval = setInterval(() => {
       const pendingHabits = habits.filter(h => !h.today_log?.completed);
@@ -1084,9 +1165,9 @@ export default function App() {
     fetchData();
   };
 
-  const sendCoachNotification = (title: string, body: string, emoji = '🔥') => {
+  const sendCoachNotification = (title: string, body: string, emoji = '🔥', habitId?: number) => {
     // 1. In-App alert con sonido y vibración
-    showInAppNotification(title, body, emoji);
+    showInAppNotification(title, body, emoji, habitId);
 
     // 2. Disparar notificación de sistema si los permisos están concedidos
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
@@ -1094,8 +1175,8 @@ export default function App() {
         body,
         icon: '/taskia/pwa-192x192.png',
         badge: '/taskia/pwa-192x192.png',
-        tag: 'taskia-coach-reminder',
-        data: { url: '/taskia/' },
+        tag: habitId ? `taskia-habit-${habitId}` : 'taskia-coach-reminder',
+        data: { url: '/taskia/', habitId },
         vibrate: [150, 60, 150]
       };
 
@@ -1398,6 +1479,7 @@ export default function App() {
       target_value: 1,
       unit: '',
       estimated_minutes: 5,
+      reminder_time: '',
       frequency_type: 'daily',
       days_of_week: '0,1,2,3,4,5,6',
       sla_target_percent: 85,
@@ -1417,6 +1499,7 @@ export default function App() {
       target_value: habit.target_value || 1,
       unit: habit.unit || '',
       estimated_minutes: habit.estimated_minutes ?? 5,
+      reminder_time: habit.reminder_time || '',
       frequency_type: habit.frequency_type || 'daily',
       days_of_week: habit.days_of_week || '0,1,2,3,4,5,6',
       sla_target_percent: habit.sla_target_percent || 85,
@@ -1442,6 +1525,7 @@ export default function App() {
       target_value: habitFormData.target_value,
       unit: habitFormData.unit.trim(),
       estimated_minutes: Number(habitFormData.estimated_minutes) || 5,
+      reminder_time: habitFormData.reminder_time.trim() || null,
       frequency_type: habitFormData.frequency_type,
       days_of_week: habitFormData.days_of_week,
       sla_target_percent: Number(habitFormData.sla_target_percent) || 85
@@ -1479,6 +1563,7 @@ export default function App() {
         target_value: payload.target_value,
         unit: payload.unit,
         estimated_minutes: payload.estimated_minutes,
+        reminder_time: payload.reminder_time,
         frequency_type: payload.frequency_type,
         days_of_week: payload.days_of_week,
         sla_target_percent: payload.sla_target_percent,
@@ -2067,8 +2152,13 @@ export default function App() {
           <div 
             onClick={() => {
               haptics.tap();
+              const habitIdToFocus = activeAlert.habitId;
               setActiveAlert(null);
-              setShowFocusModal(true);
+              if (habitIdToFocus) {
+                focusAndHighlightHabit(habitIdToFocus);
+              } else {
+                setShowFocusModal(true);
+              }
             }}
             className="bg-slate-900 border border-slate-700 hover:border-indigo-500 text-white rounded-2xl p-3 shadow-2xl flex items-start gap-2.5 backdrop-blur-md cursor-pointer transition active:scale-98"
           >
@@ -2391,7 +2481,10 @@ export default function App() {
                                     return (
                                       <div
                                         key={habit.id}
-                                        className={`p-3 rounded-xl border transition-all duration-200 flex flex-col gap-2 ${
+                                        id={`habit-card-${habit.id}`}
+                                        className={`p-3 rounded-xl border transition-all duration-300 flex flex-col gap-2 ${
+                                          highlightedHabitId === habit.id ? 'animate-habit-highlight ring-2 ring-amber-500' : ''
+                                        } ${
                                           isCompleted
                                             ? 'bg-slate-950/40 border-emerald-900/30 opacity-75'
                                             : 'bg-slate-950/80 border-slate-800/90 hover:border-slate-700'
@@ -2418,6 +2511,12 @@ export default function App() {
                                                 <h4 className={`text-xs sm:text-sm font-semibold leading-snug group-hover/item:text-indigo-300 transition ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
                                                   {title}
                                                 </h4>
+                                                {habit.reminder_time && (
+                                                  <span className="text-[10px] font-mono text-amber-300 bg-amber-950/80 border border-amber-800/60 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                                                    <Bell className="w-2.5 h-2.5 text-amber-400" />
+                                                    <span>{habit.reminder_time}</span>
+                                                  </span>
+                                                )}
                                                 {habit.estimated_minutes ? (
                                                   <span className="text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
                                                     <Clock className="w-2.5 h-2.5 text-indigo-400" />
