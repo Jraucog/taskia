@@ -109,6 +109,53 @@ html, body {
   animation: breatheRipple 4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
 
+/* Dynamic Island Reactive Animations */
+@keyframes islandSlideDown {
+  0% { transform: translateY(-8px) scale(0.97); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes islandPulseBorder {
+  0%, 100% { border-color: rgba(99, 102, 241, 0.3); }
+  50% { border-color: rgba(52, 211, 153, 0.6); }
+}
+
+@keyframes soundWave {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+.animate-island-enter {
+  animation: islandSlideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-sound-wave-1 {
+  animation: soundWave 0.8s ease-in-out infinite;
+}
+.animate-sound-wave-2 {
+  animation: soundWave 0.6s ease-in-out infinite 0.15s;
+}
+.animate-sound-wave-3 {
+  animation: soundWave 0.9s ease-in-out infinite 0.3s;
+}
+
+/* Mobile Touch Ergonomics: Target min 44px-48px touch bounding box */
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.touch-target-sm {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ========================================================= */
 /* PALETAS DE TEMA DINÁMICO COMPLETAS Y ULTRA COMPATIBLES    */
 /* Sistema de Design Tokens con Variables CSS y Fallbacks    */

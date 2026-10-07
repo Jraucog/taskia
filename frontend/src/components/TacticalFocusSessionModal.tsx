@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Play, Pause, RotateCcw, Check, SkipForward, 
-  Wind, Plus, Minus, X
+  Wind, Plus, Minus, X, VolumeX, Sparkles
 } from 'lucide-react';
 import type { Habit } from '../types';
+import { ambientSound, type AmbientSoundscapeType } from '../services/soundscape';
+import { haptics } from '../services/haptics';
 
 interface TacticalFocusSessionModalProps {
   isOpen: boolean;
@@ -31,6 +33,8 @@ export const TacticalFocusSessionModal: React.FC<TacticalFocusSessionModalProps>
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(true);
+  const [ambientActive, setAmbientActive] = useState(false);
+  const [soundscapeMode, setSoundscapeMode] = useState<AmbientSoundscapeType>('528hz');
 
   // Asegurar que el índice esté dentro de los límites
   useEffect(() => {
@@ -38,6 +42,38 @@ export const TacticalFocusSessionModal: React.FC<TacticalFocusSessionModalProps>
       setCurrentIndex(Math.max(0, queue.length - 1));
     }
   }, [queue.length, currentIndex]);
+
+  // Manejo de sonido ambiental offline
+  useEffect(() => {
+    if (!isOpen) {
+      if (ambientActive) {
+        ambientSound.stop();
+        setAmbientActive(false);
+      }
+    }
+  }, [isOpen]);
+
+  const toggleAmbientSound = () => {
+    haptics.selection();
+    if (ambientActive) {
+      ambientSound.stop();
+      setAmbientActive(false);
+    } else {
+      ambientSound.start(soundscapeMode);
+      setAmbientActive(true);
+    }
+  };
+
+  const cycleSoundscape = () => {
+    haptics.tap();
+    const modes: AmbientSoundscapeType[] = ['528hz', 'binaural_alpha', 'deep_zen'];
+    const nextIdx = (modes.indexOf(soundscapeMode) + 1) % modes.length;
+    const nextMode = modes[nextIdx];
+    setSoundscapeMode(nextMode);
+    if (ambientActive) {
+      ambientSound.start(nextMode);
+    }
+  };
 
   const currentHabit = queue[currentIndex];
 
@@ -115,14 +151,59 @@ export const TacticalFocusSessionModal: React.FC<TacticalFocusSessionModalProps>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-slate-400 hover:text-white p-1.5 rounded-xl bg-slate-800/80 transition"
-              title="Salir del modo enfoque"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              {/* Selector de Paisaje Sonoro Offline (528Hz / Binaural / Zen) */}
+              <button
+                type="button"
+                onClick={cycleSoundscape}
+                className={`px-2.5 py-1.5 rounded-xl text-[10px] font-bold font-mono transition flex items-center gap-1 border min-h-[44px] ${
+                  ambientActive
+                    ? 'bg-indigo-950/90 text-indigo-300 border-indigo-700/80 shadow-sm shadow-indigo-500/20'
+                    : 'bg-slate-800/80 text-slate-400 border-slate-700/60 hover:text-white'
+                }`}
+                title="Cambiar frecuencia armónica"
+              >
+                <Sparkles className="w-3 h-3 text-indigo-400" />
+                <span>
+                  {soundscapeMode === '528hz' ? '528Hz Foco' : soundscapeMode === 'binaural_alpha' ? 'Alfa 10Hz' : 'Zen 432Hz'}
+                </span>
+              </button>
+
+              {/* Botón Play / Silencio Sonido Ambiental */}
+              <button
+                type="button"
+                onClick={toggleAmbientSound}
+                className={`p-2 rounded-xl border transition min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                  ambientActive
+                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/80 shadow-md shadow-emerald-500/20'
+                    : 'bg-slate-800/80 text-slate-400 border-slate-700/60 hover:text-white'
+                }`}
+                title={ambientActive ? "Silenciar audio ambiental de enfoque" : "Activar paisaje sonoro 528Hz offline"}
+              >
+                {ambientActive ? (
+                  <div className="flex items-center gap-0.5">
+                    <span className="w-1 bg-emerald-400 rounded-full animate-sound-wave-1 inline-block" />
+                    <span className="w-1 bg-emerald-400 rounded-full animate-sound-wave-2 inline-block" />
+                    <span className="w-1 bg-emerald-400 rounded-full animate-sound-wave-3 inline-block" />
+                  </div>
+                ) : (
+                  <VolumeX className="w-4 h-4" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  haptics.tap();
+                  if (ambientActive) ambientSound.stop();
+                  onClose();
+                }}
+                className="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+                title="Salir del modo enfoque"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Barra de progreso de la sesión */}
@@ -177,37 +258,47 @@ export const TacticalFocusSessionModal: React.FC<TacticalFocusSessionModalProps>
 
           {/* Controles interactivos específicos para series / respiración */}
           {currentHabit.unit === 'series' || currentHabit.habit_type === 'numeric' ? (
-            <div className="flex items-center gap-3 bg-slate-950 p-2 rounded-2xl border border-slate-800">
+            <div className="flex items-center gap-3 bg-slate-950 p-2.5 rounded-2xl border border-slate-800">
               <button
                 type="button"
-                onClick={() => onLogSeriesStep(currentHabit.id, -1)}
+                onClick={() => {
+                  haptics.tap();
+                  onLogSeriesStep(currentHabit.id, -1);
+                }}
                 disabled={currentVal <= 0}
-                className="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white disabled:opacity-30 transition"
+                className="w-12 h-12 rounded-xl bg-slate-800 text-slate-300 hover:text-white disabled:opacity-30 transition flex items-center justify-center active:scale-95"
+                title="Restar serie"
               >
-                <Minus className="w-4 h-4" />
+                <Minus className="w-5 h-5" />
               </button>
-              <div className="px-3">
-                <span className="text-lg font-black font-mono text-white block">
+              <div className="px-4">
+                <span className="text-xl font-black font-mono text-white block">
                   {currentVal} / {targetVal}
                 </span>
-                <span className="text-[10px] text-slate-400 uppercase font-bold">Series</span>
+                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Series</span>
               </div>
               <button
                 type="button"
-                onClick={() => onLogSeriesStep(currentHabit.id, 1)}
-                className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-md shadow-indigo-600/30"
+                onClick={() => {
+                  haptics.success();
+                  onLogSeriesStep(currentHabit.id, 1);
+                }}
+                className="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-md shadow-indigo-600/30 flex items-center justify-center active:scale-95"
+                title="Sumar serie"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
               </button>
             </div>
           ) : isBreathing ? (
             <button
               type="button"
               onClick={() => {
+                haptics.tap();
+                if (ambientActive) ambientSound.stop();
                 onClose();
                 onStartBreathing(currentHabit);
               }}
-              className="bg-indigo-950 hover:bg-indigo-900 border border-indigo-700/80 text-indigo-200 font-bold text-xs px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shadow-sm animate-pulse"
+              className="bg-indigo-950 hover:bg-indigo-900 border border-indigo-700/80 text-indigo-200 font-bold text-xs px-5 min-h-[48px] rounded-2xl transition flex items-center gap-2 shadow-sm animate-pulse active:scale-95"
             >
               <Wind className="w-4 h-4 text-indigo-400" />
               <span>Abrir Guía Rítmica 528Hz</span>
@@ -220,13 +311,14 @@ export const TacticalFocusSessionModal: React.FC<TacticalFocusSessionModalProps>
           <button
             type="button"
             onClick={() => {
+              haptics.tap();
               if (currentIndex < queue.length - 1) {
                 setCurrentIndex(i => i + 1);
               } else {
                 setCurrentIndex(0);
               }
             }}
-            className="py-3 px-4 rounded-2xl border border-slate-800 text-slate-400 hover:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition"
+            className="min-h-[48px] px-4 rounded-2xl border border-slate-800 text-slate-400 hover:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
           >
             <SkipForward className="w-4 h-4" />
             <span>Saltar Tarea</span>
@@ -234,8 +326,11 @@ export const TacticalFocusSessionModal: React.FC<TacticalFocusSessionModalProps>
 
           <button
             type="button"
-            onClick={handleCompleteCurrent}
-            className={`flex-1 py-3 px-5 rounded-2xl font-black text-xs transition flex items-center justify-center gap-2 shadow-xl active:scale-95 ${
+            onClick={() => {
+              haptics.success();
+              handleCompleteCurrent();
+            }}
+            className={`flex-1 min-h-[48px] px-5 rounded-2xl font-black text-xs transition flex items-center justify-center gap-2 shadow-xl active:scale-95 ${
               isCompleted
                 ? 'bg-emerald-600 text-white'
                 : 'bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white shadow-emerald-600/25'

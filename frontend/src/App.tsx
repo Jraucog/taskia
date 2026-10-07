@@ -27,6 +27,7 @@ import {
   applyLocalSeriesStep,
   syncWithBackend
 } from './services/storageSync';
+import { haptics } from './services/haptics';
 import type {
   Habit,
   CoachProfile,
@@ -139,9 +140,10 @@ export default function App() {
     () => typeof Notification !== 'undefined' && Notification.permission !== 'granted' && localStorage.getItem('taskia_dismiss_notif_banner') !== 'true'
   );
 
-  // Estado de Dynamic Island
+  // Estado de Dynamic Island Reactiva
   const [islandExpanded, setIslandExpanded] = useState(false);
   const [islandMessage, setIslandMessage] = useState<string | null>(null);
+  const [islandBadge, setIslandBadge] = useState<{ text: string; color: string } | null>(null);
 
   // Modo Estación de Enfoque Táctico
   const [showFocusModal, setShowFocusModal] = useState(false);
@@ -1210,9 +1212,19 @@ export default function App() {
 
     if (isNowCompleted) {
       triggerCelebration();
-      setIslandMessage(`¡Hábito cumplido! ${cleanTitle(habit.title)}`);
+      const remaining = updatedHabits.filter(h => !h.today_log?.completed);
+      if (remaining.length === 0) {
+        setIslandBadge({ text: '100% VICTORIA', color: 'bg-emerald-500 text-slate-950' });
+        setIslandMessage(`🏆 ¡Día perfecto completado! Todos tus hábitos están en verde.`);
+      } else {
+        const nextTask = remaining[0];
+        setIslandBadge({ text: 'RITMO ACTIVO', color: 'bg-indigo-500 text-white' });
+        setIslandMessage(`🎉 ¡${cleanTitle(habit.title)} cumplido! Siguiente recomendado: ${cleanTitle(nextTask.title)}.`);
+      }
       setIslandExpanded(true);
-      setTimeout(() => setIslandExpanded(false), 3500);
+      setTimeout(() => setIslandExpanded(false), 4500);
+    } else {
+      haptics.tap();
     }
 
     // 2. Encolar acción pendiente para sincronizar cuando el servidor esté disponible
@@ -1722,6 +1734,49 @@ export default function App() {
     );
   }
 
+  // === MICRO-COACH REACTIVO EN TIEMPO REAL (DYNAMIC ISLAND INTELIGENTE) ===
+  const slaRate = metrics?.habits_meeting_sla_percent ?? 100;
+  const pendingCount = habits.filter(h => !h.today_log?.completed).length;
+  const completedCount = habits.filter(h => h.today_log?.completed).length;
+  const activeCoach = coaches.find(c => c.id === selectedCoachId);
+
+  // Determinar consejo reactivo táctico
+  const getReactiveCoachContext = () => {
+    if (slaRate < 80) {
+      return {
+        badge: 'MODO ESCUDO',
+        badgeColor: 'bg-amber-500 text-slate-950',
+        message: 'Modo Escudo activo: Tu SLA cayó bajo 80%. No hagas todo a la vez, enfócate en solo 1 micro-tarea de 5 min para volver a zona segura.',
+        actionText: 'Iniciar Micro-Enfoque'
+      };
+    }
+    if (pendingCount === 0 && habits.length > 0) {
+      return {
+        badge: 'DÍA ÉLITE',
+        badgeColor: 'bg-emerald-500 text-slate-950',
+        message: '¡Victoria total hoy! Todos tus hábitos están cumplidos en SLA. Tu disciplina está forjando identidad ganadora.',
+        actionText: 'Ver Visión'
+      };
+    }
+    if (completedCount > 0 && pendingCount > 0) {
+      const nextPending = habits.find(h => !h.today_log?.completed);
+      return {
+        badge: 'EN FLUJO',
+        badgeColor: 'bg-indigo-500 text-white',
+        message: `Excelente impulso (${completedCount}/${habits.length}). Próximo paso de alto impacto: ${cleanTitle(nextPending?.title || 'Siguiente hábito')}.`,
+        actionText: 'Continuar Tarea'
+      };
+    }
+    return {
+      badge: 'LISTO PARA ACCIÓN',
+      badgeColor: 'bg-slate-700 text-slate-200',
+      message: activeCoach?.morning_quote || 'El primer paso del día es el que vence la inercia. Abre tu primera micro-sesión.',
+      actionText: 'Comenzar Hoy'
+    };
+  };
+
+  const reactiveCoach = getReactiveCoachContext();
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans w-full max-w-full overflow-x-hidden pb-28 md:pb-12">
       {/* Top Header Responsivo - Minimalista y Sofisticado (Ajustado con safe-top en PWA Standalone) */}
@@ -1740,13 +1795,24 @@ export default function App() {
 
           {/* Dynamic Island Compacta en Barra Superior */}
           <div 
-            onClick={() => setIslandExpanded(!islandExpanded)}
-            className="flex items-center gap-2 bg-slate-900/90 border border-slate-800/90 hover:border-slate-700 px-3 py-1 rounded-full cursor-pointer transition"
-            title="Toca para ver mensaje del Coach"
+            onClick={() => {
+              haptics.tap();
+              setIslandExpanded(!islandExpanded);
+            }}
+            className={`flex items-center gap-2 bg-slate-900/95 border px-3 py-1.5 rounded-full cursor-pointer transition-all duration-300 min-h-[44px] shadow-sm select-none active:scale-95 ${
+              slaRate < 80 
+                ? 'border-amber-600/70 hover:border-amber-500 shadow-amber-950/30' 
+                : 'border-slate-800/90 hover:border-slate-700'
+            }`}
+            title="Toca para ver consejo táctico en tiempo real del Coach"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <span className="relative flex h-2.5 w-2.5">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                slaRate < 80 ? 'bg-amber-400' : 'bg-emerald-400'
+              }`}></span>
+              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+                slaRate < 80 ? 'bg-amber-500' : 'bg-emerald-500'
+              }`}></span>
             </span>
             {/* Circular progress mini */}
             <div className="relative w-7 h-7">
@@ -1754,17 +1820,31 @@ export default function App() {
                 <circle cx="14" cy="14" r="11" fill="none" stroke="rgb(30,41,59)" strokeWidth="2.5" />
                 <circle cx="14" cy="14" r="11" fill="none" stroke={
                   habits.length > 0 && habits.filter(h => h.today_log?.completed).length === habits.length
-                    ? 'rgb(52,211,153)' : 'rgb(99,102,241)'
+                    ? 'rgb(52,211,153)' 
+                    : slaRate < 80 ? 'rgb(245,158,11)' : 'rgb(99,102,241)'
                 } strokeWidth="2.5" strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 11}`}
                   strokeDashoffset={`${2 * Math.PI * 11 * (1 - (habits.length > 0 ? habits.filter(h => h.today_log?.completed).length / habits.length : 0))}`}
                   className="transition-all duration-700 ease-out"
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white">
+              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white font-mono">
                 {habits.length > 0 ? Math.round((habits.filter(h => h.today_log?.completed).length / habits.length) * 100) : 0}
               </span>
             </div>
+
+            {/* Micro-Coach Reactive Label / Tag */}
+            <div className="flex items-center gap-1.5">
+              <span className={`text-[9px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded-md font-mono hidden xs:inline-block ${
+                islandBadge ? islandBadge.color : reactiveCoach.badgeColor
+              }`}>
+                {islandBadge ? islandBadge.text : reactiveCoach.badge}
+              </span>
+              <span className="text-xs transition-transform duration-300 hover:scale-110">
+                {activeCoach?.avatar_emoji || '🔥'}
+              </span>
+            </div>
+
             {restTimer !== null && (
               <div className="relative w-6 h-6 shrink-0">
                 <svg className="w-6 h-6 -rotate-90" viewBox="0 0 24 24">
@@ -1778,7 +1858,6 @@ export default function App() {
                 <span className="absolute inset-0 flex items-center justify-center text-[7px] font-black text-amber-300 font-mono">{restTimer}</span>
               </div>
             )}
-            <span className="text-[11px]">{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -1880,24 +1959,73 @@ export default function App() {
 
         {/* Vista Desplegada de la Dynamic Island (Si el usuario la toca) */}
         {islandExpanded && (
-          <div className="max-w-md mx-auto mt-2 bg-slate-900 border border-slate-800 p-3 rounded-2xl shadow-xl transition-all">
-            <div className="flex items-center justify-between mb-1.5">
+          <div className="max-w-md mx-auto mt-2 bg-slate-900/95 border border-slate-800 p-4 rounded-3xl shadow-2xl backdrop-blur-md transition-all animate-island-enter relative overflow-hidden">
+            {/* Ambient accent top bar */}
+            <div className={`absolute top-0 left-0 right-0 h-1 ${
+              slaRate < 80 
+                ? 'bg-gradient-to-r from-amber-500 to-red-500' 
+                : 'bg-gradient-to-r from-indigo-500 via-emerald-400 to-teal-400'
+            }`} />
+
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-base">{coaches.find(c => c.id === selectedCoachId)?.avatar_emoji || '🔥'}</span>
-                <span className="text-xs font-bold text-white">
-                  {coaches.find(c => c.id === selectedCoachId)?.name || 'Entrenador Taskia'}
+                <span className="text-xl p-1 bg-slate-800/80 rounded-xl">{activeCoach?.avatar_emoji || '🔥'}</span>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-black text-white">
+                      {activeCoach?.name || 'Entrenador Taskia'}
+                    </span>
+                    <span className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
+                      islandBadge ? islandBadge.color : reactiveCoach.badgeColor
+                    }`}>
+                      {islandBadge ? islandBadge.text : reactiveCoach.badge}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400">
+                    SLA Actual: <strong className={slaRate < 80 ? 'text-amber-400' : 'text-emerald-400'}>{slaRate}%</strong>
+                  </span>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  haptics.tap();
+                  setIslandExpanded(false);
+                }} 
+                className="text-slate-400 hover:text-white text-xs p-1.5 rounded-lg hover:bg-slate-800 transition min-h-[36px] min-w-[36px] flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-200 leading-relaxed font-medium bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80">
+              "{islandMessage || reactiveCoach.message}"
+            </p>
+
+            <div className="flex items-center justify-between gap-2 pt-3 mt-3 border-t border-slate-800/80 text-[11px]">
+              <div className="flex items-center gap-1.5 text-slate-400">
+                <span>Progreso hoy:</span>
+                <span className="font-bold font-mono text-slate-200">
+                  {completedCount}/{habits.length} ({metrics?.today_compliance_percent || 0}%)
                 </span>
               </div>
-              <button onClick={() => setIslandExpanded(false)} className="text-slate-500 hover:text-white text-xs">✕</button>
-            </div>
-            <p className="text-xs text-slate-300 italic leading-relaxed">
-              "{islandMessage || coaches.find(c => c.id === selectedCoachId)?.morning_quote || '¡Despierta! Hoy es el día para mover la aguja.'}"
-            </p>
-            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 mt-2 border-t border-slate-800/80">
-              <span>Cumplimiento hoy:</span>
-              <span className="font-bold text-slate-200">
-                {habits.filter(h => h.today_log?.completed).length} de {habits.length} ({metrics?.today_compliance_percent || 0}%)
-              </span>
+
+              {/* Botón de acción táctica rápida */}
+              <button
+                type="button"
+                onClick={() => {
+                  haptics.success();
+                  setIslandExpanded(false);
+                  setShowFocusModal(true);
+                }}
+                className={`px-3 py-1.5 rounded-xl font-bold text-[11px] flex items-center gap-1 transition active:scale-95 shadow-md min-h-[38px] ${
+                  slaRate < 80
+                    ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                }`}
+              >
+                <Zap className="w-3 h-3 fill-current" />
+                <span>{slaRate < 80 ? 'Activar Escudo (5m)' : 'Estación de Enfoque'}</span>
+              </button>
             </div>
           </div>
         )}
@@ -2118,11 +2246,14 @@ export default function App() {
 
                       <button
                         type="button"
-                        onClick={() => setShowFocusModal(true)}
-                        className="bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-black px-3.5 py-1.5 rounded-xl shadow-md shadow-emerald-900/30 transition flex items-center gap-1.5 active:scale-95 shrink-0"
-                        title="Abrir estación guiada de ejecución paso a paso con timer"
+                        onClick={() => {
+                          haptics.tap();
+                          setShowFocusModal(true);
+                        }}
+                        className="bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-black px-4 min-h-[44px] rounded-xl shadow-md shadow-emerald-900/30 transition flex items-center gap-2 active:scale-95 shrink-0"
+                        title="Abrir estación guiada de ejecución paso a paso con timer y audio 528Hz"
                       >
-                        <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                        <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
                         <span>Sesión de Enfoque</span>
                       </button>
                     </div>
@@ -3021,12 +3152,16 @@ export default function App() {
 
       </main>
 
-      {/* Bottom Navigation Bar Limpia, Táctil y Ergonómica (4 Secciones Esenciales con Hit Area de 48px) */}
+      {/* Bottom Navigation Bar Limpia, Táctil y Ergonómica (4 Secciones Esenciales con Hit Area de 48px y Haptics) */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/90 px-2 sm:px-3 pt-1.5 pb-2 safe-bottom pwa-standalone-nav shadow-2xl">
         <div className="max-w-md mx-auto grid grid-cols-4 gap-1">
           <button 
-            onClick={() => { setActiveTab('today'); setSelectedPlanName(null); }}
-            className={`min-h-[46px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
+            onClick={() => {
+              haptics.tap();
+              setActiveTab('today');
+              setSelectedPlanName(null);
+            }}
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
               activeTab === 'today' ? 'bg-indigo-950/70 text-indigo-300 font-bold border border-indigo-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -3035,8 +3170,11 @@ export default function App() {
           </button>
 
           <button 
-            onClick={() => setActiveTab('calendar')}
-            className={`min-h-[46px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
+            onClick={() => {
+              haptics.tap();
+              setActiveTab('calendar');
+            }}
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
               activeTab === 'calendar' ? 'bg-indigo-950/70 text-indigo-300 font-bold border border-indigo-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -3045,8 +3183,11 @@ export default function App() {
           </button>
 
           <button 
-            onClick={() => setActiveTab('vision')}
-            className={`min-h-[46px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
+            onClick={() => {
+              haptics.tap();
+              setActiveTab('vision');
+            }}
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
               activeTab === 'vision' ? 'bg-amber-950/70 text-amber-300 font-bold border border-amber-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -3055,8 +3196,11 @@ export default function App() {
           </button>
 
           <button 
-            onClick={() => setActiveTab('programs')}
-            className={`min-h-[46px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
+            onClick={() => {
+              haptics.tap();
+              setActiveTab('programs');
+            }}
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
               activeTab === 'programs' || activeTab === 'inject' ? 'bg-indigo-950/70 text-indigo-300 font-bold border border-indigo-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
