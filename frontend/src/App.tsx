@@ -52,6 +52,7 @@ import { BrianTracyConfirmModal } from './components/BrianTracyConfirmModal';
 import { AuthModal } from './components/AuthModal';
 import { ShareModal } from './components/ShareModal';
 import { TacticalFocusSessionModal } from './components/TacticalFocusSessionModal';
+import { AnkiInteractiveModal } from './components/AnkiInteractiveModal';
 import { VisionView } from './views/VisionView';
 import { CalendarView } from './views/CalendarView';
 import { ProgramsView } from './views/ProgramsView';
@@ -335,6 +336,10 @@ export default function App() {
 
   // Modal Detalle Interactivo de Tarea / Guía de Ejecución
   const [selectedDetailHabit, setSelectedDetailHabit] = useState<Habit | null>(null);
+
+  // Modal Interactivo de Inglés Método Anki (Spaced Repetition & Active Recall)
+  const [activeAnkiHabit, setActiveAnkiHabit] = useState<Habit | null>(null);
+  const [showAnkiModal, setShowAnkiModal] = useState<boolean>(false);
 
   // Modal para inspeccionar plantilla en el Catálogo antes de inscribir
   const [previewProgram, setPreviewProgram] = useState<Program | null>(null);
@@ -1356,6 +1361,26 @@ export default function App() {
     setBreathingCompletedRounds(0);
     setBreathingIsRunning(true);
     playBreathingChime('inhale');
+  };
+
+  const startAnkiSession = (habit: Habit) => {
+    setActiveAnkiHabit(habit);
+    setShowAnkiModal(true);
+  };
+
+  const handleCompleteAnkiSession = (habit: Habit, cardsReviewed: number) => {
+    // Si el hábito es numérico o de flashcards, registrar el avance en el log de hoy
+    if (habit.habit_type === 'numeric') {
+      const currentVal = habit.today_log?.value || 0;
+      const stepDelta = Math.max(1, cardsReviewed - currentVal);
+      logSeriesStep(habit.id, stepDelta);
+    } else if (!habit.today_log?.completed) {
+      toggleHabit(habit);
+    }
+    triggerCelebration();
+    setIslandMessage(`🇬🇧 ¡Sesión Anki completada! ${cardsReviewed} tarjetas repasadas.`);
+    setIslandExpanded(true);
+    setTimeout(() => setIslandExpanded(false), 4500);
   };
 
   const confirmBrianTracyCheck = async () => {
@@ -2606,6 +2631,18 @@ export default function App() {
                                               </button>
                                             )}
 
+                                            {/* Botón de Entrenador Interactivo de Flashcards / Anki si corresponde */}
+                                            {(habit.title.toLowerCase().includes('anki') || habit.title.toLowerCase().includes('flashcard') || habit.title.toLowerCase().includes('inglés') || habit.title.toLowerCase().includes('ingles') || habit.title.toLowerCase().includes('vocabulario')) && (
+                                              <button
+                                                onClick={() => startAnkiSession(habit)}
+                                                className="bg-amber-950/80 hover:bg-amber-900 border border-amber-600/60 text-amber-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                                title="Abrir Mazo de Flashcards Interactivas Anki SRS"
+                                              >
+                                                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                                                <span>Practicar</span>
+                                              </button>
+                                            )}
+
                                             {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
                                               <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
                                                 <button
@@ -2749,6 +2786,18 @@ export default function App() {
                                       >
                                         <Wind className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
                                         <span>Guiar</span>
+                                      </button>
+                                    )}
+
+                                    {/* Botón de Entrenador Interactivo de Flashcards / Anki si corresponde */}
+                                    {(habit.title.toLowerCase().includes('anki') || habit.title.toLowerCase().includes('flashcard') || habit.title.toLowerCase().includes('inglés') || habit.title.toLowerCase().includes('ingles') || habit.title.toLowerCase().includes('vocabulario')) && (
+                                      <button
+                                        onClick={() => startAnkiSession(habit)}
+                                        className="bg-amber-950/80 hover:bg-amber-900 border border-amber-600/60 text-amber-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                        title="Abrir Mazo de Flashcards Interactivas Anki SRS"
+                                      >
+                                        <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                                        <span>Practicar</span>
                                       </button>
                                     )}
 
@@ -3476,6 +3525,17 @@ export default function App() {
         }}
       />
       {/* Modal: Entrenador Visual Interactivo de Respiración */}
+      {/* Modal: Entrenador Interactivo de Inglés Método Anki (Spaced Repetition) */}
+      <AnkiInteractiveModal
+        isOpen={showAnkiModal}
+        habit={activeAnkiHabit}
+        onClose={() => {
+          setShowAnkiModal(false);
+          setActiveAnkiHabit(null);
+        }}
+        onCompleteSession={handleCompleteAnkiSession}
+      />
+
       <BreathingModal
         habit={activeBreathingHabit}
         isRunning={breathingIsRunning}
