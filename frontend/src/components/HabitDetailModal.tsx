@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  Clock, Target, BookOpen, Wind, Timer, Edit3, Trash2, Minus, Plus, Check, Users 
+  Clock, Target, BookOpen, Wind, Timer, Edit3, Trash2, Minus, Plus, Check, Users, Sparkles 
 } from 'lucide-react';
 import type { Habit } from '../types';
 
@@ -10,6 +10,7 @@ interface HabitDetailModalProps {
   onClose: () => void;
   onShowGoalsModal: () => void;
   onStartBreathingSession: (habit: Habit) => void;
+  onStartAnkiSession?: (habit: Habit) => void;
   onSetRestTimer: (seconds: number) => void;
   onOpenEditHabitModal: (habit: Habit) => void;
   onOpenShareModal: (habit: Habit) => void;
@@ -26,6 +27,7 @@ export const HabitDetailModal: React.FC<HabitDetailModalProps> = ({
   onClose,
   onShowGoalsModal,
   onStartBreathingSession,
+  onStartAnkiSession,
   onSetRestTimer,
   onOpenEditHabitModal,
   onOpenShareModal,
@@ -49,6 +51,12 @@ export const HabitDetailModal: React.FC<HabitDetailModalProps> = ({
     habit.title.toLowerCase().includes('suspiro') || 
     habit.title.toLowerCase().includes('coherencia') || 
     habit.title.toLowerCase().includes('4-7-8');
+
+  const isAnki = habit.title.toLowerCase().includes('anki') || 
+    habit.title.toLowerCase().includes('flashcard') || 
+    habit.title.toLowerCase().includes('inglés') || 
+    habit.title.toLowerCase().includes('ingles') || 
+    habit.title.toLowerCase().includes('vocabulario');
 
   const isWater = habit.title.toLowerCase().includes('agua');
 
@@ -189,6 +197,30 @@ export const HabitDetailModal: React.FC<HabitDetailModalProps> = ({
                 <Wind className="w-4 h-4 animate-pulse" />
                 <span>Lanzar Entrenador Visual Interactivo</span>
               </button>
+            </div>
+          )}
+
+          {/* Si es de Inglés / Flashcards Método Anki */}
+          {isAnki && (
+            <div className="space-y-2 text-xs text-slate-300">
+              <div className="bg-amber-950/30 p-3 rounded-xl border border-amber-800/50 space-y-1.5">
+                <p className="font-semibold text-amber-300 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" /> <strong>Método Anki (Active Recall & SRS):</strong>
+                </p>
+                <p className="text-[11px] text-amber-200/80">
+                  Prueba evocar mentalmente el significado de la palabra y pronunciar en voz alta antes de girar la tarjeta. La repetición espaciada traslada los patrones al subconsciente.
+                </p>
+              </div>
+
+              {onStartAnkiSession && (
+                <button
+                  onClick={() => onStartAnkiSession(habit)}
+                  className="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-md transition active:scale-95"
+                >
+                  <Sparkles className="w-4 h-4 animate-pulse" />
+                  <span>Abrir Entrenador Interactivo de Flashcards</span>
+                </button>
+              )}
             </div>
           )}
 

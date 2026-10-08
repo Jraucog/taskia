@@ -3564,6 +3564,7 @@ export default function App() {
         onClose={() => setSelectedDetailHabit(null)}
         onShowGoalsModal={() => setShowGoalsModal(true)}
         onStartBreathingSession={startBreathingSession}
+        onStartAnkiSession={startAnkiSession}
         onSetRestTimer={setRestTimer}
         onOpenEditHabitModal={openEditHabitModal}
         onOpenShareModal={(h) => setShareModalHabit(h)}
