@@ -47,6 +47,29 @@ export default defineConfig({
             type: 'image/svg+xml',
             purpose: 'any'
           }
+        ],
+        shortcuts: [
+          {
+            name: 'SOS Calma Rápida',
+            short_name: 'SOS',
+            description: 'Acceso inmediato a respiración guiada y grounding 5-4-3-2-1',
+            url: '/taskia/#sos',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Hub Ansiedad & Zen',
+            short_name: 'Ansiedad',
+            description: 'Juegos cognitivos Impulse y check-in emocional',
+            url: '/taskia/#ansiedad',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Respiración Fisiológica',
+            short_name: 'Respirar',
+            description: 'Suspiro fisiológico y ritmo 4-7-8 con 528Hz',
+            url: '/taskia/#breathe',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+          }
         ]
       },
 

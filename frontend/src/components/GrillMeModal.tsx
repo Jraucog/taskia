@@ -1,6 +1,7 @@
-import React from 'react';
-import { Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { Sparkles, Swords, CheckCircle2, AlertCircle } from 'lucide-react';
 import type { VisionCard } from '../types';
+import { haptics } from '../services/haptics';
 
 export interface GrillAnswers {
   area: string;
@@ -29,7 +30,76 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
   onClose,
   onSave
 }) => {
+  const [coachFeedback, setCoachFeedback] = useState<{
+    critique: string;
+    suggestedGoal?: string;
+    passed: boolean;
+  } | null>(null);
+
   if (!isOpen) return null;
+
+  const handleCoachGrill = () => {
+    haptics.impact();
+    const text = (answers.goal || '').trim();
+    const lower = text.toLowerCase();
+
+    if (!text) {
+      setCoachFeedback({
+        critique: "Aún no has escrito tu meta. Define qué quieres lograr antes de desafiarte.",
+        passed: false
+      });
+      return;
+    }
+
+    const issues: string[] = [];
+    let suggested = text;
+
+    // Regla 1: Personal (Debe comenzar con "Yo")
+    if (!lower.startsWith('yo ')) {
+      issues.push("Fórmula 3P requiere que empiece con 'Yo' (Personal) en tiempo presente.");
+      suggested = `Yo ${suggested.charAt(0).toLowerCase() + suggested.slice(1)}`;
+    }
+
+    // Regla 2: Positivo (Evitar "no", "dejar de", "parar")
+    if (lower.includes('no ') || lower.includes('dejar de') || lower.includes('evitar')) {
+      issues.push("Evita redactar en negativo ('no', 'dejar de'). El subconsciente ignora la palabra 'no'. Redacta hacia el estado deseado.");
+    }
+
+    // Regla 3: Sin tibieza (Evitar "intentar", "tratar", "espero")
+    if (lower.includes('intentar') || lower.includes('tratar') || lower.includes('espero') || lower.includes('quisiera')) {
+      issues.push("Elimina palabras tibias como 'intentar' o 'tratar'. Actúa como un operador de élite: la meta ya es tuya.");
+      suggested = suggested
+        .replace(/intentar/gi, 'ejecutar')
+        .replace(/tratar de/gi, '')
+        .replace(/espero/gi, '')
+        .replace(/quisiera/gi, '');
+    }
+
+    // Regla 4: Métrica o precisión
+    const hasNumbers = /\d+/.test(text);
+    if (!hasNumbers && !lower.includes('diario') && !lower.includes('excelencia')) {
+      issues.push("Falta una métrica cuantitativa (ej. 85 kg, 10 clientes, 20 minutos diarios).");
+    }
+
+    if (issues.length === 0) {
+      setCoachFeedback({
+        critique: "¡Excelente redacción 3P! Es personal, afirmativa y contundente. Tu mente subconsciente tiene una directiva clara.",
+        passed: true
+      });
+    } else {
+      setCoachFeedback({
+        critique: issues.join(' '),
+        suggestedGoal: suggested.trim(),
+        passed: false
+      });
+    }
+  };
+
+  const applySuggestion = (sug: string) => {
+    haptics.success();
+    onAnswersChange({ ...answers, goal: sug });
+    setCoachFeedback(null);
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 animate-fade-in">
@@ -93,10 +163,59 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
             </div>
             <textarea
               value={answers.goal}
-              onChange={(e) => onAnswersChange({ ...answers, goal: e.target.value })}
+              onChange={(e) => {
+                onAnswersChange({ ...answers, goal: e.target.value });
+                if (coachFeedback) setCoachFeedback(null);
+              }}
               placeholder="Yo ..."
               className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80 h-24"
             />
+
+            {/* Botón de Desafío del Coach (Modo Adversarial) */}
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={handleCoachGrill}
+                className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 hover:bg-amber-500/25 flex items-center gap-1.5 transition active:scale-95"
+              >
+                <Swords className="w-3.5 h-3.5" />
+                <span>Desafiar Redacción (Modo Coach)</span>
+              </button>
+            </div>
+
+            {coachFeedback && (
+              <div className={`p-3 rounded-2xl border text-xs space-y-2 ${
+                coachFeedback.passed
+                  ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
+                  : 'bg-amber-950/40 border-amber-500/40 text-amber-200'
+              }`}>
+                <div className="flex items-start gap-2">
+                  {coachFeedback.passed ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  )}
+                  <div className="text-[11px] leading-relaxed">
+                    {coachFeedback.critique}
+                  </div>
+                </div>
+
+                {coachFeedback.suggestedGoal && (
+                  <div className="pt-2 border-t border-amber-800/40 flex items-center justify-between gap-2">
+                    <span className="text-[10px] text-slate-300 truncate italic">
+                      Sugerencia: "{coachFeedback.suggestedGoal}"
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => applySuggestion(coachFeedback.suggestedGoal!)}
+                      className="px-2 py-1 bg-amber-500 text-slate-950 rounded-lg text-[10px] font-bold shrink-0 hover:bg-amber-400"
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -145,7 +264,10 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
         <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
           {step > 0 && (
             <button
-              onClick={() => onStepChange(step - 1)}
+              onClick={() => {
+                setCoachFeedback(null);
+                onStepChange(step - 1);
+              }}
               className="px-4 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
             >
               Atrás
@@ -154,7 +276,10 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
 
           {step < 3 ? (
             <button
-              onClick={() => onStepChange(step + 1)}
+              onClick={() => {
+                setCoachFeedback(null);
+                onStepChange(step + 1);
+              }}
               className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition"
             >
               Siguiente Pregunta →

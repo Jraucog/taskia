@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import axios from 'axios';
 import { 
   CheckCircle2, Circle, Flame, Zap, 
@@ -10,7 +10,7 @@ import {
   Wind, Info, Clock,
   Search, Users,
   Cloud, CloudOff,
-  Brain
+  Brain, Share2, Award
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
@@ -29,6 +29,7 @@ import {
   syncWithBackend
 } from './services/storageSync';
 import { haptics } from './services/haptics';
+import { calculateSkillTree } from './services/skillTreeService';
 import type {
   Habit,
   CoachProfile,
@@ -52,18 +53,24 @@ import { GoalsReferenceModal } from './components/GoalsReferenceModal';
 import { BrianTracyConfirmModal } from './components/BrianTracyConfirmModal';
 import { AuthModal } from './components/AuthModal';
 import { ShareModal } from './components/ShareModal';
-import { TacticalFocusSessionModal } from './components/TacticalFocusSessionModal';
-import { AnkiInteractiveModal } from './components/AnkiInteractiveModal';
-import { VisionView } from './views/VisionView';
-import { CalendarView } from './views/CalendarView';
-import { ProgramsView } from './views/ProgramsView';
-import { AnxietyView } from './views/AnxietyView';
-import { ZenBubblePopGame } from './components/anxiety/ZenBubblePopGame';
-import { ColorHarmonyGame } from './components/anxiety/ColorHarmonyGame';
-import { ZenPathTracingGame } from './components/anxiety/ZenPathTracingGame';
-import { GroundingSOSModal } from './components/anxiety/GroundingSOSModal';
-import { AnxietyAssessmentModal } from './components/anxiety/AnxietyAssessmentModal';
-import { DailyAnxietyCheckInModal } from './components/anxiety/DailyAnxietyCheckInModal';
+
+// Code Splitting Dinámico con React.lazy para optimizar rendimiento y tiempo de carga PWA
+const TacticalFocusSessionModal = lazy(() => import('./components/TacticalFocusSessionModal').then(m => ({ default: m.TacticalFocusSessionModal })));
+const AnkiInteractiveModal = lazy(() => import('./components/AnkiInteractiveModal').then(m => ({ default: m.AnkiInteractiveModal })));
+const SkillTreeModal = lazy(() => import('./components/SkillTreeModal').then(m => ({ default: m.SkillTreeModal })));
+const ShareSnapshotModal = lazy(() => import('./components/ShareSnapshotModal').then(m => ({ default: m.ShareSnapshotModal })));
+
+const VisionView = lazy(() => import('./views/VisionView').then(m => ({ default: m.VisionView })));
+const CalendarView = lazy(() => import('./views/CalendarView').then(m => ({ default: m.CalendarView })));
+const ProgramsView = lazy(() => import('./views/ProgramsView').then(m => ({ default: m.ProgramsView })));
+const AnxietyView = lazy(() => import('./views/AnxietyView').then(m => ({ default: m.AnxietyView })));
+
+const ZenBubblePopGame = lazy(() => import('./components/anxiety/ZenBubblePopGame').then(m => ({ default: m.ZenBubblePopGame })));
+const ColorHarmonyGame = lazy(() => import('./components/anxiety/ColorHarmonyGame').then(m => ({ default: m.ColorHarmonyGame })));
+const ZenPathTracingGame = lazy(() => import('./components/anxiety/ZenPathTracingGame').then(m => ({ default: m.ZenPathTracingGame })));
+const GroundingSOSModal = lazy(() => import('./components/anxiety/GroundingSOSModal').then(m => ({ default: m.GroundingSOSModal })));
+const AnxietyAssessmentModal = lazy(() => import('./components/anxiety/AnxietyAssessmentModal').then(m => ({ default: m.AnxietyAssessmentModal })));
+const DailyAnxietyCheckInModal = lazy(() => import('./components/anxiety/DailyAnxietyCheckInModal').then(m => ({ default: m.DailyAnxietyCheckInModal })));
 
 const API_BASE = import.meta.env.VITE_API_URL 
   || (window.location.hostname.includes('trycloudflare.com')
@@ -357,6 +364,10 @@ export default function App() {
   const [showSOSGroundingModal, setShowSOSGroundingModal] = useState<boolean>(false);
   const [showAssessmentModal, setShowAssessmentModal] = useState<boolean>(false);
   const [showAnxietyCheckInModal, setShowAnxietyCheckInModal] = useState<boolean>(false);
+
+  // Modales de Maestría RPG y Compartir Progreso
+  const [showSkillTreeModal, setShowSkillTreeModal] = useState<boolean>(false);
+  const [showShareSnapshotModal, setShowShareSnapshotModal] = useState<boolean>(false);
 
   // Modal para inspeccionar plantilla en el Catálogo antes de inscribir
   const [previewProgram, setPreviewProgram] = useState<Program | null>(null);
@@ -1380,6 +1391,40 @@ export default function App() {
     playBreathingChime('inhale');
   };
 
+  // Métrica general de SLA ponderada
+  const overallSLA = useMemo(() => {
+    if (!habits || habits.length === 0) return 100;
+    const sum = habits.reduce((acc, h) => acc + (h.compliance_summary?.rate_percent || 0), 0);
+    return Math.round(sum / habits.length);
+  }, [habits]);
+
+  // Perfil RPG Dinámico (Nivel, Título, XP y 4 Pilares)
+  const skillTreeProfile = useMemo(() => {
+    return calculateSkillTree(habits, streakData.current, overallSLA);
+  }, [habits, streakData.current, overallSLA]);
+
+  // Hash Routing PWA (#sos, #ansiedad, #breathe, #skills)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#sos') {
+        setShowSOSGroundingModal(true);
+      } else if (hash === '#ansiedad') {
+        setActiveTab('ansiedad');
+      } else if (hash === '#breathe') {
+        const breathHabit = habits.find(h => h.title.toLowerCase().includes('respir') || h.title.toLowerCase().includes('suspiro'));
+        if (breathHabit) startBreathingSession(breathHabit);
+        else setShowSOSGroundingModal(true);
+      } else if (hash === '#skills') {
+        setShowSkillTreeModal(true);
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [habits]);
+
   const startAnkiSession = (habit: Habit) => {
     setActiveAnkiHabit(habit);
     setShowAnkiModal(true);
@@ -2090,6 +2135,31 @@ export default function App() {
               <span className="text-[11px] font-medium text-slate-300 hidden sm:inline">
                 {currentUser?.username ? `@${currentUser.username}` : 'demo'}
               </span>
+            </button>
+
+            {/* Botón Árbol de Habilidades RPG */}
+            <button
+              onClick={() => {
+                haptics.tap();
+                setShowSkillTreeModal(true);
+              }}
+              className="px-2 py-1 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-200 rounded-xl transition flex items-center gap-1 active:scale-95"
+              title={`Árbol de Habilidades RPG: Nivel ${skillTreeProfile.level} (${skillTreeProfile.title})`}
+            >
+              <Award className="w-3.5 h-3.5 text-amber-300" />
+              <span className="text-[10px] font-mono font-bold">Nv.{skillTreeProfile.level}</span>
+            </button>
+
+            {/* Botón Compartir Progreso */}
+            <button
+              onClick={() => {
+                haptics.tap();
+                setShowShareSnapshotModal(true);
+              }}
+              className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl transition active:scale-95"
+              title="Compartir tarjeta de disciplina"
+            >
+              <Share2 className="w-3.5 h-3.5 text-slate-300" />
             </button>
 
             {/* Botón SOS Rápido de Pánico & Ansiedad */}
@@ -3401,67 +3471,76 @@ export default function App() {
         {/* PESTAÑA: ANSIEDAD & CALMA MENTAL (IMPULSE ZEN) */}
         {/* ======================================================== */}
         {activeTab === 'ansiedad' && (
-          <AnxietyView
-            onOpenCheckIn={() => setShowAnxietyCheckInModal(true)}
-            onOpenAssessment={() => setShowAssessmentModal(true)}
-            onOpenBubblePop={() => setShowBubblePopModal(true)}
-            onOpenColorHarmony={() => setShowColorHarmonyModal(true)}
-            onOpenZenTracing={() => setShowZenTracingModal(true)}
-            onOpenSOSGrounding={() => setShowSOSGroundingModal(true)}
-            onOpenBreathing={() => {
-              const breathHabit = habits.find(h => h.title.toLowerCase().includes('respir') || h.title.toLowerCase().includes('suspiro'));
-              if (breathHabit) startBreathingSession(breathHabit);
-              else setShowSOSGroundingModal(true);
-            }}
-          />
+          <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando módulo Zen...</div>}>
+            <AnxietyView
+              habits={habits}
+              onOpenCheckIn={() => setShowAnxietyCheckInModal(true)}
+              onOpenAssessment={() => setShowAssessmentModal(true)}
+              onOpenBubblePop={() => setShowBubblePopModal(true)}
+              onOpenColorHarmony={() => setShowColorHarmonyModal(true)}
+              onOpenZenTracing={() => setShowZenTracingModal(true)}
+              onOpenSOSGrounding={() => setShowSOSGroundingModal(true)}
+              onOpenBreathing={() => {
+                const breathHabit = habits.find(h => h.title.toLowerCase().includes('respir') || h.title.toLowerCase().includes('suspiro'));
+                if (breathHabit) startBreathingSession(breathHabit);
+                else setShowSOSGroundingModal(true);
+              }}
+            />
+          </Suspense>
         )}
 
         {/* ======================================================== */}
         {/* PESTAÑA 2: MATRIZ SEMANAL & SLA */}
         {/* ======================================================== */}
         {activeTab === 'calendar' && (
-          <CalendarView
-            habits={habits}
-            metrics={metrics}
-            streakData={streakData}
-            badges={badges}
-            earnedBadgesCount={earnedBadgesCount}
-            cleanTitle={cleanTitle}
-          />
+          <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando matriz de consistencia...</div>}>
+            <CalendarView
+              habits={habits}
+              metrics={metrics}
+              streakData={streakData}
+              badges={badges}
+              earnedBadgesCount={earnedBadgesCount}
+              cleanTitle={cleanTitle}
+            />
+          </Suspense>
         )}
 
         {/* ======================================================== */}
         {/* PESTAÑA 3: CATÁLOGO DE PLANES Y PLANTILLAS */}
         {/* ======================================================== */}
         {activeTab === 'programs' && (
-          <ProgramsView
-            programs={programs}
-            catalogSearchQuery={catalogSearchQuery}
-            setCatalogSearchQuery={setCatalogSearchQuery}
-            selectedCatalogCategory={selectedCatalogCategory}
-            setSelectedCatalogCategory={setSelectedCatalogCategory}
-            collapsedBlocks={collapsedBlocks}
-            toggleBlockCollapse={toggleBlockCollapse}
-            setPreviewProgram={setPreviewProgram}
-            handleEnroll={handleEnroll}
-            onNavigateInject={() => setActiveTab('inject')}
-          />
+          <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando catálogo...</div>}>
+            <ProgramsView
+              programs={programs}
+              catalogSearchQuery={catalogSearchQuery}
+              setCatalogSearchQuery={setCatalogSearchQuery}
+              selectedCatalogCategory={selectedCatalogCategory}
+              setSelectedCatalogCategory={setSelectedCatalogCategory}
+              collapsedBlocks={collapsedBlocks}
+              toggleBlockCollapse={toggleBlockCollapse}
+              setPreviewProgram={setPreviewProgram}
+              handleEnroll={handleEnroll}
+              onNavigateInject={() => setActiveTab('inject')}
+            />
+          </Suspense>
         )}
 
         {/* ======================================================== */}
         {/* PESTAÑA 4: VISION BOARD Y GRILL-ME INTERACTIVO */}
         {/* ======================================================== */}
         {activeTab === 'vision' && (
-          <VisionView
-            visionCards={visionCards}
-            habits={habits}
-            onOpenGrillMe={() => {
-              setGrillStep(0);
-              setGrillAnswers({ area: 'Cuerpo & Salud', goal: '', why: '', deadline: '', commitment: '90%' });
-              setShowGrillMeModal(true);
-            }}
-            onEditCard={(card) => setEditingCard(card)}
-          />
+          <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando visión 3P...</div>}>
+            <VisionView
+              visionCards={visionCards}
+              habits={habits}
+              onOpenGrillMe={() => {
+                setGrillStep(0);
+                setGrillAnswers({ area: 'Cuerpo & Salud', goal: '', why: '', deadline: '', commitment: '90%' });
+                setShowGrillMeModal(true);
+              }}
+              onEditCard={(card) => setEditingCard(card)}
+            />
+          </Suspense>
         )}
 
         {/* ======================================================== */}
@@ -3664,98 +3743,116 @@ export default function App() {
           setEditingCard(null);
         }}
       />
-      {/* Modal: Entrenador Visual Interactivo de Respiración */}
-      {/* Modal: Entrenador Interactivo de Inglés Método Anki (Spaced Repetition) */}
-      <AnkiInteractiveModal
-        isOpen={showAnkiModal}
-        habit={activeAnkiHabit}
-        onClose={() => {
-          setShowAnkiModal(false);
-          setActiveAnkiHabit(null);
-        }}
-        onCompleteSession={handleCompleteAnkiSession}
-      />
+      {/* Modal: Entrenador Interactivo de Inglés Método Anki (Spaced Repetition) & Modales Zen / RPG */}
+      <Suspense fallback={null}>
+        <AnkiInteractiveModal
+          isOpen={showAnkiModal}
+          habit={activeAnkiHabit}
+          onClose={() => {
+            setShowAnkiModal(false);
+            setActiveAnkiHabit(null);
+          }}
+          onCompleteSession={handleCompleteAnkiSession}
+        />
 
-      {/* Modales de Ansiedad & Salud Mental (Impulse Style) */}
-      <ZenBubblePopGame
-        isOpen={showBubblePopModal}
-        onClose={() => {
-          setShowBubblePopModal(false);
-          setActiveZenHabit(null);
-        }}
-        onComplete={(popped) => {
-          handleCompleteZenSession(activeZenHabit, `¡${popped} preocupaciones disueltas!`);
-          setShowBubblePopModal(false);
-          setActiveZenHabit(null);
-        }}
-      />
+        {/* Modales de Ansiedad & Salud Mental (Impulse Style) */}
+        <ZenBubblePopGame
+          isOpen={showBubblePopModal}
+          onClose={() => {
+            setShowBubblePopModal(false);
+            setActiveZenHabit(null);
+          }}
+          onComplete={(popped) => {
+            handleCompleteZenSession(activeZenHabit, `¡${popped} preocupaciones disueltas!`);
+            setShowBubblePopModal(false);
+            setActiveZenHabit(null);
+          }}
+        />
 
-      <ColorHarmonyGame
-        isOpen={showColorHarmonyModal}
-        onClose={() => {
-          setShowColorHarmonyModal(false);
-          setActiveZenHabit(null);
-        }}
-        onComplete={(moves) => {
-          handleCompleteZenSession(activeZenHabit, `¡Armonía cromática completada en ${moves} pasos!`);
-          setShowColorHarmonyModal(false);
-          setActiveZenHabit(null);
-        }}
-      />
+        <ColorHarmonyGame
+          isOpen={showColorHarmonyModal}
+          onClose={() => {
+            setShowColorHarmonyModal(false);
+            setActiveZenHabit(null);
+          }}
+          onComplete={(moves) => {
+            handleCompleteZenSession(activeZenHabit, `¡Armonía cromática completada en ${moves} pasos!`);
+            setShowColorHarmonyModal(false);
+            setActiveZenHabit(null);
+          }}
+        />
 
-      <ZenPathTracingGame
-        isOpen={showZenTracingModal}
-        onClose={() => {
-          setShowZenTracingModal(false);
-          setActiveZenHabit(null);
-        }}
-        onComplete={(cycles) => {
-          handleCompleteZenSession(activeZenHabit, `¡${cycles} órbitas zen completadas!`);
-          setShowZenTracingModal(false);
-          setActiveZenHabit(null);
-        }}
-      />
+        <ZenPathTracingGame
+          isOpen={showZenTracingModal}
+          onClose={() => {
+            setShowZenTracingModal(false);
+            setActiveZenHabit(null);
+          }}
+          onComplete={(cycles) => {
+            handleCompleteZenSession(activeZenHabit, `¡${cycles} órbitas zen completadas!`);
+            setShowZenTracingModal(false);
+            setActiveZenHabit(null);
+          }}
+        />
 
-      <GroundingSOSModal
-        isOpen={showSOSGroundingModal}
-        onClose={() => {
-          setShowSOSGroundingModal(false);
-          setActiveZenHabit(null);
-        }}
-        onComplete={() => {
-          handleCompleteZenSession(activeZenHabit, '¡Aterrizaje sensorial 5-4-3-2-1 completado!');
-          setShowSOSGroundingModal(false);
-          setActiveZenHabit(null);
-        }}
-      />
+        <GroundingSOSModal
+          isOpen={showSOSGroundingModal}
+          onClose={() => {
+            setShowSOSGroundingModal(false);
+            setActiveZenHabit(null);
+          }}
+          onComplete={() => {
+            handleCompleteZenSession(activeZenHabit, '¡Aterrizaje sensorial 5-4-3-2-1 completado!');
+            setShowSOSGroundingModal(false);
+            setActiveZenHabit(null);
+          }}
+        />
 
-      <AnxietyAssessmentModal
-        isOpen={showAssessmentModal}
-        onClose={() => {
-          setShowAssessmentModal(false);
-          setActiveZenHabit(null);
-        }}
-        onLaunchZenTool={(tool) => {
-          setShowAssessmentModal(false);
-          if (tool === 'bubble_pop') setShowBubblePopModal(true);
-          else if (tool === 'color_flow') setShowColorHarmonyModal(true);
-          else if (tool === 'zen_trace') setShowZenTracingModal(true);
-          else if (tool === 'grounding') setShowSOSGroundingModal(true);
-        }}
-      />
+        <AnxietyAssessmentModal
+          isOpen={showAssessmentModal}
+          onClose={() => {
+            setShowAssessmentModal(false);
+            setActiveZenHabit(null);
+          }}
+          onLaunchZenTool={(tool) => {
+            setShowAssessmentModal(false);
+            if (tool === 'bubble_pop') setShowBubblePopModal(true);
+            else if (tool === 'color_flow') setShowColorHarmonyModal(true);
+            else if (tool === 'zen_trace') setShowZenTracingModal(true);
+            else if (tool === 'grounding') setShowSOSGroundingModal(true);
+          }}
+        />
 
-      <DailyAnxietyCheckInModal
-        isOpen={showAnxietyCheckInModal}
-        onClose={() => {
-          setShowAnxietyCheckInModal(false);
-          setActiveZenHabit(null);
-        }}
-        onSaved={(log) => {
-          handleCompleteZenSession(activeZenHabit, `Check-in de ansiedad guardado (${log.score}/10)`);
-          setShowAnxietyCheckInModal(false);
-          setActiveZenHabit(null);
-        }}
-      />
+        <DailyAnxietyCheckInModal
+          isOpen={showAnxietyCheckInModal}
+          onClose={() => {
+            setShowAnxietyCheckInModal(false);
+            setActiveZenHabit(null);
+          }}
+          onSaved={(log) => {
+            handleCompleteZenSession(activeZenHabit, `Check-in de ansiedad guardado (${log.score}/10)`);
+            setShowAnxietyCheckInModal(false);
+            setActiveZenHabit(null);
+          }}
+        />
+
+        {/* Modal: Árbol de Habilidades RPG */}
+        <SkillTreeModal
+          isOpen={showSkillTreeModal}
+          onClose={() => setShowSkillTreeModal(false)}
+          profile={skillTreeProfile}
+          userName={currentUser?.username ? `@${currentUser.username}` : 'Operador'}
+        />
+
+        {/* Modal: Compartir Snapshot de Disciplina */}
+        <ShareSnapshotModal
+          isOpen={showShareSnapshotModal}
+          onClose={() => setShowShareSnapshotModal(false)}
+          profile={skillTreeProfile}
+          overallSLA={overallSLA}
+          userName={currentUser?.username ? `@${currentUser.username}` : 'Operador'}
+        />
+      </Suspense>
 
       <BreathingModal
         habit={activeBreathingHabit}
@@ -3828,15 +3925,17 @@ export default function App() {
       />
 
       {/* Modal: Estación Táctica de Enfoque con Cronómetro Solfeggio */}
-      <TacticalFocusSessionModal
-        isOpen={showFocusModal}
-        habits={habits}
-        onClose={() => setShowFocusModal(false)}
-        onToggleHabit={toggleHabit}
-        onLogSeriesStep={logSeriesStep}
-        onStartBreathing={startBreathingSession}
-        cleanTitle={cleanTitle}
-      />
+      <Suspense fallback={null}>
+        <TacticalFocusSessionModal
+          isOpen={showFocusModal}
+          habits={habits}
+          onClose={() => setShowFocusModal(false)}
+          onToggleHabit={toggleHabit}
+          onLogSeriesStep={logSeriesStep}
+          onStartBreathing={startBreathingSession}
+          cleanTitle={cleanTitle}
+        />
+      </Suspense>
     </div>
   );
 }

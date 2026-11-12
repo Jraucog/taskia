@@ -3,6 +3,7 @@ import {
   Brain, ShieldAlert, Sparkles, Palette, Compass, Activity, 
   Wind, Heart, ArrowRight, Plus, History
 } from 'lucide-react';
+import type { Habit } from '../types';
 import { 
   getTodayAnxietyLog, 
   getLatestAssessment, 
@@ -12,9 +13,11 @@ import {
   type AnxietyAssessmentResult,
   type ZenSessionRecord
 } from '../services/anxietyService';
+import { AnxietyCorrelationCard } from '../components/anxiety/AnxietyCorrelationCard';
 import { haptics } from '../services/haptics';
 
 interface AnxietyViewProps {
+  habits?: Habit[];
   onOpenCheckIn: () => void;
   onOpenAssessment: () => void;
   onOpenBubblePop: () => void;
@@ -25,6 +28,7 @@ interface AnxietyViewProps {
 }
 
 export const AnxietyView: React.FC<AnxietyViewProps> = ({
+  habits = [],
   onOpenCheckIn,
   onOpenAssessment,
   onOpenBubblePop,
@@ -134,6 +138,9 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Tarjeta de Correlación Neurobiológica: Hábitos vs Ansiedad */}
+      <AnxietyCorrelationCard habits={habits} />
 
       {/* 2. JUEGOS COGNITIVOS RELAJANTES (IMPULSE CALMING GAMES) */}
       <div className="space-y-3">

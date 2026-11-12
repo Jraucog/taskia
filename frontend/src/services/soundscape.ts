@@ -3,7 +3,7 @@
  * Requires 0 external audio files/assets and works 100% offline.
  */
 
-export type AmbientSoundscapeType = '528hz' | 'binaural_alpha' | 'deep_zen';
+export type AmbientSoundscapeType = '528hz' | 'binaural_alpha' | 'deep_zen' | 'brown_noise' | 'sleep_delta';
 
 class AmbientSoundEngine {
   private ctx: AudioContext | null = null;
@@ -125,6 +125,58 @@ class AmbientSoundEngine {
       filter.connect(master);
       osc.start(now);
       this.nodes.push(osc, filter);
+    } else if (type === 'brown_noise') {
+      // Ruido Marrón Puro (Brownian Noise) sintetizado para TDAH y Foco Profundo
+      const bufferSize = ctx.sampleRate * 4;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastOut = 0.0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        lastOut = (lastOut + (0.02 * white)) / 1.02;
+        data[i] = lastOut * 3.2;
+      }
+      const noiseSource = ctx.createBufferSource();
+      noiseSource.buffer = buffer;
+      noiseSource.loop = true;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(450, now);
+
+      noiseSource.connect(filter);
+      filter.connect(master);
+      noiseSource.start(now);
+      this.nodes.push(noiseSource, filter);
+    } else if (type === 'sleep_delta') {
+      // Frecuencias Delta (2 Hz binaural: 100 Hz y 102 Hz) para Inducción al Sueño
+      const oscL = ctx.createOscillator();
+      oscL.type = 'sine';
+      oscL.frequency.setValueAtTime(100, now);
+
+      const oscR = ctx.createOscillator();
+      oscR.type = 'sine';
+      oscR.frequency.setValueAtTime(102, now);
+
+      if (typeof ctx.createStereoPanner === 'function') {
+        const panL = ctx.createStereoPanner();
+        panL.pan.setValueAtTime(-0.85, now);
+        oscL.connect(panL);
+        panL.connect(master);
+
+        const panR = ctx.createStereoPanner();
+        panR.pan.setValueAtTime(0.85, now);
+        oscR.connect(panR);
+        panR.connect(master);
+        this.nodes.push(panL, panR);
+      } else {
+        oscL.connect(master);
+        oscR.connect(master);
+      }
+
+      oscL.start(now);
+      oscR.start(now);
+      this.nodes.push(oscL, oscR);
     }
   }
 

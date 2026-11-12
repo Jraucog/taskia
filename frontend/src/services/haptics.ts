@@ -26,4 +26,6 @@ export const haptics = {
   selection: () => triggerHaptic(20),
   /** Tactile impact for popping bubbles, swapping tiles, or grounding checkpoints */
   impact: () => triggerHaptic(28),
+  /** Error pulse for failed actions or invalid input */
+  error: () => triggerHaptic([50, 40, 50, 40]),
 };

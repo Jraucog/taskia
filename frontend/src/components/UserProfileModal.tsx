@@ -1,6 +1,8 @@
-import React from 'react';
-import { User, Palette, Flame, Award, Bell, LogOut, Check } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { User, Palette, Flame, Award, Bell, LogOut, Check, Download, Upload } from 'lucide-react';
 import type { CoachProfile, AppTheme, ThemeOption, Badge, MetricsSummary } from '../types';
+import { downloadBackupFile, restoreBackupFromJSON } from '../services/backupService';
+import { haptics } from '../services/haptics';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -43,9 +45,39 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   notificationPermission,
   handleLogout
 }) => {
+  const [backupStatus, setBackupStatus] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   if (!isOpen) return null;
 
   const earnedBadgesCount = badges.filter(b => b.earned).length;
+
+  const handleExportBackup = () => {
+    haptics.success();
+    downloadBackupFile();
+    setBackupStatus('✓ Copia de respaldo descargada');
+    setTimeout(() => setBackupStatus(null), 3500);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const res = restoreBackupFromJSON(content);
+      if (res.success) {
+        haptics.success();
+        setBackupStatus(`✓ Se restauraron ${res.keysRestored} registros. Recargando...`);
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        haptics.error();
+        setBackupStatus(`Error: ${res.error}`);
+      }
+    };
+    reader.readAsText(file);
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
@@ -226,6 +258,52 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <span>Cerrar Sesión</span>
                   </button>
                 )}
+              </div>
+
+              {/* Sección de Portabilidad & Respaldo Offline */}
+              <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-3 space-y-2.5 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                    Portabilidad Offline
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 font-semibold">100% Local</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Exporta tus hábitos, metas 3P, sesiones Zen y evaluaciones como archivo JSON para llevarlos a otro dispositivo o recuperarlos cuando quieras.
+                </p>
+
+                {backupStatus && (
+                  <div className="text-[11px] font-mono p-2 rounded-xl bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 text-center">
+                    {backupStatus}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleExportBackup}
+                    className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95"
+                  >
+                    <Download className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Descargar JSON</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Restaurar JSON</span>
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </div>
               </div>
             </div>
           )}
