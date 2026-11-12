@@ -67,7 +67,7 @@ export const AnxietyCorrelationCard: React.FC<AnxietyCorrelationCardProps> = ({ 
   }, [habits, dailyLogs]);
 
   return (
-    <div className="bg-gradient-to-br from-slate-900/90 via-indigo-950/40 to-slate-900/90 border border-indigo-900/50 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-lg">
+    <div className="healthy-card bg-gradient-to-br from-slate-900/90 via-indigo-950/40 to-slate-900/90 border border-indigo-900/50 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-lg">
       <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
 
       <div className="relative z-10">

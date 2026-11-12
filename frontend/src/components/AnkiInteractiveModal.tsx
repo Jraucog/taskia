@@ -181,7 +181,7 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 animate-fade-in">
-      <div className="bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl flex flex-col relative max-h-[92vh] overflow-hidden">
+      <div className="anki-modal-card bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl flex flex-col relative max-h-[92vh] overflow-hidden">
         
         {/* Cabecera del Entrenador Anki */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">

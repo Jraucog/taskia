@@ -128,7 +128,7 @@ export const TacticalFocusSessionModal: React.FC<TacticalFocusSessionModalProps>
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 animate-fade-in">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 max-w-lg w-full flex flex-col justify-between shadow-2xl relative overflow-hidden min-h-[520px]">
+      <div className="tactical-focus-modal-card bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 max-w-lg w-full flex flex-col justify-between shadow-2xl relative overflow-hidden min-h-[520px]">
         {/* Glow de fondo ambiental */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />

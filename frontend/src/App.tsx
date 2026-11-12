@@ -3438,7 +3438,7 @@ export default function App() {
 
       {/* Modern Floating Glass Dock (Concentric rounded-full, high-depth blur, serene labels) */}
       <nav className="fixed bottom-2 sm:bottom-4 inset-x-0 z-40 px-3 flex justify-center pointer-events-none safe-bottom pwa-standalone-nav">
-        <div className="w-full max-w-md bg-slate-950/80 backdrop-blur-2xl border border-white/[0.08] rounded-full p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.65)] pointer-events-auto grid grid-cols-5 gap-1">
+        <div className="w-full max-w-md pwa-dock-container bg-slate-950/80 backdrop-blur-2xl border border-white/[0.08] rounded-full p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.65)] pointer-events-auto grid grid-cols-5 gap-1">
           <button 
             onClick={() => {
               haptics.tap();

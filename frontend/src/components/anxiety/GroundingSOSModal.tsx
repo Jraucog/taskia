@@ -159,7 +159,7 @@ export const GroundingSOSModal: React.FC<GroundingSOSModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-3 sm:p-4 select-none animate-fade-in">
-      <div className="w-full max-w-md bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 border border-red-900/40 rounded-3xl p-5 shadow-2xl flex flex-col relative overflow-hidden">
+      <div className="anxiety-modal-card w-full max-w-md bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 border border-red-900/40 rounded-3xl p-5 shadow-2xl flex flex-col relative overflow-hidden">
         {/* Cabecera SOS con selector de modo */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">

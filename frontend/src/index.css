@@ -123,14 +123,11 @@ html, body {
   min-height: 100vh;
 }
 
-/* Organic Soft Pillowy Cards with layered depth (Not flat, not cluttered) */
+/* Organic Soft Pillowy Cards with layered depth */
 .healthy-card {
-  background: linear-gradient(145deg, rgba(22, 33, 53, 0.65) 0%, rgba(13, 20, 33, 0.82) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 
-    0 16px 36px -8px rgba(0, 0, 0, 0.5),
-    0 4px 12px -2px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: var(--healthy-card-bg, linear-gradient(145deg, rgba(15, 23, 42, 0.85) 0%, rgba(2, 6, 23, 0.95) 100%));
+  border: 1px solid var(--healthy-card-border, rgba(51, 65, 85, 0.4));
+  box-shadow: var(--healthy-card-shadow, 0 16px 36px -8px rgba(0, 0, 0, 0.5)), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -166,9 +163,9 @@ html, body {
 
 /* Glassmorphism & High-Depth Surfaces */
 .surface-depth {
-  background: linear-gradient(145deg, rgba(22, 33, 53, 0.65) 0%, rgba(13, 20, 33, 0.82) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: var(--surface-depth-bg, linear-gradient(145deg, rgba(15, 23, 42, 0.75) 0%, rgba(2, 6, 23, 0.85) 100%));
+  border: 1px solid var(--surface-depth-border, rgba(51, 65, 85, 0.35));
+  box-shadow: var(--surface-depth-shadow, 0 8px 30px -4px rgba(0, 0, 0, 0.5)), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -333,6 +330,15 @@ html[data-theme="dark"] body {
   color: #f8fafc !important;
   color-scheme: dark;
 }
+html[data-theme="dark"],
+html:not([data-theme]) {
+  --healthy-card-bg: linear-gradient(145deg, rgba(15, 23, 42, 0.85) 0%, rgba(2, 6, 23, 0.95) 100%);
+  --healthy-card-border: rgba(51, 65, 85, 0.4);
+  --healthy-card-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6);
+  --surface-depth-bg: linear-gradient(145deg, rgba(15, 23, 42, 0.75) 0%, rgba(2, 6, 23, 0.85) 100%);
+  --surface-depth-border: rgba(51, 65, 85, 0.35);
+  --surface-depth-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.5);
+}
 
 /* 2. TEMA CLARO REAL (LUZ DIURNA MINIMALISTA) */
 /* Cero elementos oscuros residuales: fondos limpios, bordes suaves y textos oscuros legibles */
@@ -469,7 +475,270 @@ html[data-theme="light"] textarea::placeholder {
   color: #94a3b8 !important;
 }
 
+/* Tokens de Variables para Modo Claro */
+html[data-theme="light"] {
+  --healthy-card-bg: #ffffff;
+  --healthy-card-border: #e2e8f0;
+  --healthy-card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --surface-depth-bg: #ffffff;
+  --surface-depth-border: #e2e8f0;
+  --surface-depth-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Tarjetas y Superficies Claras */
+html[data-theme="light"] .healthy-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .surface-depth {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .surface-interactive:hover,
+html[data-theme="light"] .healthy-card-interactive:hover {
+  border-color: #059669 !important;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Modales y Overlays Claros */
+html[data-theme="light"] .fixed.inset-0.z-50 {
+  background-color: rgba(15, 23, 42, 0.55) !important;
+}
+
+html[data-theme="light"] .fixed.inset-0.z-50 > div,
+html[data-theme="light"] [role="dialog"] > div,
+html[data-theme="light"] .anki-modal-card,
+html[data-theme="light"] .anxiety-modal-card,
+html[data-theme="light"] .zen-game-card,
+html[data-theme="light"] .mastery-modal-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+}
+
+html[data-theme="light"] .fixed.inset-0.z-50 > div > div.sticky,
+html[data-theme="light"] .fixed.inset-0.z-50 > div > header {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Dock Flotante (Glassmorphism Claro) */
+html[data-theme="light"] nav.pwa-standalone-nav > div,
+html[data-theme="light"] .pwa-dock-container {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme="light"] nav.pwa-standalone-nav button {
+  color: #64748b !important;
+}
+
+html[data-theme="light"] nav.pwa-standalone-nav button:hover {
+  color: #0f172a !important;
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Texto de pestañas activas en el dock y badges en modo claro */
+html[data-theme="light"] .text-teal-200,
+html[data-theme="light"] .text-emerald-200,
+html[data-theme="light"] .text-indigo-200,
+html[data-theme="light"] .text-amber-200,
+html[data-theme="light"] .text-violet-200 {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* Banners con gradientes oscuros reconvertidos a luz suave */
+html[data-theme="light"] .from-indigo-950\/70,
+html[data-theme="light"] .from-indigo-950,
+html[data-theme="light"] .from-indigo-950\/90,
+html[data-theme="light"] .from-indigo-950\/60,
+html[data-theme="light"] .from-indigo-950\/40 {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #e0e7ff 100%) !important;
+  border-color: #c7d2fe !important;
+}
+
+html[data-theme="light"] .from-amber-950\/70,
+html[data-theme="light"] .from-amber-950 {
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 50%, #fef3c7 100%) !important;
+  border-color: #fde68a !important;
+}
+
+/* Anulación de gradientes oscuros en tarjetas y modales */
+html[data-theme="light"] .bg-gradient-to-b.from-slate-900,
+html[data-theme="light"] .bg-gradient-to-br.from-slate-900,
+html[data-theme="light"] .bg-gradient-to-r.from-slate-900 {
+  background-image: none !important;
+}
+
+/* PALETA TEAL (Módulo Ansiedad & Neuro-Calm) */
+html[data-theme="light"] .bg-teal-950,
+html[data-theme="light"] .bg-teal-950\/90,
+html[data-theme="light"] .bg-teal-950\/80,
+html[data-theme="light"] .bg-teal-950\/70,
+html[data-theme="light"] .bg-teal-950\/60,
+html[data-theme="light"] .bg-teal-950\/40,
+html[data-theme="light"] .bg-teal-950\/30,
+html[data-theme="light"] .bg-teal-900,
+html[data-theme="light"] .bg-teal-900\/60,
+html[data-theme="light"] .bg-teal-600\/30,
+html[data-theme="light"] .bg-teal-600\/25 {
+  background-color: #ccfbf1 !important;
+  color: #0f766e !important;
+  border-color: #99f6e4 !important;
+}
+
+html[data-theme="light"] .border-teal-800,
+html[data-theme="light"] .border-teal-700\/60,
+html[data-theme="light"] .border-teal-700\/50,
+html[data-theme="light"] .border-teal-600\/60,
+html[data-theme="light"] .border-teal-500\/50,
+html[data-theme="light"] .border-teal-500\/40,
+html[data-theme="light"] .border-teal-500\/30,
+html[data-theme="light"] .border-teal-400\/40 {
+  border-color: #99f6e4 !important;
+}
+
+html[data-theme="light"] .text-teal-400,
+html[data-theme="light"] .text-teal-300 {
+  color: #0f766e !important;
+}
+
+/* PALETA CYAN (Trazado Zen) */
+html[data-theme="light"] .bg-cyan-950,
+html[data-theme="light"] .bg-cyan-950\/90,
+html[data-theme="light"] .bg-cyan-950\/80,
+html[data-theme="light"] .bg-cyan-950\/60 {
+  background-color: #cffafe !important;
+  color: #0e7490 !important;
+  border-color: #a5f3fc !important;
+}
+
+html[data-theme="light"] .border-cyan-800,
+html[data-theme="light"] .border-cyan-700\/60,
+html[data-theme="light"] .border-cyan-700\/50,
+html[data-theme="light"] .border-cyan-500\/50,
+html[data-theme="light"] .border-cyan-500\/30 {
+  border-color: #a5f3fc !important;
+}
+
+html[data-theme="light"] .text-cyan-400,
+html[data-theme="light"] .text-cyan-300 {
+  color: #0e7490 !important;
+}
+
+/* PALETA VIOLET (Color Harmony) */
+html[data-theme="light"] .bg-violet-950,
+html[data-theme="light"] .bg-violet-950\/90,
+html[data-theme="light"] .bg-violet-950\/80,
+html[data-theme="light"] .bg-violet-950\/60,
+html[data-theme="light"] .bg-violet-900\/60 {
+  background-color: #ede9fe !important;
+  color: #6d28d9 !important;
+  border-color: #ddd6fe !important;
+}
+
+html[data-theme="light"] .border-violet-800,
+html[data-theme="light"] .border-violet-700\/60,
+html[data-theme="light"] .border-violet-700\/50,
+html[data-theme="light"] .border-violet-600\/70,
+html[data-theme="light"] .border-violet-500\/50,
+html[data-theme="light"] .border-violet-500\/30 {
+  border-color: #ddd6fe !important;
+}
+
+html[data-theme="light"] .text-violet-400,
+html[data-theme="light"] .text-violet-300 {
+  color: #6d28d9 !important;
+}
+
+/* PALETA ROSE (Grounding 5-4-3-2-1) */
+html[data-theme="light"] .bg-rose-950,
+html[data-theme="light"] .bg-rose-950\/90,
+html[data-theme="light"] .bg-rose-950\/80,
+html[data-theme="light"] .bg-rose-950\/70,
+html[data-theme="light"] .bg-rose-950\/60 {
+  background-color: #ffe4e6 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
+}
+
+html[data-theme="light"] .border-rose-800,
+html[data-theme="light"] .border-rose-700\/60,
+html[data-theme="light"] .border-rose-600\/60 {
+  border-color: #fecdd3 !important;
+}
+
+html[data-theme="light"] .text-rose-400,
+html[data-theme="light"] .text-rose-300 {
+  color: #be123c !important;
+}
+
+/* PALETA BLUE (Grounding Somático) */
+html[data-theme="light"] .bg-blue-950,
+html[data-theme="light"] .bg-blue-950\/90,
+html[data-theme="light"] .bg-blue-950\/80,
+html[data-theme="light"] .bg-blue-950\/70,
+html[data-theme="light"] .bg-blue-950\/60 {
+  background-color: #dbeafe !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+html[data-theme="light"] .border-blue-500\/60,
+html[data-theme="light"] .border-blue-500\/50,
+html[data-theme="light"] .border-blue-500\/30 {
+  border-color: #93c5fd !important;
+}
+
+html[data-theme="light"] .text-blue-400,
+html[data-theme="light"] .text-blue-300 {
+  color: #1d4ed8 !important;
+}
+
+/* PALETA RED (SOS Pánico & Alertas) */
+html[data-theme="light"] .bg-red-950,
+html[data-theme="light"] .bg-red-950\/90,
+html[data-theme="light"] .bg-red-950\/80,
+html[data-theme="light"] .bg-red-950\/70,
+html[data-theme="light"] .bg-red-950\/60 {
+  background-color: #fee2e2 !important;
+  color: #b91c1c !important;
+  border-color: #fecaca !important;
+}
+
+html[data-theme="light"] .border-red-900\/40,
+html[data-theme="light"] .border-red-700\/60,
+html[data-theme="light"] .border-red-600\/70 {
+  border-color: #fca5a5 !important;
+}
+
+html[data-theme="light"] .text-red-400,
+html[data-theme="light"] .text-red-300 {
+  color: #b91c1c !important;
+}
+
 /* 3. TEMA CYBERPUNK NEÓN */
+html[data-theme="cyberpunk"] {
+  --healthy-card-bg: linear-gradient(145deg, rgba(24, 9, 41, 0.85) 0%, rgba(13, 4, 23, 0.95) 100%);
+  --healthy-card-border: rgba(192, 38, 211, 0.35);
+  --healthy-card-shadow: 0 10px 30px -4px rgba(6, 2, 14, 0.7), 0 0 15px rgba(192, 38, 211, 0.15);
+  --surface-depth-bg: linear-gradient(145deg, rgba(27, 9, 46, 0.8) 0%, rgba(10, 3, 18, 0.9) 100%);
+  --surface-depth-border: rgba(112, 26, 117, 0.4);
+  --surface-depth-shadow: 0 8px 30px -4px rgba(6, 2, 14, 0.6);
+}
+
 html[data-theme="cyberpunk"],
 html[data-theme="cyberpunk"] body {
   background-color: #06020e !important;
@@ -518,7 +787,64 @@ html[data-theme="cyberpunk"] .bg-indigo-600:hover {
   background-color: #d946ef !important;
 }
 
+html[data-theme="cyberpunk"] .healthy-card {
+  background: var(--healthy-card-bg) !important;
+  border-color: var(--healthy-card-border) !important;
+  box-shadow: var(--healthy-card-shadow) !important;
+}
+
+html[data-theme="cyberpunk"] .surface-depth {
+  background: var(--surface-depth-bg) !important;
+  border-color: var(--surface-depth-border) !important;
+  box-shadow: var(--surface-depth-shadow) !important;
+}
+
+html[data-theme="cyberpunk"] .surface-interactive:hover,
+html[data-theme="cyberpunk"] .healthy-card-interactive:hover {
+  border-color: #c026d3 !important;
+  box-shadow: 0 12px 32px -4px rgba(192, 38, 211, 0.25) !important;
+}
+
+/* Modales y Overlays Cyberpunk */
+html[data-theme="cyberpunk"] .fixed.inset-0.z-50 > div,
+html[data-theme="cyberpunk"] [role="dialog"] > div,
+html[data-theme="cyberpunk"] .anki-modal-card,
+html[data-theme="cyberpunk"] .anxiety-modal-card,
+html[data-theme="cyberpunk"] .zen-game-card,
+html[data-theme="cyberpunk"] .mastery-modal-card,
+html[data-theme="cyberpunk"] .share-modal-card,
+html[data-theme="cyberpunk"] .tactical-focus-modal-card {
+  background: linear-gradient(165deg, #180929 0%, #0d0417 100%) !important;
+  border-color: #701a75 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 25px rgba(192, 38, 211, 0.2) !important;
+}
+
+/* Dock Flotante Cyberpunk */
+html[data-theme="cyberpunk"] nav.pwa-standalone-nav > div,
+html[data-theme="cyberpunk"] .pwa-dock-container {
+  background-color: rgba(24, 9, 41, 0.92) !important;
+  border-color: #701a75 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(192, 38, 211, 0.25) !important;
+}
+
+/* Gradientes oscuros adaptados a Cyberpunk */
+html[data-theme="cyberpunk"] .bg-gradient-to-b.from-slate-900,
+html[data-theme="cyberpunk"] .bg-gradient-to-br.from-indigo-950\/70,
+html[data-theme="cyberpunk"] .bg-gradient-to-r.from-slate-900 {
+  background: linear-gradient(145deg, #1e0a33 0%, #0d0417 100%) !important;
+  border-color: #701a75 !important;
+}
+
 /* 4. TEMA BIO-HACKING ESMERALDA */
+html[data-theme="emerald"] {
+  --healthy-card-bg: linear-gradient(145deg, rgba(3, 42, 31, 0.85) 0%, rgba(1, 20, 14, 0.95) 100%);
+  --healthy-card-border: rgba(5, 150, 105, 0.35);
+  --healthy-card-shadow: 0 10px 30px -4px rgba(2, 26, 19, 0.7), 0 0 15px rgba(16, 185, 129, 0.15);
+  --surface-depth-bg: linear-gradient(145deg, rgba(3, 48, 35, 0.8) 0%, rgba(1, 22, 16, 0.9) 100%);
+  --surface-depth-border: rgba(6, 95, 70, 0.45);
+  --surface-depth-shadow: 0 8px 30px -4px rgba(2, 26, 19, 0.6);
+}
+
 html[data-theme="emerald"],
 html[data-theme="emerald"] body {
   background-color: #021a13 !important;
@@ -567,7 +893,64 @@ html[data-theme="emerald"] .bg-indigo-600:hover {
   background-color: #10b981 !important;
 }
 
+html[data-theme="emerald"] .healthy-card {
+  background: var(--healthy-card-bg) !important;
+  border-color: var(--healthy-card-border) !important;
+  box-shadow: var(--healthy-card-shadow) !important;
+}
+
+html[data-theme="emerald"] .surface-depth {
+  background: var(--surface-depth-bg) !important;
+  border-color: var(--surface-depth-border) !important;
+  box-shadow: var(--surface-depth-shadow) !important;
+}
+
+html[data-theme="emerald"] .surface-interactive:hover,
+html[data-theme="emerald"] .healthy-card-interactive:hover {
+  border-color: #059669 !important;
+  box-shadow: 0 12px 32px -4px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* Modales y Overlays Esmeralda */
+html[data-theme="emerald"] .fixed.inset-0.z-50 > div,
+html[data-theme="emerald"] [role="dialog"] > div,
+html[data-theme="emerald"] .anki-modal-card,
+html[data-theme="emerald"] .anxiety-modal-card,
+html[data-theme="emerald"] .zen-game-card,
+html[data-theme="emerald"] .mastery-modal-card,
+html[data-theme="emerald"] .share-modal-card,
+html[data-theme="emerald"] .tactical-focus-modal-card {
+  background: linear-gradient(165deg, #032a1f 0%, #01140e 100%) !important;
+  border-color: #065f46 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 25px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Dock Flotante Esmeralda */
+html[data-theme="emerald"] nav.pwa-standalone-nav > div,
+html[data-theme="emerald"] .pwa-dock-container {
+  background-color: rgba(3, 42, 31, 0.92) !important;
+  border-color: #065f46 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* Gradientes oscuros adaptados a Esmeralda */
+html[data-theme="emerald"] .bg-gradient-to-b.from-slate-900,
+html[data-theme="emerald"] .bg-gradient-to-br.from-indigo-950\/70,
+html[data-theme="emerald"] .bg-gradient-to-r.from-slate-900 {
+  background: linear-gradient(145deg, #043829 0%, #01140e 100%) !important;
+  border-color: #065f46 !important;
+}
+
 /* 5. TEMA DRÁCULA & OBSIDIANA */
+html[data-theme="dracula"] {
+  --healthy-card-bg: linear-gradient(145deg, rgba(34, 24, 61, 0.85) 0%, rgba(13, 10, 26, 0.95) 100%);
+  --healthy-card-border: rgba(124, 58, 237, 0.35);
+  --healthy-card-shadow: 0 10px 30px -4px rgba(18, 14, 36, 0.7), 0 0 15px rgba(139, 92, 246, 0.15);
+  --surface-depth-bg: linear-gradient(145deg, rgba(38, 26, 70, 0.8) 0%, rgba(14, 10, 29, 0.9) 100%);
+  --surface-depth-border: rgba(91, 33, 182, 0.45);
+  --surface-depth-shadow: 0 8px 30px -4px rgba(18, 14, 36, 0.6);
+}
+
 html[data-theme="dracula"],
 html[data-theme="dracula"] body {
   background-color: #120e24 !important;
@@ -616,7 +999,64 @@ html[data-theme="dracula"] .bg-indigo-600:hover {
   background-color: #8b5cf6 !important;
 }
 
+html[data-theme="dracula"] .healthy-card {
+  background: var(--healthy-card-bg) !important;
+  border-color: var(--healthy-card-border) !important;
+  box-shadow: var(--healthy-card-shadow) !important;
+}
+
+html[data-theme="dracula"] .surface-depth {
+  background: var(--surface-depth-bg) !important;
+  border-color: var(--surface-depth-border) !important;
+  box-shadow: var(--surface-depth-shadow) !important;
+}
+
+html[data-theme="dracula"] .surface-interactive:hover,
+html[data-theme="dracula"] .healthy-card-interactive:hover {
+  border-color: #7c3aed !important;
+  box-shadow: 0 12px 32px -4px rgba(139, 92, 246, 0.25) !important;
+}
+
+/* Modales y Overlays Dracula */
+html[data-theme="dracula"] .fixed.inset-0.z-50 > div,
+html[data-theme="dracula"] [role="dialog"] > div,
+html[data-theme="dracula"] .anki-modal-card,
+html[data-theme="dracula"] .anxiety-modal-card,
+html[data-theme="dracula"] .zen-game-card,
+html[data-theme="dracula"] .mastery-modal-card,
+html[data-theme="dracula"] .share-modal-card,
+html[data-theme="dracula"] .tactical-focus-modal-card {
+  background: linear-gradient(165deg, #22183d 0%, #0d0a1a 100%) !important;
+  border-color: #5b21b6 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 25px rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Dock Flotante Dracula */
+html[data-theme="dracula"] nav.pwa-standalone-nav > div,
+html[data-theme="dracula"] .pwa-dock-container {
+  background-color: rgba(34, 24, 61, 0.92) !important;
+  border-color: #5b21b6 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(139, 92, 246, 0.25) !important;
+}
+
+/* Gradientes oscuros adaptados a Dracula */
+html[data-theme="dracula"] .bg-gradient-to-b.from-slate-900,
+html[data-theme="dracula"] .bg-gradient-to-br.from-indigo-950\/70,
+html[data-theme="dracula"] .bg-gradient-to-r.from-slate-900 {
+  background: linear-gradient(145deg, #2a1b4d 0%, #0d0a1a 100%) !important;
+  border-color: #5b21b6 !important;
+}
+
 /* 6. TEMA SAIYAN BLUE MIGATTE NO GOKUI (ULTRA INSTINTO - MODO OSCURO) */
+html[data-theme="saiyan"] {
+  --healthy-card-bg: linear-gradient(145deg, rgba(7, 30, 61, 0.85) 0%, rgba(3, 16, 36, 0.95) 100%);
+  --healthy-card-border: rgba(2, 132, 199, 0.4);
+  --healthy-card-shadow: 0 10px 30px -4px rgba(2, 9, 20, 0.8), 0 0 18px rgba(56, 189, 248, 0.2);
+  --surface-depth-bg: linear-gradient(145deg, rgba(9, 38, 77, 0.8) 0%, rgba(3, 16, 36, 0.9) 100%);
+  --surface-depth-border: rgba(3, 105, 161, 0.45);
+  --surface-depth-shadow: 0 8px 30px -4px rgba(2, 9, 20, 0.7);
+}
+
 html[data-theme="saiyan"],
 html[data-theme="saiyan"] body {
   background-color: #020914 !important;
@@ -672,8 +1112,65 @@ html[data-theme="saiyan"] .text-amber-400 {
   text-shadow: 0 0 8px rgba(56, 189, 248, 0.8) !important;
 }
 
+html[data-theme="saiyan"] .healthy-card {
+  background: var(--healthy-card-bg) !important;
+  border-color: var(--healthy-card-border) !important;
+  box-shadow: var(--healthy-card-shadow) !important;
+}
+
+html[data-theme="saiyan"] .surface-depth {
+  background: var(--surface-depth-bg) !important;
+  border-color: var(--surface-depth-border) !important;
+  box-shadow: var(--surface-depth-shadow) !important;
+}
+
+html[data-theme="saiyan"] .surface-interactive:hover,
+html[data-theme="saiyan"] .healthy-card-interactive:hover {
+  border-color: #0284c7 !important;
+  box-shadow: 0 12px 32px -4px rgba(56, 189, 248, 0.3) !important;
+}
+
+/* Modales y Overlays Saiyan */
+html[data-theme="saiyan"] .fixed.inset-0.z-50 > div,
+html[data-theme="saiyan"] [role="dialog"] > div,
+html[data-theme="saiyan"] .anki-modal-card,
+html[data-theme="saiyan"] .anxiety-modal-card,
+html[data-theme="saiyan"] .zen-game-card,
+html[data-theme="saiyan"] .mastery-modal-card,
+html[data-theme="saiyan"] .share-modal-card,
+html[data-theme="saiyan"] .tactical-focus-modal-card {
+  background: linear-gradient(165deg, #071e3d 0%, #031024 100%) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 35px rgba(14, 165, 233, 0.25) !important;
+}
+
+/* Dock Flotante Saiyan */
+html[data-theme="saiyan"] nav.pwa-standalone-nav > div,
+html[data-theme="saiyan"] .pwa-dock-container {
+  background-color: rgba(7, 30, 61, 0.92) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.3) !important;
+}
+
+/* Gradientes oscuros adaptados a Saiyan */
+html[data-theme="saiyan"] .bg-gradient-to-b.from-slate-900,
+html[data-theme="saiyan"] .bg-gradient-to-br.from-indigo-950\/70,
+html[data-theme="saiyan"] .bg-gradient-to-r.from-slate-900 {
+  background: linear-gradient(145deg, #08264e 0%, #031024 100%) !important;
+  border-color: #0284c7 !important;
+}
+
 /* 7. TEMA SAIYAN BLUE CELESTIAL (MODO CLARO) */
 /* Cero oscuridad: blanco nieve, aura cian celeste (#0284c7), contrastes nítidos */
+html[data-theme="saiyan-light"] {
+  --healthy-card-bg: #ffffff;
+  --healthy-card-border: #bae6fd;
+  --healthy-card-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.08), 0 4px 6px -2px rgba(2, 132, 199, 0.04);
+  --surface-depth-bg: #ffffff;
+  --surface-depth-border: #bae6fd;
+  --surface-depth-shadow: 0 4px 16px -2px rgba(2, 132, 199, 0.06);
+}
+
 html[data-theme="saiyan-light"],
 html[data-theme="saiyan-light"] body {
   background-color: #f0f9ff !important;
@@ -800,5 +1297,240 @@ html[data-theme="saiyan-light"] input::placeholder,
 html[data-theme="saiyan-light"] textarea::placeholder {
   color: #7dd3fc !important;
 }
+
+/* Tarjetas y Superficies Saiyan Light */
+html[data-theme="saiyan-light"] .healthy-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #bae6fd !important;
+  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.08), 0 4px 6px -2px rgba(2, 132, 199, 0.04) !important;
+  color: #0c4a6e !important;
+}
+
+html[data-theme="saiyan-light"] .surface-depth {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #bae6fd !important;
+  box-shadow: 0 4px 16px -2px rgba(2, 132, 199, 0.06) !important;
+  color: #0c4a6e !important;
+}
+
+html[data-theme="saiyan-light"] .surface-interactive:hover,
+html[data-theme="saiyan-light"] .healthy-card-interactive:hover {
+  border-color: #0284c7 !important;
+  box-shadow: 0 12px 28px -4px rgba(2, 132, 199, 0.15) !important;
+}
+
+/* Modales y Overlays Saiyan Light */
+html[data-theme="saiyan-light"] .fixed.inset-0.z-50 {
+  background-color: rgba(12, 74, 110, 0.45) !important;
+}
+
+html[data-theme="saiyan-light"] .fixed.inset-0.z-50 > div,
+html[data-theme="saiyan-light"] [role="dialog"] > div,
+html[data-theme="saiyan-light"] .anki-modal-card,
+html[data-theme="saiyan-light"] .anxiety-modal-card,
+html[data-theme="saiyan-light"] .zen-game-card,
+html[data-theme="saiyan-light"] .mastery-modal-card,
+html[data-theme="saiyan-light"] .share-modal-card,
+html[data-theme="saiyan-light"] .tactical-focus-modal-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #0c4a6e !important;
+  border-color: #7dd3fc !important;
+  box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.2) !important;
+}
+
+html[data-theme="saiyan-light"] .fixed.inset-0.z-50 > div > div.sticky,
+html[data-theme="saiyan-light"] .fixed.inset-0.z-50 > div > header {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  border-color: #bae6fd !important;
+}
+
+/* Dock Flotante Saiyan Light */
+html[data-theme="saiyan-light"] nav.pwa-standalone-nav > div,
+html[data-theme="saiyan-light"] .pwa-dock-container {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #7dd3fc !important;
+  box-shadow: 0 16px 36px -4px rgba(2, 132, 199, 0.18), 0 0 1px rgba(2, 132, 199, 0.1) !important;
+}
+
+html[data-theme="saiyan-light"] nav.pwa-standalone-nav button {
+  color: #0369a1 !important;
+}
+
+html[data-theme="saiyan-light"] nav.pwa-standalone-nav button:hover {
+  color: #0284c7 !important;
+  background-color: rgba(2, 132, 199, 0.08) !important;
+}
+
+/* Texto de pestañas activas en el dock y badges en Saiyan Light */
+html[data-theme="saiyan-light"] .text-teal-200,
+html[data-theme="saiyan-light"] .text-emerald-200,
+html[data-theme="saiyan-light"] .text-indigo-200,
+html[data-theme="saiyan-light"] .text-amber-200,
+html[data-theme="saiyan-light"] .text-violet-200 {
+  color: #0284c7 !important;
+  font-weight: 700 !important;
+}
+
+/* Banners con gradientes oscuros reconvertidos a luz celestial */
+html[data-theme="saiyan-light"] .from-indigo-950\/70,
+html[data-theme="saiyan-light"] .from-indigo-950,
+html[data-theme="saiyan-light"] .from-indigo-950\/90,
+html[data-theme="saiyan-light"] .from-indigo-950\/60,
+html[data-theme="saiyan-light"] .from-indigo-950\/40 {
+  background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #e0f2fe 100%) !important;
+  border-color: #7dd3fc !important;
+}
+
+html[data-theme="saiyan-light"] .from-amber-950\/70,
+html[data-theme="saiyan-light"] .from-amber-950 {
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 50%, #fef3c7 100%) !important;
+  border-color: #fde68a !important;
+}
+
+/* Anulación de gradientes oscuros en tarjetas y modales */
+html[data-theme="saiyan-light"] .bg-gradient-to-b.from-slate-900,
+html[data-theme="saiyan-light"] .bg-gradient-to-br.from-slate-900,
+html[data-theme="saiyan-light"] .bg-gradient-to-r.from-slate-900 {
+  background-image: none !important;
+}
+
+/* PALETA TEAL (Módulo Ansiedad & Neuro-Calm en Saiyan Light) */
+html[data-theme="saiyan-light"] .bg-teal-950,
+html[data-theme="saiyan-light"] .bg-teal-950\/90,
+html[data-theme="saiyan-light"] .bg-teal-950\/80,
+html[data-theme="saiyan-light"] .bg-teal-950\/70,
+html[data-theme="saiyan-light"] .bg-teal-950\/60,
+html[data-theme="saiyan-light"] .bg-teal-950\/40,
+html[data-theme="saiyan-light"] .bg-teal-950\/30,
+html[data-theme="saiyan-light"] .bg-teal-900,
+html[data-theme="saiyan-light"] .bg-teal-900\/60,
+html[data-theme="saiyan-light"] .bg-teal-600\/30,
+html[data-theme="saiyan-light"] .bg-teal-600\/25 {
+  background-color: #ccfbf1 !important;
+  color: #0f766e !important;
+  border-color: #99f6e4 !important;
+}
+
+html[data-theme="saiyan-light"] .border-teal-800,
+html[data-theme="saiyan-light"] .border-teal-700\/60,
+html[data-theme="saiyan-light"] .border-teal-700\/50,
+html[data-theme="saiyan-light"] .border-teal-600\/60,
+html[data-theme="saiyan-light"] .border-teal-500\/50,
+html[data-theme="saiyan-light"] .border-teal-500\/40,
+html[data-theme="saiyan-light"] .border-teal-500\/30,
+html[data-theme="saiyan-light"] .border-teal-400\/40 {
+  border-color: #99f6e4 !important;
+}
+
+html[data-theme="saiyan-light"] .text-teal-400,
+html[data-theme="saiyan-light"] .text-teal-300 {
+  color: #0f766e !important;
+}
+
+/* PALETA CYAN */
+html[data-theme="saiyan-light"] .bg-cyan-950,
+html[data-theme="saiyan-light"] .bg-cyan-950\/90,
+html[data-theme="saiyan-light"] .bg-cyan-950\/80,
+html[data-theme="saiyan-light"] .bg-cyan-950\/60 {
+  background-color: #e0f2fe !important;
+  color: #0284c7 !important;
+  border-color: #bae6fd !important;
+}
+
+html[data-theme="saiyan-light"] .border-cyan-800,
+html[data-theme="saiyan-light"] .border-cyan-700\/60,
+html[data-theme="saiyan-light"] .border-cyan-700\/50,
+html[data-theme="saiyan-light"] .border-cyan-500\/50,
+html[data-theme="saiyan-light"] .border-cyan-500\/30 {
+  border-color: #bae6fd !important;
+}
+
+html[data-theme="saiyan-light"] .text-cyan-400,
+html[data-theme="saiyan-light"] .text-cyan-300 {
+  color: #0284c7 !important;
+}
+
+/* PALETA VIOLET */
+html[data-theme="saiyan-light"] .bg-violet-950,
+html[data-theme="saiyan-light"] .bg-violet-950\/90,
+html[data-theme="saiyan-light"] .bg-violet-950\/80,
+html[data-theme="saiyan-light"] .bg-violet-950\/60,
+html[data-theme="saiyan-light"] .bg-violet-900\/60 {
+  background-color: #ede9fe !important;
+  color: #6d28d9 !important;
+  border-color: #ddd6fe !important;
+}
+
+html[data-theme="saiyan-light"] .border-violet-800,
+html[data-theme="saiyan-light"] .border-violet-700\/60,
+html[data-theme="saiyan-light"] .border-violet-700\/50,
+html[data-theme="saiyan-light"] .border-violet-600\/70,
+html[data-theme="saiyan-light"] .border-violet-500\/50,
+html[data-theme="saiyan-light"] .border-violet-500\/30 {
+  border-color: #ddd6fe !important;
+}
+
+html[data-theme="saiyan-light"] .text-violet-400,
+html[data-theme="saiyan-light"] .text-violet-300 {
+  color: #6d28d9 !important;
+}
+
+/* PALETA ROSE & RED (SOS y Alertas) */
+html[data-theme="saiyan-light"] .bg-rose-950,
+html[data-theme="saiyan-light"] .bg-rose-950\/90,
+html[data-theme="saiyan-light"] .bg-rose-950\/80,
+html[data-theme="saiyan-light"] .bg-rose-950\/70,
+html[data-theme="saiyan-light"] .bg-rose-950\/60,
+html[data-theme="saiyan-light"] .bg-red-950,
+html[data-theme="saiyan-light"] .bg-red-950\/90,
+html[data-theme="saiyan-light"] .bg-red-950\/80,
+html[data-theme="saiyan-light"] .bg-red-950\/70,
+html[data-theme="saiyan-light"] .bg-red-950\/60 {
+  background-color: #ffe4e6 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
+}
+
+html[data-theme="saiyan-light"] .border-rose-800,
+html[data-theme="saiyan-light"] .border-rose-700\/60,
+html[data-theme="saiyan-light"] .border-rose-600\/60,
+html[data-theme="saiyan-light"] .border-red-900\/40,
+html[data-theme="saiyan-light"] .border-red-700\/60,
+html[data-theme="saiyan-light"] .border-red-600\/70 {
+  border-color: #fecdd3 !important;
+}
+
+html[data-theme="saiyan-light"] .text-rose-400,
+html[data-theme="saiyan-light"] .text-rose-300,
+html[data-theme="saiyan-light"] .text-red-400,
+html[data-theme="saiyan-light"] .text-red-300 {
+  color: #be123c !important;
+}
+
+/* PALETA BLUE */
+html[data-theme="saiyan-light"] .bg-blue-950,
+html[data-theme="saiyan-light"] .bg-blue-950\/90,
+html[data-theme="saiyan-light"] .bg-blue-950\/80,
+html[data-theme="saiyan-light"] .bg-blue-950\/70,
+html[data-theme="saiyan-light"] .bg-blue-950\/60 {
+  background-color: #e0f2fe !important;
+  color: #0284c7 !important;
+  border-color: #bae6fd !important;
+}
+
+html[data-theme="saiyan-light"] .border-blue-500\/60,
+html[data-theme="saiyan-light"] .border-blue-500\/50,
+html[data-theme="saiyan-light"] .border-blue-500\/30 {
+  border-color: #bae6fd !important;
+}
+
+html[data-theme="saiyan-light"] .text-blue-400,
+html[data-theme="saiyan-light"] .text-blue-300 {
+  color: #0284c7 !important;
+}
+
 
 

@@ -56,7 +56,7 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
   return (
     <div className="w-full max-w-xl mx-auto px-3 sm:px-4 py-4 pb-28 text-left space-y-5 animate-fade-in">
       {/* 1. HERO HEADER */}
-      <div className="bg-gradient-to-br from-indigo-950/70 via-slate-900 to-slate-950 p-5 rounded-3xl border border-indigo-800/40 shadow-xl relative overflow-hidden">
+      <div className="healthy-card bg-gradient-to-br from-indigo-950/70 via-slate-900 to-slate-950 p-5 rounded-3xl border border-indigo-800/40 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex items-center justify-between gap-3 mb-2">
@@ -268,7 +268,7 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
       </div>
 
       {/* 4. HISTORIAL Y TENDENCIAS SEMANALES */}
-      <div className="bg-slate-950/80 p-4 rounded-3xl border border-slate-800">
+      <div className="healthy-card bg-slate-950/80 p-4 rounded-3xl border border-slate-800">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <History className="w-4 h-4 text-indigo-400" />
