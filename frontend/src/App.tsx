@@ -2089,16 +2089,16 @@ export default function App() {
 
           {/* Acciones Rápidas Unificadas: SOS Calma + Sincronización + Perfil */}
           <div className="flex items-center gap-2">
-            {/* Botón SOS Calma & Pánico */}
+            {/* Botón SOS Calma & Pánico (Sereno, integrado y no alarmista) */}
             <button
               onClick={() => {
                 haptics.impact();
                 setShowSOSGroundingModal(true);
               }}
-              className="px-3 py-1.5 bg-red-950/50 hover:bg-red-900/70 border border-red-500/40 text-red-200 rounded-full transition flex items-center gap-1.5 active:scale-95 text-xs font-bold shadow-[0_0_10px_rgba(239,68,68,0.15)]"
-              title="SOS Ansiedad & Pánico (Aterrizaje sensorial 5-4-3-2-1)"
+              className="px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white rounded-full transition flex items-center gap-1.5 active:scale-95 text-xs font-medium"
+              title="SOS Ansiedad & Calma (Aterrizaje sensorial 5-4-3-2-1)"
             >
-              <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+              <ShieldAlert className="w-3.5 h-3.5 text-indigo-400" />
               <span className="hidden xs:inline">SOS Calma</span>
             </button>
 
@@ -2334,18 +2334,18 @@ export default function App() {
                       </p>
                     </div>
 
-                    {/* Botones de Acción Primaria */}
-                    <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 mt-2 sm:mt-0">
+                    {/* Botones de Acción Primaria (Armónicos y Cohesivos) */}
+                    <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 mt-2 sm:mt-0 flex-wrap">
                       <button
                         type="button"
                         onClick={() => {
                           haptics.tap();
                           setShowFocusModal(true);
                         }}
-                        className="shimmer-badge bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-bold px-3.5 py-2.5 rounded-2xl shadow-lg shadow-emerald-950/50 transition flex items-center gap-1.5 active:scale-95"
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5 active:scale-95 shadow-sm"
                         title="Iniciar sesión guiada de respiración y enfoque con audio 528Hz"
                       >
-                        <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                        <Zap className="w-3.5 h-3.5 text-emerald-200 fill-emerald-200" />
                         <span>Enfoque Guiado</span>
                       </button>
 
@@ -2356,16 +2356,16 @@ export default function App() {
                           haptics.tap();
                           startAnkiSession();
                         }}
-                        className="bg-amber-950/70 hover:bg-amber-900/80 border border-amber-500/40 text-amber-200 text-xs font-bold px-3 py-2.5 rounded-2xl transition flex items-center gap-1.5 active:scale-95 shadow-sm"
+                        className="bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 text-xs font-medium px-3 py-2 rounded-xl transition flex items-center gap-1.5 active:scale-95"
                         title="Abrir Mazo de Flashcards Interactivas Anki (25 tarjetas)"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                         <span>🇬🇧 Anki SRS</span>
                       </button>
 
                       <button
                         onClick={() => openCreateHabitModal()}
-                        className="bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-2.5 rounded-2xl border border-white/[0.08] transition flex items-center gap-1.5 active:scale-95"
+                        className="bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 text-xs font-medium px-3 py-2 rounded-xl transition flex items-center gap-1.5 active:scale-95"
                         title="Crear un nuevo hábito o rutina saludable"
                       >
                         <Plus className="w-3.5 h-3.5 text-emerald-400" />
@@ -3447,13 +3447,13 @@ export default function App() {
             }}
             className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'today' 
-                ? 'bg-emerald-600/25 text-emerald-200 font-bold border border-emerald-400/40 shadow-[0_0_15px_rgba(16,185,129,0.25)]' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                ? 'bg-white/[0.08] text-white font-semibold border border-white/[0.12] shadow-sm' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
             }`}
           >
-            <Dumbbell className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'today' ? 'scale-110 text-emerald-400' : ''}`} />
-            <span className="text-[10px] tracking-tight leading-none font-medium">Hoy</span>
-            {activeTab === 'today' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />}
+            <Dumbbell className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'today' ? 'scale-110 text-white' : 'text-slate-400'}`} />
+            <span className={`text-[10px] tracking-tight leading-none ${activeTab === 'today' ? 'font-semibold text-white' : 'font-medium text-slate-400'}`}>Hoy</span>
+            {activeTab === 'today' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-emerald-400" />}
           </button>
 
           <button 
@@ -3463,13 +3463,13 @@ export default function App() {
             }}
             className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'ansiedad' 
-                ? 'bg-teal-600/25 text-teal-200 font-bold border border-teal-400/40 shadow-[0_0_15px_rgba(20,184,166,0.25)]' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                ? 'bg-white/[0.08] text-white font-semibold border border-white/[0.12] shadow-sm' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
             }`}
           >
-            <Brain className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'ansiedad' ? 'scale-110 text-teal-400' : 'text-teal-400'}`} />
-            <span className="text-[10px] tracking-tight leading-none font-medium">Ansiedad</span>
-            {activeTab === 'ansiedad' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-teal-400 shadow-[0_0_6px_#2dd4bf]" />}
+            <Brain className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'ansiedad' ? 'scale-110 text-white' : 'text-slate-400'}`} />
+            <span className={`text-[10px] tracking-tight leading-none ${activeTab === 'ansiedad' ? 'font-semibold text-white' : 'font-medium text-slate-400'}`}>Ansiedad</span>
+            {activeTab === 'ansiedad' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-teal-400" />}
           </button>
 
           <button 
@@ -3479,13 +3479,13 @@ export default function App() {
             }}
             className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'calendar' 
-                ? 'bg-indigo-600/25 text-indigo-200 font-bold border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.25)]' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                ? 'bg-white/[0.08] text-white font-semibold border border-white/[0.12] shadow-sm' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
             }`}
           >
-            <Calendar className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'calendar' ? 'scale-110 text-indigo-400' : ''}`} />
-            <span className="text-[10px] tracking-tight leading-none font-medium">Progreso</span>
-            {activeTab === 'calendar' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />}
+            <Calendar className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'calendar' ? 'scale-110 text-white' : 'text-slate-400'}`} />
+            <span className={`text-[10px] tracking-tight leading-none ${activeTab === 'calendar' ? 'font-semibold text-white' : 'font-medium text-slate-400'}`}>Progreso</span>
+            {activeTab === 'calendar' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400" />}
           </button>
 
           <button 
@@ -3495,13 +3495,13 @@ export default function App() {
             }}
             className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'vision' 
-                ? 'bg-amber-600/25 text-amber-200 font-bold border border-amber-400/40 shadow-[0_0_15px_rgba(245,158,11,0.25)]' 
+                ? 'bg-white/[0.08] text-white font-semibold border border-white/[0.12] shadow-sm' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
-            <Compass className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'vision' ? 'scale-110 text-amber-400' : ''}`} />
-            <span className="text-[10px] tracking-tight leading-none font-medium">Visión</span>
-            {activeTab === 'vision' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-amber-400 shadow-[0_0_6px_#fbbf24]" />}
+            <Compass className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'vision' ? 'scale-110 text-white' : 'text-slate-400'}`} />
+            <span className={`text-[10px] tracking-tight leading-none ${activeTab === 'vision' ? 'font-semibold text-white' : 'font-medium text-slate-400'}`}>Visión</span>
+            {activeTab === 'vision' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-amber-400" />}
           </button>
 
           <button 
@@ -3511,13 +3511,13 @@ export default function App() {
             }}
             className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'programs' || activeTab === 'inject' 
-                ? 'bg-indigo-600/25 text-indigo-200 font-bold border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.25)]' 
+                ? 'bg-white/[0.08] text-white font-semibold border border-white/[0.12] shadow-sm' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
-            <Layers className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'programs' || activeTab === 'inject' ? 'scale-110 text-indigo-400' : ''}`} />
-            <span className="text-[10px] tracking-tight leading-none font-medium">Catálogo</span>
-            {(activeTab === 'programs' || activeTab === 'inject') && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />}
+            <Layers className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'programs' || activeTab === 'inject' ? 'scale-110 text-white' : 'text-slate-400'}`} />
+            <span className={`text-[10px] tracking-tight leading-none ${activeTab === 'programs' || activeTab === 'inject' ? 'font-semibold text-white' : 'font-medium text-slate-400'}`}>Catálogo</span>
+            {(activeTab === 'programs' || activeTab === 'inject') && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400" />}
           </button>
         </div>
       </nav>
