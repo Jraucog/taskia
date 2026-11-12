@@ -2385,11 +2385,11 @@ export default function App() {
       )}
 
       {/* Main Content Area */}
-      <main className="max-w-2xl mx-auto w-full px-3 sm:px-4 py-3 flex-1 flex flex-col gap-4">
+      <main className="max-w-2xl mx-auto w-full px-3 sm:px-4 pt-3 pb-28 sm:pb-32 flex-1 flex flex-col gap-4">
         
         {/* Banner de Notificaciones con opción de cerrar y silenciar */}
         {showNotificationBanner && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
+          <div className="surface-depth rounded-2xl p-3 flex items-center justify-between gap-3 shadow-md">
             <div className="flex items-center gap-2 min-w-0">
               <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
               <div className="min-w-0">
@@ -2401,7 +2401,7 @@ export default function App() {
             <div className="flex items-center gap-2 shrink-0">
               <button 
                 onClick={requestNotificationPermission}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold py-1.5 px-3 rounded-xl transition"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold py-1.5 px-3 rounded-xl transition active:scale-95"
               >
                 Activar
               </button>
@@ -2425,13 +2425,13 @@ export default function App() {
         {/* PESTAÑA 1: MIS PLANES Y TAREAS (SISTEMA DE DRILL-DOWN / ENTRAR Y SALIR) */}
         {/* ======================================================== */}
         {activeTab === 'today' && (
-          <div className="space-y-4">
+          <div className="space-y-4 animate-view-enter">
             
             {/* Si el usuario NO ha entrado dentro de un plan -> VISTA DE RESUMEN DIARIO O COLECCIÓN DE PLANES */}
             {!selectedPlanName && (
               <div className="space-y-3.5">
                 {/* Cabecera con selector de modo: Resumen Directo vs Carpetas de Planes */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-slate-900/90 border border-slate-800 p-3 rounded-2xl shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 surface-depth p-4 rounded-3xl border border-white/[0.08] shadow-lg">
                   <div>
                     <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                       <CheckSquare className="w-4 h-4 text-emerald-400" />
@@ -2446,10 +2446,10 @@ export default function App() {
 
                   {/* Switcher entre Resumen Directo, Vista por Planes y Botón + Nuevo Hábito */}
                   <div className="flex items-center gap-1.5 flex-wrap shrink-0 self-start sm:self-auto">
-                    <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800/80">
+                    <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
                       <button
                         onClick={() => setTodayViewMode('checklist')}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
                           todayViewMode === 'checklist'
                             ? 'bg-emerald-600 text-white shadow-sm'
                             : 'text-slate-400 hover:text-slate-200'
@@ -2460,7 +2460,7 @@ export default function App() {
                       </button>
                       <button
                         onClick={() => setTodayViewMode('plans')}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
                           todayViewMode === 'plans'
                             ? 'bg-indigo-600 text-white shadow-sm'
                             : 'text-slate-400 hover:text-slate-200'
@@ -2564,7 +2564,7 @@ export default function App() {
                           haptics.tap();
                           setShowFocusModal(true);
                         }}
-                        className="bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-black px-4 min-h-[44px] rounded-xl shadow-md shadow-emerald-900/30 transition flex items-center gap-2 active:scale-95 shrink-0"
+                        className="shimmer-badge bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-black px-4 min-h-[44px] rounded-2xl shadow-lg shadow-emerald-950/40 transition flex items-center gap-2 active:scale-95 shrink-0"
                         title="Abrir estación guiada de ejecución paso a paso con timer y audio 528Hz"
                       >
                         <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
@@ -2683,22 +2683,23 @@ export default function App() {
                                       <div
                                         key={habit.id}
                                         id={`habit-card-${habit.id}`}
-                                        className={`p-3 rounded-xl border transition-all duration-300 flex flex-col gap-2 ${
+                                        className={`p-3.5 rounded-2xl border flex flex-col gap-2.5 relative overflow-hidden surface-interactive ${
                                           highlightedHabitId === habit.id ? 'animate-habit-highlight ring-2 ring-amber-500' : ''
                                         } ${
                                           isCompleted
-                                            ? 'bg-slate-950/40 border-emerald-900/30 opacity-75'
-                                            : 'bg-slate-950/80 border-slate-800/90 hover:border-slate-700'
+                                            ? 'bg-gradient-to-r from-emerald-950/20 via-slate-900/60 to-slate-950/80 border-emerald-500/30 shadow-[0_2px_12px_rgba(16,185,129,0.08)]'
+                                            : 'surface-depth hover:border-indigo-500/40'
                                         }`}
                                       >
                                         <div className="flex items-start justify-between gap-3">
                                           <div className="flex items-start gap-2.5 flex-1 min-w-0">
                                             <button
                                               onClick={() => toggleHabit(habit)}
-                                              className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition"
+                                              className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition active:scale-90"
+                                              aria-label={isCompleted ? "Marcar incompleto" : "Completar tarea"}
                                             >
                                               {isCompleted ? (
-                                                <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950" />
+                                                <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950 animate-check-pop" />
                                               ) : (
                                                 <Circle className="w-5 h-5 text-slate-500 hover:text-white" />
                                               )}
@@ -2864,21 +2865,21 @@ export default function App() {
                             return (
                               <div
                                 key={habit.id}
-                                className={`p-3.5 rounded-2xl border transition-all duration-200 flex flex-col gap-2.5 ${
+                                className={`p-3.5 rounded-2xl border flex flex-col gap-2.5 relative overflow-hidden surface-interactive ${
                                   isCompleted
-                                    ? 'bg-slate-900/40 border-emerald-900/40 opacity-75'
-                                    : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 shadow-sm'
+                                    ? 'bg-gradient-to-r from-emerald-950/20 via-slate-900/60 to-slate-950/80 border-emerald-500/30 shadow-[0_2px_12px_rgba(16,185,129,0.08)]'
+                                    : 'surface-depth hover:border-indigo-500/40'
                                 }`}
                               >
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="flex items-start gap-2.5 flex-1 min-w-0">
                                     <button
                                       onClick={() => toggleHabit(habit)}
-                                      className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition"
+                                      className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition active:scale-90"
                                       title={isCompleted ? 'Marcar incompleto' : 'Completar hábito'}
                                     >
                                       {isCompleted ? (
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950" />
+                                        <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950 animate-check-pop" />
                                       ) : (
                                         <Circle className="w-5 h-5 text-slate-500 hover:text-white" />
                                       )}
@@ -3295,10 +3296,10 @@ export default function App() {
                     return (
                       <div 
                         key={habit.id}
-                        className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                        className={`rounded-2xl border overflow-hidden surface-interactive ${
                           isCompleted 
-                            ? 'bg-slate-900/50 border-emerald-900/50' 
-                            : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 shadow-sm'
+                            ? 'bg-gradient-to-r from-emerald-950/20 via-slate-900/60 to-slate-950/80 border-emerald-500/30' 
+                            : 'surface-depth hover:border-indigo-500/40'
                         }`}
                       >
                         {/* Cabecera del Ejercicio (Tocable para colapsar/expandir) */}
@@ -3471,83 +3472,91 @@ export default function App() {
         {/* PESTAÑA: ANSIEDAD & CALMA MENTAL (IMPULSE ZEN) */}
         {/* ======================================================== */}
         {activeTab === 'ansiedad' && (
-          <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando módulo Zen...</div>}>
-            <AnxietyView
-              habits={habits}
-              onOpenCheckIn={() => setShowAnxietyCheckInModal(true)}
-              onOpenAssessment={() => setShowAssessmentModal(true)}
-              onOpenBubblePop={() => setShowBubblePopModal(true)}
-              onOpenColorHarmony={() => setShowColorHarmonyModal(true)}
-              onOpenZenTracing={() => setShowZenTracingModal(true)}
-              onOpenSOSGrounding={() => setShowSOSGroundingModal(true)}
-              onOpenBreathing={() => {
-                const breathHabit = habits.find(h => h.title.toLowerCase().includes('respir') || h.title.toLowerCase().includes('suspiro'));
-                if (breathHabit) startBreathingSession(breathHabit);
-                else setShowSOSGroundingModal(true);
-              }}
-            />
-          </Suspense>
+          <div className="animate-view-enter">
+            <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando módulo Zen...</div>}>
+              <AnxietyView
+                habits={habits}
+                onOpenCheckIn={() => setShowAnxietyCheckInModal(true)}
+                onOpenAssessment={() => setShowAssessmentModal(true)}
+                onOpenBubblePop={() => setShowBubblePopModal(true)}
+                onOpenColorHarmony={() => setShowColorHarmonyModal(true)}
+                onOpenZenTracing={() => setShowZenTracingModal(true)}
+                onOpenSOSGrounding={() => setShowSOSGroundingModal(true)}
+                onOpenBreathing={() => {
+                  const breathHabit = habits.find(h => h.title.toLowerCase().includes('respir') || h.title.toLowerCase().includes('suspiro'));
+                  if (breathHabit) startBreathingSession(breathHabit);
+                  else setShowSOSGroundingModal(true);
+                }}
+              />
+            </Suspense>
+          </div>
         )}
 
         {/* ======================================================== */}
         {/* PESTAÑA 2: MATRIZ SEMANAL & SLA */}
         {/* ======================================================== */}
         {activeTab === 'calendar' && (
-          <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando matriz de consistencia...</div>}>
-            <CalendarView
-              habits={habits}
-              metrics={metrics}
-              streakData={streakData}
-              badges={badges}
-              earnedBadgesCount={earnedBadgesCount}
-              cleanTitle={cleanTitle}
-            />
-          </Suspense>
+          <div className="animate-view-enter">
+            <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando matriz de consistencia...</div>}>
+              <CalendarView
+                habits={habits}
+                metrics={metrics}
+                streakData={streakData}
+                badges={badges}
+                earnedBadgesCount={earnedBadgesCount}
+                cleanTitle={cleanTitle}
+              />
+            </Suspense>
+          </div>
         )}
 
         {/* ======================================================== */}
         {/* PESTAÑA 3: CATÁLOGO DE PLANES Y PLANTILLAS */}
         {/* ======================================================== */}
         {activeTab === 'programs' && (
-          <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando catálogo...</div>}>
-            <ProgramsView
-              programs={programs}
-              catalogSearchQuery={catalogSearchQuery}
-              setCatalogSearchQuery={setCatalogSearchQuery}
-              selectedCatalogCategory={selectedCatalogCategory}
-              setSelectedCatalogCategory={setSelectedCatalogCategory}
-              collapsedBlocks={collapsedBlocks}
-              toggleBlockCollapse={toggleBlockCollapse}
-              setPreviewProgram={setPreviewProgram}
-              handleEnroll={handleEnroll}
-              onNavigateInject={() => setActiveTab('inject')}
-            />
-          </Suspense>
+          <div className="animate-view-enter">
+            <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando catálogo...</div>}>
+              <ProgramsView
+                programs={programs}
+                catalogSearchQuery={catalogSearchQuery}
+                setCatalogSearchQuery={setCatalogSearchQuery}
+                selectedCatalogCategory={selectedCatalogCategory}
+                setSelectedCatalogCategory={setSelectedCatalogCategory}
+                collapsedBlocks={collapsedBlocks}
+                toggleBlockCollapse={toggleBlockCollapse}
+                setPreviewProgram={setPreviewProgram}
+                handleEnroll={handleEnroll}
+                onNavigateInject={() => setActiveTab('inject')}
+              />
+            </Suspense>
+          </div>
         )}
 
         {/* ======================================================== */}
         {/* PESTAÑA 4: VISION BOARD Y GRILL-ME INTERACTIVO */}
         {/* ======================================================== */}
         {activeTab === 'vision' && (
-          <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando visión 3P...</div>}>
-            <VisionView
-              visionCards={visionCards}
-              habits={habits}
-              onOpenGrillMe={() => {
-                setGrillStep(0);
-                setGrillAnswers({ area: 'Cuerpo & Salud', goal: '', why: '', deadline: '', commitment: '90%' });
-                setShowGrillMeModal(true);
-              }}
-              onEditCard={(card) => setEditingCard(card)}
-            />
-          </Suspense>
+          <div className="animate-view-enter">
+            <Suspense fallback={<div className="py-12 flex justify-center text-slate-500 font-mono text-xs">Cargando visión 3P...</div>}>
+              <VisionView
+                visionCards={visionCards}
+                habits={habits}
+                onOpenGrillMe={() => {
+                  setGrillStep(0);
+                  setGrillAnswers({ area: 'Cuerpo & Salud', goal: '', why: '', deadline: '', commitment: '90%' });
+                  setShowGrillMeModal(true);
+                }}
+                onEditCard={(card) => setEditingCard(card)}
+              />
+            </Suspense>
+          </div>
         )}
 
         {/* ======================================================== */}
         {/* PESTAÑA 5: INYECCIÓN API */}
         {/* ======================================================== */}
         {activeTab === 'inject' && (
-          <div className="space-y-3">
+          <div className="space-y-3 animate-view-enter">
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <Zap className="w-4 h-4 text-emerald-400" /> Inyector de Programas (API)
@@ -3575,22 +3584,24 @@ export default function App() {
 
       </main>
 
-      {/* Bottom Navigation Bar Limpia, Táctil y Ergonómica (4 Secciones Esenciales con Hit Area de 48px y Haptics) */}
-      {/* Bottom Navigation Bar Limpia, Táctil y Ergonómica (5 Secciones Esenciales con Hit Area de 48px y Haptics) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/90 px-1.5 sm:px-3 pt-1.5 pb-2 safe-bottom pwa-standalone-nav shadow-2xl">
-        <div className="max-w-md mx-auto grid grid-cols-5 gap-1">
+      {/* Modern Floating Glass Dock (Concentric corners, high-depth blur, tactile scaling, indicator glow) */}
+      <nav className="fixed bottom-2 sm:bottom-4 inset-x-0 z-40 px-3 flex justify-center pointer-events-none safe-bottom pwa-standalone-nav">
+        <div className="w-full max-w-md bg-slate-950/85 backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.65)] pointer-events-auto grid grid-cols-5 gap-1">
           <button 
             onClick={() => {
               haptics.tap();
               setActiveTab('today');
               setSelectedPlanName(null);
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
-              activeTab === 'today' ? 'bg-indigo-950/70 text-indigo-300 font-bold border border-indigo-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+              activeTab === 'today' 
+                ? 'bg-indigo-600/25 text-indigo-200 font-bold border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.25)]' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
-            <Dumbbell className="w-4 h-4" />
+            <Dumbbell className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'today' ? 'scale-110 text-indigo-400' : ''}`} />
             <span className="text-[10px] tracking-tight leading-none">Hoy</span>
+            {activeTab === 'today' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />}
           </button>
 
           <button 
@@ -3598,12 +3609,15 @@ export default function App() {
               haptics.tap();
               setActiveTab('ansiedad');
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
-              activeTab === 'ansiedad' ? 'bg-teal-950/70 text-teal-300 font-bold border border-teal-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+              activeTab === 'ansiedad' 
+                ? 'bg-teal-600/25 text-teal-200 font-bold border border-teal-400/40 shadow-[0_0_15px_rgba(20,184,166,0.25)]' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
-            <Brain className="w-4 h-4 text-teal-400" />
+            <Brain className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'ansiedad' ? 'scale-110 text-teal-400' : 'text-teal-400'}`} />
             <span className="text-[10px] tracking-tight leading-none">Ansiedad</span>
+            {activeTab === 'ansiedad' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-teal-400 shadow-[0_0_6px_#2dd4bf]" />}
           </button>
 
           <button 
@@ -3611,12 +3625,15 @@ export default function App() {
               haptics.tap();
               setActiveTab('calendar');
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
-              activeTab === 'calendar' ? 'bg-indigo-950/70 text-indigo-300 font-bold border border-indigo-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+              activeTab === 'calendar' 
+                ? 'bg-indigo-600/25 text-indigo-200 font-bold border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.25)]' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
-            <Calendar className="w-4 h-4" />
+            <Calendar className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'calendar' ? 'scale-110 text-indigo-400' : ''}`} />
             <span className="text-[10px] tracking-tight leading-none">Racha & SLA</span>
+            {activeTab === 'calendar' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />}
           </button>
 
           <button 
@@ -3624,12 +3641,15 @@ export default function App() {
               haptics.tap();
               setActiveTab('vision');
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
-              activeTab === 'vision' ? 'bg-amber-950/70 text-amber-300 font-bold border border-amber-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+              activeTab === 'vision' 
+                ? 'bg-amber-600/25 text-amber-200 font-bold border border-amber-400/40 shadow-[0_0_15px_rgba(245,158,11,0.25)]' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
-            <Compass className="w-4 h-4" />
+            <Compass className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'vision' ? 'scale-110 text-amber-400' : ''}`} />
             <span className="text-[10px] tracking-tight leading-none">Vision</span>
+            {activeTab === 'vision' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-amber-400 shadow-[0_0_6px_#fbbf24]" />}
           </button>
 
           <button 
@@ -3637,12 +3657,15 @@ export default function App() {
               haptics.tap();
               setActiveTab('programs');
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
-              activeTab === 'programs' || activeTab === 'inject' ? 'bg-indigo-950/70 text-indigo-300 font-bold border border-indigo-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+              activeTab === 'programs' || activeTab === 'inject' 
+                ? 'bg-indigo-600/25 text-indigo-200 font-bold border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.25)]' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
-            <Layers className="w-4 h-4" />
+            <Layers className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'programs' || activeTab === 'inject' ? 'scale-110 text-indigo-400' : ''}`} />
             <span className="text-[10px] tracking-tight leading-none">Catálogo</span>
+            {(activeTab === 'programs' || activeTab === 'inject') && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />}
           </button>
         </div>
       </nav>

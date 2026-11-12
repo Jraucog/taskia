@@ -90,11 +90,11 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
         </p>
 
         {/* Tarjeta Rápida de Estado Hoy */}
-        <div className="mt-4 pt-3 border-t border-slate-800/70 grid grid-cols-2 gap-2">
+        <div className="mt-4 pt-3 border-t border-white/[0.08] grid grid-cols-2 gap-2.5">
           {/* Check-In Diario */}
           <button
             onClick={() => { haptics.tap(); onOpenCheckIn(); }}
-            className="bg-slate-900/90 hover:bg-slate-850 p-3 rounded-2xl border border-slate-800 text-left transition group active:scale-98"
+            className="surface-depth surface-interactive p-3.5 rounded-2xl text-left group active:scale-95"
           >
             <span className="text-[10px] text-slate-400 block uppercase font-bold">Check-In Hoy</span>
             {todayLog ? (
@@ -117,7 +117,7 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
           {/* Test Psicométrico GAD-7 */}
           <button
             onClick={() => { haptics.tap(); onOpenAssessment(); }}
-            className="bg-slate-900/90 hover:bg-slate-850 p-3 rounded-2xl border border-slate-800 text-left transition group active:scale-98"
+            className="surface-depth surface-interactive p-3.5 rounded-2xl text-left group active:scale-95"
           >
             <span className="text-[10px] text-slate-400 block uppercase font-bold">Test GAD-7</span>
             {latestAssessment ? (
@@ -160,9 +160,9 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
           {/* Juego 1: Zen Bubble Pop */}
           <button
             onClick={() => { haptics.tap(); onOpenBubblePop(); }}
-            className="bg-gradient-to-b from-slate-900 to-slate-950 hover:from-slate-850 hover:to-slate-900 p-4 rounded-2xl border border-teal-800/40 text-left transition shadow-lg group active:scale-98 relative overflow-hidden"
+            className="surface-depth surface-interactive p-4 rounded-2xl border border-teal-500/30 text-left group active:scale-95 relative overflow-hidden"
           >
-            <div className="w-8 h-8 rounded-xl bg-teal-950 border border-teal-600/50 flex items-center justify-center text-teal-300 mb-2 group-hover:scale-110 transition">
+            <div className="w-8 h-8 rounded-xl bg-teal-950/80 border border-teal-500/50 flex items-center justify-center text-teal-300 mb-2 group-hover:scale-110 transition">
               <Sparkles className="w-4 h-4" />
             </div>
             <h4 className="text-xs font-bold text-white group-hover:text-teal-300 transition">
@@ -176,9 +176,9 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
           {/* Juego 2: Color Harmony Flow */}
           <button
             onClick={() => { haptics.tap(); onOpenColorHarmony(); }}
-            className="bg-gradient-to-b from-slate-900 to-slate-950 hover:from-slate-850 hover:to-slate-900 p-4 rounded-2xl border border-violet-800/40 text-left transition shadow-lg group active:scale-98 relative overflow-hidden"
+            className="surface-depth surface-interactive p-4 rounded-2xl border border-violet-500/30 text-left group active:scale-95 relative overflow-hidden"
           >
-            <div className="w-8 h-8 rounded-xl bg-violet-950 border border-violet-600/50 flex items-center justify-center text-violet-300 mb-2 group-hover:scale-110 transition">
+            <div className="w-8 h-8 rounded-xl bg-violet-950/80 border border-violet-500/50 flex items-center justify-center text-violet-300 mb-2 group-hover:scale-110 transition">
               <Palette className="w-4 h-4" />
             </div>
             <h4 className="text-xs font-bold text-white group-hover:text-violet-300 transition">
@@ -192,9 +192,9 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
           {/* Juego 3: Zen Path Tracing */}
           <button
             onClick={() => { haptics.tap(); onOpenZenTracing(); }}
-            className="bg-gradient-to-b from-slate-900 to-slate-950 hover:from-slate-850 hover:to-slate-900 p-4 rounded-2xl border border-cyan-800/40 text-left transition shadow-lg group active:scale-98 relative overflow-hidden"
+            className="surface-depth surface-interactive p-4 rounded-2xl border border-cyan-500/30 text-left group active:scale-95 relative overflow-hidden"
           >
-            <div className="w-8 h-8 rounded-xl bg-cyan-950 border border-cyan-600/50 flex items-center justify-center text-cyan-300 mb-2 group-hover:scale-110 transition">
+            <div className="w-8 h-8 rounded-xl bg-cyan-950/80 border border-cyan-500/50 flex items-center justify-center text-cyan-300 mb-2 group-hover:scale-110 transition">
               <Compass className="w-4 h-4" />
             </div>
             <h4 className="text-xs font-bold text-white group-hover:text-cyan-300 transition">
@@ -222,10 +222,10 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
           {/* Grounding 5-4-3-2-1 */}
           <button
             onClick={() => { haptics.tap(); onOpenSOSGrounding(); }}
-            className="bg-slate-900/90 hover:bg-slate-850 p-4 rounded-2xl border border-slate-800 text-left transition flex items-center justify-between group active:scale-98"
+            className="surface-depth surface-interactive p-4 rounded-2xl text-left flex items-center justify-between group active:scale-95"
           >
             <div className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-blue-950 border border-blue-600/60 flex items-center justify-center text-blue-300 shrink-0">
+              <span className="w-10 h-10 rounded-xl bg-blue-950/80 border border-blue-500/60 flex items-center justify-center text-blue-300 shrink-0">
                 <Wind className="w-5 h-5" />
               </span>
               <div>
@@ -247,10 +247,10 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
               if (onOpenBreathing) onOpenBreathing();
               else onOpenSOSGrounding();
             }}
-            className="bg-slate-900/90 hover:bg-slate-850 p-4 rounded-2xl border border-slate-800 text-left transition flex items-center justify-between group active:scale-98"
+            className="surface-depth surface-interactive p-4 rounded-2xl text-left flex items-center justify-between group active:scale-95"
           >
             <div className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-teal-950 border border-teal-600/60 flex items-center justify-center text-teal-300 shrink-0">
+              <span className="w-10 h-10 rounded-xl bg-teal-950/80 border border-teal-500/60 flex items-center justify-center text-teal-300 shrink-0">
                 <Activity className="w-5 h-5" />
               </span>
               <div>
