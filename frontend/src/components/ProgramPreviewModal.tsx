@@ -1,17 +1,20 @@
 import React from 'react';
-import { Eye, Clock, Play } from 'lucide-react';
+import { Eye, Clock, Play, Sparkles } from 'lucide-react';
 import type { Program } from '../types';
+import { normalizeSearchText } from '../services/storageSync';
 
 interface ProgramPreviewModalProps {
   program: Program | null;
   onClose: () => void;
   onEnroll: (programId: number) => void;
+  onStartAnkiSession?: (program: Program) => void;
 }
 
 export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
   program,
   onClose,
-  onEnroll
+  onEnroll,
+  onStartAnkiSession
 }) => {
   if (!program) return null;
 
@@ -69,23 +72,40 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
           ))}
         </div>
 
-        <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
-          <button 
-            onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
-          >
-            Cerrar Previa
-          </button>
-          <button 
-            onClick={() => {
-              const pId = program.id;
-              onClose();
-              onEnroll(pId);
-            }}
-            className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5"
-          >
-            <Play className="w-3.5 h-3.5 fill-white" /> Cargar & Usar Esta Plantilla
-          </button>
+        <div className="flex flex-col gap-2 pt-2 border-t border-slate-800">
+          {(normalizeSearchText(program.title).includes('anki') || 
+            normalizeSearchText(program.title).includes('ingles') || 
+            normalizeSearchText(program.category).includes('idioma')) && onStartAnkiSession && (
+            <button
+              onClick={() => {
+                onClose();
+                onStartAnkiSession(program);
+              }}
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs py-3 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-amber-950/40 active:scale-95"
+            >
+              <Sparkles className="w-4 h-4 text-slate-950 fill-slate-950" />
+              <span>Practicar Mazo de Flashcards Anki Ahora</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
+            >
+              Cerrar Previa
+            </button>
+            <button 
+              onClick={() => {
+                const pId = program.id;
+                onClose();
+                onEnroll(pId);
+              }}
+              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5"
+            >
+              <Play className="w-3.5 h-3.5 fill-white" /> Cargar & Usar Esta Plantilla
+            </button>
+          </div>
         </div>
       </div>
     </div>

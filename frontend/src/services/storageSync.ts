@@ -36,12 +36,130 @@ const STORAGE_KEYS = {
 // 1. GESTIÓN DE ALMACENAMIENTO LOCAL
 // ==========================================
 
+// Normalizador de búsqueda insensible a acentos/tildes y mayúsculas
+export const normalizeSearchText = (text: string = ''): string => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+};
+
+export const DEFAULT_INITIAL_HABITS: Habit[] = [
+  {
+    id: 101,
+    title: "[Desafío 21 Días Brian Tracy] Escribir 10 Metas a Mano (Fórmula 3P)",
+    description: "A primera hora sin mirar el día anterior. Fórmula 3P: Presente, Positivo, Personal. Regla: si fallas un día, reinicio a 0/21.",
+    habit_type: "boolean",
+    target_value: 1,
+    unit: "registro",
+    estimated_minutes: 10,
+    sla_target_percent: 85,
+    frequency_type: "daily",
+    owner_username: "Usuario",
+    today_log: { completed: false, value: 0, is_in_sla: false },
+    compliance_summary: { completed_last_7_days: 0, rate_percent: 0, meets_sla: false, history: [] }
+  },
+  {
+    id: 102,
+    title: "[Inglés Táctico & Repetición Espaciada (Método Anki)] Anki SRS: 20 Flashcards Nuevas de Vocabulario & Phrasal Verbs",
+    description: "Aprender y retener 20 tarjetas nuevas con oraciones de contexto en Anki.",
+    habit_type: "numeric",
+    target_value: 20,
+    unit: "cards",
+    estimated_minutes: 15,
+    sla_target_percent: 85,
+    frequency_type: "daily",
+    owner_username: "Usuario",
+    today_log: { completed: false, value: 0, is_in_sla: false },
+    compliance_summary: { completed_last_7_days: 0, rate_percent: 0, meets_sla: false, history: [] }
+  },
+  {
+    id: 103,
+    title: "[Inglés Táctico & Repetición Espaciada (Método Anki)] Anki SRS: Repaso Diario de Tarjetas Vencidas (Due Cards)",
+    description: "Completar la cola diaria de tarjetas vencidas sin posponer según el algoritmo SRS de Anki.",
+    habit_type: "numeric",
+    target_value: 50,
+    unit: "cards",
+    estimated_minutes: 15,
+    sla_target_percent: 85,
+    frequency_type: "daily",
+    owner_username: "Usuario",
+    today_log: { completed: false, value: 0, is_in_sla: false },
+    compliance_summary: { completed_last_7_days: 0, rate_percent: 0, meets_sla: false, history: [] }
+  },
+  {
+    id: 104,
+    title: "[Inglés Táctico & Repetición Espaciada (Método Anki)] Técnica de Shadowing & Pronunciación (10 min)",
+    description: "Repetir en voz alta inmediatamente detrás de un audio nativo o podcast imitando entonación y acento.",
+    habit_type: "numeric",
+    target_value: 10,
+    unit: "min",
+    estimated_minutes: 10,
+    sla_target_percent: 85,
+    frequency_type: "daily",
+    owner_username: "Usuario",
+    today_log: { completed: false, value: 0, is_in_sla: false },
+    compliance_summary: { completed_last_7_days: 0, rate_percent: 0, meets_sla: false, history: [] }
+  },
+  {
+    id: 105,
+    title: "[Respiración Táctica & Alivio del Estrés] Suspiro Fisiológico Cíclico (Dr. Huberman)",
+    description: "Doble inhalación nasal rápida y exhalación bucal prolongada para colapsar taquicardia y picos de estrés.",
+    habit_type: "numeric",
+    target_value: 3,
+    unit: "min",
+    estimated_minutes: 3,
+    sla_target_percent: 85,
+    frequency_type: "daily",
+    owner_username: "Usuario",
+    today_log: { completed: false, value: 0, is_in_sla: false },
+    compliance_summary: { completed_last_7_days: 0, rate_percent: 0, meets_sla: false, history: [] }
+  },
+  {
+    id: 106,
+    title: "[Entrenamiento de Fuerza Tren Inferior y Prevención Aquiles (TRX)] Dorsiflexión dinámica de tobillo en pared",
+    description: "Movilidad y carga excéntrica para regenerar el tendón de Aquiles.",
+    habit_type: "numeric",
+    target_value: 3,
+    unit: "series",
+    estimated_minutes: 10,
+    sla_target_percent: 85,
+    frequency_type: "daily",
+    owner_username: "Usuario",
+    today_log: { completed: false, value: 0, is_in_sla: false },
+    compliance_summary: { completed_last_7_days: 0, rate_percent: 0, meets_sla: false, history: [] }
+  }
+];
+
 export const getLocalHabits = (): Habit[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.HABITS);
-    return raw ? JSON.parse(raw) : [];
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Garantizar que si el usuario guardó hábitos pero no tenía los de Anki / Inglés,
+        // se fusionen automáticamente para que siempre aparezca el método Anki
+        const hasAnki = parsed.some((h: Habit) => 
+          normalizeSearchText(h.title).includes('anki') || 
+          normalizeSearchText(h.title).includes('ingles')
+        );
+        if (!hasAnki) {
+          const ankiHabits = DEFAULT_INITIAL_HABITS.filter(h => 
+            normalizeSearchText(h.title).includes('anki')
+          );
+          const merged = [...parsed, ...ankiHabits];
+          saveLocalHabits(merged);
+          return merged;
+        }
+        return parsed;
+      }
+    }
+    // Si no había nada, inicializar con la suite por defecto completa
+    saveLocalHabits(DEFAULT_INITIAL_HABITS);
+    return DEFAULT_INITIAL_HABITS;
   } catch {
-    return [];
+    return DEFAULT_INITIAL_HABITS;
   }
 };
 

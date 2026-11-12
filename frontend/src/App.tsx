@@ -26,7 +26,9 @@ import {
   enqueuePendingAction,
   applyLocalToggle,
   applyLocalSeriesStep,
-  syncWithBackend
+  syncWithBackend,
+  normalizeSearchText,
+  DEFAULT_INITIAL_HABITS
 } from './services/storageSync';
 import { haptics } from './services/haptics';
 import { calculateSkillTree } from './services/skillTreeService';
@@ -1417,6 +1419,8 @@ export default function App() {
         else setShowSOSGroundingModal(true);
       } else if (hash === '#skills') {
         setShowSkillTreeModal(true);
+      } else if (hash === '#anki' || hash === '#ingles' || hash === '#flashcards') {
+        startAnkiSession();
       }
     };
 
@@ -1425,8 +1429,9 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [habits]);
 
-  const startAnkiSession = (habit: Habit) => {
-    setActiveAnkiHabit(habit);
+  const startAnkiSession = (habit?: Habit) => {
+    const targetHabit = habit || habits.find(h => normalizeSearchText(h.title).includes('anki') || normalizeSearchText(h.title).includes('ingles')) || DEFAULT_INITIAL_HABITS[1];
+    setActiveAnkiHabit(targetHabit);
     setShowAnkiModal(true);
   };
 
@@ -2337,11 +2342,25 @@ export default function App() {
                           haptics.tap();
                           setShowFocusModal(true);
                         }}
-                        className="shimmer-badge bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-emerald-950/50 transition flex items-center gap-2 active:scale-95"
+                        className="shimmer-badge bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-bold px-3.5 py-2.5 rounded-2xl shadow-lg shadow-emerald-950/50 transition flex items-center gap-1.5 active:scale-95"
                         title="Iniciar sesión guiada de respiración y enfoque con audio 528Hz"
                       >
                         <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
                         <span>Enfoque Guiado</span>
+                      </button>
+
+                      {/* Botón Acceso Rápido: Mazo Anki & Active Recall */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          haptics.tap();
+                          startAnkiSession();
+                        }}
+                        className="bg-amber-950/70 hover:bg-amber-900/80 border border-amber-500/40 text-amber-200 text-xs font-bold px-3 py-2.5 rounded-2xl transition flex items-center gap-1.5 active:scale-95 shadow-sm"
+                        title="Abrir Mazo de Flashcards Interactivas Anki (25 tarjetas)"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <span>🇬🇧 Anki SRS</span>
                       </button>
 
                       <button
@@ -2480,8 +2499,8 @@ export default function App() {
                         {planSummaryList.map(plan => {
                           const planFilteredHabits = plan.habits.filter(h => {
                             if (searchQuery.trim()) {
-                              const q = searchQuery.toLowerCase();
-                              if (!h.title.toLowerCase().includes(q) && !h.description?.toLowerCase().includes(q)) return false;
+                              const q = normalizeSearchText(searchQuery);
+                              if (!normalizeSearchText(h.title).includes(q) && !normalizeSearchText(h.description || '').includes(q)) return false;
                             }
                             if (todayFilter === 'pending') return !h.today_log?.completed;
                             if (todayFilter === 'completed') return !!h.today_log?.completed;
@@ -2691,8 +2710,8 @@ export default function App() {
                         {habits
                           .filter(h => {
                             if (searchQuery.trim()) {
-                              const q = searchQuery.toLowerCase();
-                              if (!h.title.toLowerCase().includes(q) && !h.description?.toLowerCase().includes(q)) return false;
+                              const q = normalizeSearchText(searchQuery);
+                              if (!normalizeSearchText(h.title).includes(q) && !normalizeSearchText(h.description || '').includes(q)) return false;
                             }
                             if (todayFilter === 'pending') return !h.today_log?.completed;
                             if (todayFilter === 'completed') return !!h.today_log?.completed;
@@ -3359,6 +3378,7 @@ export default function App() {
                 setPreviewProgram={setPreviewProgram}
                 handleEnroll={handleEnroll}
                 onNavigateInject={() => setActiveTab('inject')}
+                onStartAnkiSession={() => startAnkiSession()}
               />
             </Suspense>
           </div>
@@ -3567,6 +3587,7 @@ export default function App() {
         program={previewProgram}
         onClose={() => setPreviewProgram(null)}
         onEnroll={handleEnroll}
+        onStartAnkiSession={() => startAnkiSession()}
       />
 
       {/* Modal: Asistente Grill Me Wizard */}

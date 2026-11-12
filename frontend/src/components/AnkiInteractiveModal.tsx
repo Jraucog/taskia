@@ -26,7 +26,10 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
   const [deck, setDeck] = useState<AnkiFlashcard[]>(() => {
     try {
       const saved = localStorage.getItem('taskia_anki_custom_deck');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch {
       // fallback
     }
@@ -46,11 +49,11 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
   const [shadowingMode, setShadowingMode] = useState(false);
 
   // Filtrar tarjetas según categoría
-  const filteredCards = selectedFilter === 'All' 
+  const filteredCards = (selectedFilter === 'All' 
     ? deck 
-    : deck.filter(c => c.category === selectedFilter);
+    : deck.filter(c => c.category === selectedFilter)) || ANKI_DECK_INITIAL;
 
-  const currentCard = filteredCards[currentIndex] || filteredCards[0];
+  const currentCard = (filteredCards.length > 0 ? filteredCards[currentIndex] || filteredCards[0] : ANKI_DECK_INITIAL[0]);
 
   useEffect(() => {
     // Resetear al abrir
