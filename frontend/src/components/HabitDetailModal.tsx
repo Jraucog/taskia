@@ -61,8 +61,19 @@ export const HabitDetailModal: React.FC<HabitDetailModalProps> = ({
   const isWater = habit.title.toLowerCase().includes('agua');
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 animate-fade-in">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto relative">
+    <div 
+      className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 animate-fade-in overflow-y-auto overscroll-contain min-h-full"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div 
+        className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto overscroll-contain touch-pan-y relative my-auto shrink-0"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Botón cerrar */}
         <button
           onClick={onClose}

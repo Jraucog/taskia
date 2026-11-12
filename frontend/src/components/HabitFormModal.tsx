@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Edit3, Plus, Clock, Check, Trash2, Bell } from 'lucide-react';
 import type { Habit } from '../types';
 
@@ -38,26 +38,53 @@ export const HabitFormModal: React.FC<HabitFormModalProps> = ({
   onSave,
   onDelete
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 animate-fade-in">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-3.5 max-h-[92vh] overflow-y-auto">
-        {/* Header del Modal */}
-        <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+    <div 
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm overflow-y-auto overscroll-contain p-3 sm:p-4 flex min-h-full items-start sm:items-center justify-center animate-fade-in"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="habit-modal-title"
+    >
+      <div 
+        className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full shadow-2xl flex flex-col my-auto max-h-[90vh] sm:max-h-[85vh] overflow-hidden overscroll-contain relative shrink-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header del Modal - Sticky superior siempre visible */}
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-20 shrink-0">
+          <h3 id="habit-modal-title" className="text-sm font-bold text-white flex items-center gap-2">
             {editingHabit ? <Edit3 className="w-4 h-4 text-indigo-400" /> : <Plus className="w-4 h-4 text-emerald-400" />}
-            {editingHabit ? 'Editar Hábito / Tarea' : 'Crear Nuevo Hábito o Plan'}
+            <span>{editingHabit ? 'Editar Hábito / Tarea' : 'Crear Nuevo Hábito o Plan'}</span>
           </h3>
           <button 
+            type="button"
             onClick={onClose} 
-            className="text-slate-400 hover:text-white text-sm p-1"
+            className="text-slate-400 hover:text-white hover:bg-slate-800/80 p-1.5 rounded-xl transition min-w-[36px] min-h-[36px] flex items-center justify-center text-base"
+            aria-label="Cerrar modal"
           >
             ✕
           </button>
         </div>
 
-        {/* Selector de Plan o Categoría */}
+        {/* Cuerpo del Formulario con Scroll Suave y Soporte Táctil Fluido */}
+        <div 
+          className="p-4 sm:p-5 overflow-y-auto overscroll-contain space-y-4 flex-1 touch-pan-y"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          {/* Selector de Plan o Categoría */}
         <div>
           <label className="text-[11px] font-bold text-slate-300 block mb-1">
             Carpeta / Plan al que Pertenece
@@ -333,15 +360,17 @@ export const HabitFormModal: React.FC<HabitFormModalProps> = ({
           </label>
         </div>
 
-        {/* Botones de Guardar / Cancelar */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-800 mt-1">
+        </div>
+
+        {/* Footer del Modal - Sticky inferior siempre visible con botones de acción rápida */}
+        <div className="flex items-center justify-between p-4 sm:p-5 border-t border-slate-800 bg-slate-900/95 backdrop-blur-md sticky bottom-0 z-20 shrink-0">
           {editingHabit ? (
             <button
               type="button"
               onClick={() => onDelete(editingHabit.id, editingHabit.title)}
-              className="text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1 p-2"
+              className="text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-red-500/10 transition min-h-[40px]"
             >
-              <Trash2 className="w-3.5 h-3.5" /> Eliminar
+              <Trash2 className="w-4 h-4" /> <span>Eliminar</span>
             </button>
           ) : (
             <div />
@@ -351,16 +380,16 @@ export const HabitFormModal: React.FC<HabitFormModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
+              className="px-3.5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold hover:bg-slate-800/50 transition min-h-[40px] flex items-center justify-center"
             >
               Cancelar
             </button>
             <button
               type="button"
               onClick={onSave}
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition active:scale-95 flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition active:scale-95 flex items-center gap-1.5 min-h-[40px]"
             >
-              <Check className="w-3.5 h-3.5" />
+              <Check className="w-4 h-4" />
               <span>{editingHabit ? 'Guardar Cambios' : 'Crear Tarea'}</span>
             </button>
           </div>

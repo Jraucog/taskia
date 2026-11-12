@@ -80,8 +80,18 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full max-h-[88vh] flex flex-col shadow-2xl">
+    <div 
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overscroll-contain p-3 sm:p-4 flex min-h-full items-start sm:items-center justify-center animate-fade-in"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div 
+        className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full max-h-[88vh] flex flex-col shadow-2xl my-auto overflow-hidden overscroll-contain shrink-0"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Cabecera del Modal */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
@@ -164,7 +174,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         </div>
 
         {/* Contenido Dinámico de la Pestaña Seleccionada */}
-        <div className="overflow-y-auto space-y-3 pr-1 flex-1">
+        <div 
+          className="overflow-y-auto overscroll-contain space-y-3 pr-1 flex-1 touch-pan-y"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           
           {/* PESTAÑA 1: CUENTA Y RESUMEN DE DISCIPLINA */}
           {profileActiveTab === 'profile' && (

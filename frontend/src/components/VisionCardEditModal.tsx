@@ -18,8 +18,19 @@ export const VisionCardEditModal: React.FC<VisionCardEditModalProps> = ({
   if (!card) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 animate-fade-in">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-3.5">
+    <div 
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm overflow-y-auto overscroll-contain p-3 sm:p-4 flex min-h-full items-start sm:items-center justify-center animate-fade-in"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div 
+        className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-3.5 my-auto max-h-[90vh] overflow-y-auto overscroll-contain touch-pan-y shrink-0"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between pb-2 border-b border-slate-800">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Edit3 className="w-4 h-4 text-indigo-400" /> Editar Meta del Vision Board

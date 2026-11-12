@@ -19,8 +19,18 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
   if (!program) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 animate-fade-in">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl">
+    <div 
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm overflow-y-auto overscroll-contain p-3 sm:p-4 flex min-h-full items-start sm:items-center justify-center animate-fade-in"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div 
+        className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl my-auto overflow-hidden overscroll-contain shrink-0"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
@@ -45,7 +55,10 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
           <span className="font-mono text-amber-400 font-bold">{program.duration_days} días</span>
         </div>
 
-        <div className="overflow-y-auto space-y-2 pr-1 flex-1 mb-3">
+        <div 
+          className="overflow-y-auto overscroll-contain space-y-2 pr-1 flex-1 mb-3 touch-pan-y"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           {program.items?.map((it, idx) => (
             <div key={it.id || idx} className="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 flex items-start justify-between gap-3">
               <div className="flex items-start gap-2.5">
