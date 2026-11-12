@@ -35,13 +35,13 @@ export const BreathingModal: React.FC<BreathingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 animate-fade-in">
-      <div className="w-full max-w-sm bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+      <div className="w-full max-w-sm surface-depth border border-white/[0.1] rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
         {/* Botones de control superior (Audio y Cerrar) */}
         <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
           <button
             onClick={onToggleSound}
             className={`p-2 rounded-full transition ${
-              soundEnabled ? 'text-indigo-400 bg-indigo-950/80' : 'text-slate-500 hover:text-slate-300'
+              soundEnabled ? 'theme-badge' : 'text-slate-500 hover:text-slate-300'
             }`}
             title={soundEnabled ? "Silenciar campana de respiración" : "Activar campana tibetana suave"}
           >
@@ -50,7 +50,7 @@ export const BreathingModal: React.FC<BreathingModalProps> = ({
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800/60 transition"
+            className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-white/[0.06] transition"
           >
             ✕
           </button>
@@ -58,7 +58,7 @@ export const BreathingModal: React.FC<BreathingModalProps> = ({
 
         {/* Cabecera y Técnica */}
         <div className="mb-4">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400 bg-indigo-950/80 px-2.5 py-1 rounded-full border border-indigo-800/50">
+          <span className="text-[10px] uppercase font-bold tracking-widest theme-badge px-2.5 py-1 rounded-full">
             Guía Visual Rítmica
           </span>
           <h3 className="text-base font-bold text-white mt-2">
@@ -103,7 +103,7 @@ export const BreathingModal: React.FC<BreathingModalProps> = ({
         </div>
 
         {/* Progreso de la sesión y rondas */}
-        <div className="w-full bg-slate-950 p-3 rounded-2xl border border-slate-800/80 mb-5 flex items-center justify-between text-xs">
+        <div className="w-full bg-white/[0.03] p-3 rounded-2xl border border-white/[0.06] mb-5 flex items-center justify-between text-xs">
           <div className="text-left">
             <span className="text-[10px] text-slate-400 block uppercase font-bold">Tiempo restante</span>
             <span className="font-mono font-bold text-white">
@@ -112,7 +112,7 @@ export const BreathingModal: React.FC<BreathingModalProps> = ({
           </div>
           <div className="text-right">
             <span className="text-[10px] text-slate-400 block uppercase font-bold">Ciclos completados</span>
-            <span className="font-mono font-bold text-indigo-400">
+            <span className="font-mono font-bold text-slate-200">
               {completedRounds} rondas
             </span>
           </div>
@@ -124,17 +124,17 @@ export const BreathingModal: React.FC<BreathingModalProps> = ({
             onClick={onToggleRunning}
             className={`flex-1 font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-md active:scale-95 ${
               isRunning
-                ? 'bg-amber-600 hover:bg-amber-500 text-white'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
+                ? 'bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-slate-200'
+                : 'theme-btn-primary'
             }`}
           >
-            {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white" />}
+            {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
             <span>{isRunning ? 'Pausar Guía' : 'Reanudar Guía'}</span>
           </button>
 
           <button
             onClick={onComplete}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition flex items-center gap-1.5 shadow-md active:scale-95 shrink-0"
+            className="theme-btn-primary font-bold text-xs px-4 py-3 rounded-xl transition flex items-center gap-1.5 shadow-md active:scale-95 shrink-0"
             title="Marcar como cumplido ahora"
           >
             <Check className="w-4 h-4" />

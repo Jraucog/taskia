@@ -111,18 +111,18 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
       aria-modal="true"
     >
       <div 
-        className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-4 my-auto max-h-[90vh] overflow-y-auto overscroll-contain touch-pan-y shrink-0"
+        className="surface-depth border border-white/[0.1] rounded-3xl p-5 max-w-md w-full shadow-2xl flex flex-col gap-4 my-auto max-h-[90vh] overflow-y-auto overscroll-contain touch-pan-y shrink-0"
         style={{ WebkitOverflowScrolling: 'touch' }}
         onClick={(e) => e.stopPropagation()}
       >
         
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+            <div className="p-2 rounded-xl theme-badge">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-800/50">
+              <span className="text-[10px] font-bold uppercase tracking-wider theme-badge px-2 py-0.5 rounded-full">
                 Grill Me Wizard • Paso {step + 1} de 4
               </span>
               <h3 className="text-sm font-bold text-white mt-1">Descubridor de Metas 3P</h3>
@@ -149,8 +149,8 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
                   onClick={() => onAnswersChange({ ...answers, area: item.label })}
                   className={`p-3 rounded-2xl border text-left flex items-center gap-2 transition ${
                     answers.area === item.label
-                      ? 'bg-amber-950/60 border-amber-500 text-white font-bold'
-                      : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                      ? 'theme-btn-primary font-bold'
+                      : 'bg-white/[0.03] border-white/[0.08] text-slate-400 hover:border-white/[0.15]'
                   }`}
                 >
                   <span className="text-xl">{item.icon}</span>
@@ -168,7 +168,7 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
               <p className="text-xs text-white font-medium mb-1">
                 2. Define tu meta en Fórmula 3P (Presente, Positivo, Personal):
               </p>
-              <p className="text-[11px] text-amber-300/80 italic">
+              <p className="text-[11px] text-slate-400 italic">
                 Ejemplo: "Yo peso 85 kg con tono muscular atlético..." o "Yo consigo mis primeros 10 clientes de pago..."
               </p>
             </div>
@@ -179,7 +179,7 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
                 if (coachFeedback) setCoachFeedback(null);
               }}
               placeholder="Yo ..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80 h-24"
+              className="w-full bg-slate-950 border border-white/[0.08] rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-white/[0.2] h-24"
             />
 
             {/* Botón de Desafío del Coach (Modo Adversarial) */}
@@ -187,7 +187,7 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
               <button
                 type="button"
                 onClick={handleCoachGrill}
-                className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 hover:bg-amber-500/25 flex items-center gap-1.5 transition active:scale-95"
+                className="text-[11px] font-bold px-3 py-1.5 rounded-xl theme-badge hover:brightness-110 flex items-center gap-1.5 transition active:scale-95"
               >
                 <Swords className="w-3.5 h-3.5" />
                 <span>Desafiar Redacción (Modo Coach)</span>
@@ -197,14 +197,14 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
             {coachFeedback && (
               <div className={`p-3 rounded-2xl border text-xs space-y-2 ${
                 coachFeedback.passed
-                  ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
-                  : 'bg-amber-950/40 border-amber-500/40 text-amber-200'
+                  ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-200'
+                  : 'bg-white/[0.03] border-white/[0.1] text-slate-200'
               }`}>
                 <div className="flex items-start gap-2">
                   {coachFeedback.passed ? (
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <AlertCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                   )}
                   <div className="text-[11px] leading-relaxed">
                     {coachFeedback.critique}
@@ -212,14 +212,14 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
                 </div>
 
                 {coachFeedback.suggestedGoal && (
-                  <div className="pt-2 border-t border-amber-800/40 flex items-center justify-between gap-2">
+                  <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between gap-2">
                     <span className="text-[10px] text-slate-300 truncate italic">
                       Sugerencia: "{coachFeedback.suggestedGoal}"
                     </span>
                     <button
                       type="button"
                       onClick={() => applySuggestion(coachFeedback.suggestedGoal!)}
-                      className="px-2 py-1 bg-amber-500 text-slate-950 rounded-lg text-[10px] font-bold shrink-0 hover:bg-amber-400"
+                      className="px-2.5 py-1 theme-btn-primary rounded-lg text-[10px] font-bold shrink-0"
                     >
                       Aplicar
                     </button>
@@ -245,7 +245,7 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
               value={answers.why}
               onChange={(e) => onAnswersChange({ ...answers, why: e.target.value })}
               placeholder="Porque quiero libertad total, jugar al fútbol sin dolor y estar orgulloso de mi disciplina..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80 h-24"
+              className="w-full bg-slate-950 border border-white/[0.08] rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-white/[0.2] h-24"
             />
           </div>
         )}
@@ -266,20 +266,20 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
               value={answers.deadline}
               onChange={(e) => onAnswersChange({ ...answers, deadline: e.target.value })}
               placeholder="ej. 31/05/2027 o 15/12/2026"
-              className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-500/80"
+              className="w-full bg-slate-950 border border-white/[0.08] rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-white/[0.2]"
             />
           </div>
         )}
 
         {/* Botones de navegación del Wizard */}
-        <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+        <div className="flex items-center gap-2 pt-2 border-t border-white/[0.08]">
           {step > 0 && (
             <button
               onClick={() => {
                 setCoachFeedback(null);
                 onStepChange(step - 1);
               }}
-              className="px-4 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
+              className="px-4 py-2.5 rounded-xl border border-white/[0.08] text-slate-400 hover:text-white text-xs font-semibold"
             >
               Atrás
             </button>
@@ -291,7 +291,7 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
                 setCoachFeedback(null);
                 onStepChange(step + 1);
               }}
-              className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition"
+              className="flex-1 py-2.5 rounded-xl theme-btn-primary font-bold text-xs transition"
             >
               Siguiente Pregunta →
             </button>
@@ -314,7 +314,7 @@ export const GrillMeModal: React.FC<GrillMeModalProps> = ({
                 };
                 onSave(newCard);
               }}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-slate-950 font-black text-xs shadow-lg transition"
+              className="flex-1 py-2.5 rounded-xl theme-btn-primary font-bold text-xs shadow-lg transition"
             >
               ✨ Guardar en mi Vision Board
             </button>

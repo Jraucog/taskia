@@ -2517,26 +2517,26 @@ export default function App() {
                           const completedInPlan = plan.habits.filter(h => h.today_log?.completed).length;
 
                           return (
-                            <div key={plan.name} className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                            <div key={plan.name} className="surface-depth border border-white/[0.08] rounded-2xl overflow-hidden shadow-sm">
                               {/* Cabecera del Grupo (Tocable para colapsar/expandir el plan) */}
                               <div
                                 onClick={() => toggleBlockCollapse(`group_${plan.name}`)}
-                                className="p-3 bg-slate-900/90 border-b border-slate-800/80 flex items-center justify-between gap-2 cursor-pointer select-none hover:bg-slate-900 transition"
+                                className="p-3 bg-white/[0.02] border-b border-white/[0.06] flex items-center justify-between gap-2 cursor-pointer select-none hover:bg-white/[0.04] transition"
                               >
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <div className="p-1.5 rounded-lg bg-indigo-950 text-indigo-400">
-                                    <Layers className="w-4 h-4" />
+                                  <div className="p-1.5 rounded-lg theme-badge">
+                                    <Layers className="w-4 h-4 opacity-80" />
                                   </div>
                                   <h3 className="text-xs sm:text-sm font-bold text-white truncate">
                                     {plan.name}
                                   </h3>
-                                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800 shrink-0">
+                                  <span className="text-[10px] font-mono text-slate-400 bg-white/[0.04] px-2 py-0.5 rounded-full border border-white/[0.08] shrink-0">
                                     {completedInPlan}/{plan.totalCount}
                                   </span>
                                 </div>
 
                                 <div className="flex items-center gap-2 shrink-0">
-                                  <span className="text-xs font-mono font-bold text-amber-400">
+                                  <span className="text-xs font-mono font-bold text-slate-200">
                                     {plan.progressPercent}%
                                   </span>
                                   {isGroupCollapsed ? <ChevronRight className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
@@ -2615,10 +2615,10 @@ export default function App() {
                                             {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
                                               <button
                                                 onClick={() => startBreathingSession(habit)}
-                                                className="bg-indigo-950/90 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                                className="theme-badge hover:brightness-110 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
                                                 title="Iniciar Guía Visual Rítmica Interactiva"
                                               >
-                                                <Wind className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                                                <Wind className="w-3.5 h-3.5 animate-pulse" />
                                                 <span>Guiar</span>
                                               </button>
                                             )}
@@ -2627,10 +2627,10 @@ export default function App() {
                                             {(habit.title.toLowerCase().includes('anki') || habit.title.toLowerCase().includes('flashcard') || habit.title.toLowerCase().includes('inglés') || habit.title.toLowerCase().includes('ingles') || habit.title.toLowerCase().includes('vocabulario')) && (
                                               <button
                                                 onClick={() => startAnkiSession(habit)}
-                                                className="bg-amber-950/80 hover:bg-amber-900 border border-amber-600/60 text-amber-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                                className="theme-badge hover:brightness-110 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
                                                 title="Abrir Mazo de Flashcards Interactivas Anki SRS"
                                               >
-                                                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                                                <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                                                 <span>Practicar</span>
                                               </button>
                                             )}
@@ -2762,7 +2762,7 @@ export default function App() {
                                           </span>
                                         ) : null}
                                         {habit.unit === 'series' && (
-                                          <span className="text-[10px] font-mono text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-900/50">
+                                          <span className="text-[10px] font-mono text-slate-300 bg-white/[0.04] px-2 py-0.5 rounded-full border border-white/[0.08]">
                                             {currentVal}/{targetVal} {habit.unit}
                                           </span>
                                         )}
@@ -2786,10 +2786,10 @@ export default function App() {
                                     {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
                                       <button
                                         onClick={() => startBreathingSession(habit)}
-                                        className="bg-indigo-950/90 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                        className="theme-badge hover:brightness-110 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
                                         title="Iniciar Guía Visual Rítmica Interactiva"
                                       >
-                                        <Wind className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                                        <Wind className="w-3.5 h-3.5 animate-pulse" />
                                         <span>Guiar</span>
                                       </button>
                                     )}
@@ -2798,10 +2798,10 @@ export default function App() {
                                     {(habit.title.toLowerCase().includes('anki') || habit.title.toLowerCase().includes('flashcard') || habit.title.toLowerCase().includes('inglés') || habit.title.toLowerCase().includes('ingles') || habit.title.toLowerCase().includes('vocabulario')) && (
                                       <button
                                         onClick={() => startAnkiSession(habit)}
-                                        className="bg-amber-950/80 hover:bg-amber-900 border border-amber-600/60 text-amber-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                        className="theme-badge hover:brightness-110 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
                                         title="Abrir Mazo de Flashcards Interactivas Anki SRS"
                                       >
-                                        <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                                        <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                                         <span>Practicar</span>
                                       </button>
                                     )}
@@ -2946,16 +2946,12 @@ export default function App() {
                         <div 
                           key={plan.name}
                           onClick={() => setSelectedPlanName(plan.name)}
-                          className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-[0.99] flex flex-col gap-3 ${
-                            isAllDone
-                              ? 'bg-slate-900/60 border-emerald-900/60 shadow-sm'
-                              : 'bg-slate-900/90 border-slate-800 hover:border-indigo-800/80 shadow-md'
-                          }`}
+                          className="surface-depth border border-white/[0.08] hover:border-white/[0.16] p-4 rounded-2xl transition-all duration-200 cursor-pointer active:scale-[0.99] flex flex-col gap-3 shadow-sm"
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-center gap-3">
                               <div className={`p-2.5 rounded-xl ${
-                                isAllDone ? 'bg-emerald-950 text-emerald-400' : 'bg-indigo-950 text-indigo-400'
+                                isAllDone ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'theme-badge'
                               }`}>
                                 {isAllDone ? <CheckSquare className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
                               </div>
@@ -2963,7 +2959,7 @@ export default function App() {
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <h3 className="font-bold text-sm text-white line-clamp-1">{plan.name}</h3>
                                   {plan.isShared && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 font-medium px-2 py-0.5 rounded-full">
+                                    <span className="inline-flex items-center gap-1 text-[10px] bg-white/[0.04] border border-white/[0.08] text-slate-300 font-medium px-2 py-0.5 rounded-full">
                                       <Users className="w-2.5 h-2.5" />
                                       <span>Compartido {plan.sharedWith && plan.sharedWith.length > 0 ? `(${plan.sharedWith.map(u => `@${u}`).join(', ')})` : ''}</span>
                                     </span>
@@ -2985,14 +2981,14 @@ export default function App() {
                                 }}
                                 className={`p-1.5 rounded-lg transition ${
                                   plan.isShared 
-                                    ? 'bg-emerald-950/80 border border-emerald-800 text-emerald-300 hover:bg-emerald-900' 
-                                    : 'bg-slate-800 hover:bg-indigo-600/40 text-slate-400 hover:text-indigo-200'
+                                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 hover:bg-emerald-500/20' 
+                                    : 'bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-400 hover:text-white'
                                 }`}
                               >
                                 <Users className="w-3.5 h-3.5" />
                               </button>
-                              <span className={`text-xs font-black font-mono px-2 py-0.5 rounded-lg ${
-                                isAllDone ? 'bg-emerald-950 text-emerald-400' : 'bg-slate-950 text-amber-400'
+                              <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded-lg bg-white/[0.04] border border-white/[0.08] ${
+                                isAllDone ? 'text-emerald-400' : 'text-slate-200'
                               }`}>
                                 {plan.progressPercent}%
                               </span>
@@ -3001,10 +2997,10 @@ export default function App() {
                           </div>
 
                           {/* Barra de progreso interactiva */}
-                          <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                          <div className="w-full bg-white/[0.04] h-2 rounded-full overflow-hidden">
                             <div 
                               className={`h-full rounded-full transition-all duration-300 ${
-                                isAllDone ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-500 to-indigo-500'
+                                isAllDone ? 'bg-emerald-500' : 'theme-progress-bar'
                               }`}
                               style={{ width: `${plan.progressPercent}%` }}
                             />
@@ -3014,11 +3010,11 @@ export default function App() {
                     })}
 
                     {planSummaryList.length === 0 && (
-                      <div className="text-center py-10 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-4">
+                      <div className="text-center py-10 surface-depth border border-dashed border-white/[0.08] rounded-2xl p-4">
                         <p className="text-xs text-slate-400">No tienes planes activos todavía.</p>
                         <button 
                           onClick={() => setActiveTab('programs')}
-                          className="mt-3 text-xs bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl"
+                          className="mt-3 text-xs theme-btn-primary font-bold px-4 py-2 rounded-xl"
                         >
                           Explorar Catálogo de Planes
                         </button>
@@ -3033,11 +3029,11 @@ export default function App() {
             {selectedPlanName && (
               <div className="space-y-4">
                 {/* Botón de Volver / Breadcrumb móvil */}
-                <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
                   <button 
                     type="button"
                     onClick={() => setSelectedPlanName(null)}
-                    className="flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 active:scale-95 transition"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white active:scale-95 transition"
                   >
                     <ArrowLeft className="w-4 h-4" /> Volver a Mis Planes
                   </button>
@@ -3048,22 +3044,22 @@ export default function App() {
                 </div>
 
                 {/* Banner de Cabecera del Plan Activo con Estadísticas de Reto */}
-                <div className="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
+                <div className="surface-depth border border-white/[0.08] p-4 rounded-2xl shadow-sm">
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/80 border border-amber-800/50 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold uppercase tracking-wider theme-badge px-2 py-0.5 rounded-full">
                         Plan Activo
                       </span>
                       <button
                         type="button"
                         onClick={() => setShareModalPlanName(selectedPlanName)}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-300 hover:text-white bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/50 px-2.5 py-0.5 rounded-full transition"
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-2.5 py-0.5 rounded-full transition"
                       >
-                        <Users className="w-3 h-3 text-indigo-400" />
+                        <Users className="w-3 h-3 opacity-80" />
                         Compartir Plan
                       </button>
                     </div>
-                    <span className="text-xs font-mono font-bold text-amber-400">
+                    <span className="text-xs font-mono text-slate-400 font-semibold">
                       {selectedPlanHabits.filter(h => h.today_log?.completed).length} / {selectedPlanHabits.length} días
                     </span>
                   </div>
@@ -3071,33 +3067,33 @@ export default function App() {
                   <h2 className="text-base font-bold text-white mt-1">{selectedPlanName}</h2>
 
                   {/* Widgets de Métricas del Desafío (Llevo, Me Faltan, Avance) */}
-                  <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80">
-                    <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
-                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Días Llevo</span>
-                      <span className="text-base font-black text-emerald-400 font-mono">
+                  <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/[0.06]">
+                    <div className="bg-white/[0.02] p-2.5 rounded-xl border border-white/[0.05] text-center">
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider block">Días Llevo</span>
+                      <span className="text-base font-bold text-white font-mono">
                         {selectedPlanHabits.filter(h => h.today_log?.completed).length}
                       </span>
                     </div>
 
-                    <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
-                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Me Faltan</span>
-                      <span className="text-base font-black text-amber-400 font-mono">
+                    <div className="bg-white/[0.02] p-2.5 rounded-xl border border-white/[0.05] text-center">
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider block">Me Faltan</span>
+                      <span className="text-base font-bold text-slate-300 font-mono">
                         {selectedPlanHabits.length - selectedPlanHabits.filter(h => h.today_log?.completed).length}
                       </span>
                     </div>
 
-                    <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
-                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Avance</span>
-                      <span className="text-base font-black text-indigo-400 font-mono">
+                    <div className="bg-white/[0.02] p-2.5 rounded-xl border border-white/[0.05] text-center">
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider block">Avance</span>
+                      <span className="text-base font-bold text-white font-mono">
                         {selectedPlanHabits.length > 0 ? Math.round((selectedPlanHabits.filter(h => h.today_log?.completed).length / selectedPlanHabits.length) * 100) : 0}%
                       </span>
                     </div>
                   </div>
 
                   {/* Barra de progreso del plan seleccionado */}
-                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden mt-3">
+                  <div className="w-full bg-white/[0.04] h-2 rounded-full overflow-hidden mt-3">
                     <div 
-                      className="bg-gradient-to-r from-amber-500 to-indigo-500 h-full rounded-full transition-all duration-300"
+                      className="theme-progress-bar h-full rounded-full transition-all duration-300"
                       style={{ 
                         width: `${selectedPlanHabits.length > 0 ? (selectedPlanHabits.filter(h => h.today_log?.completed).length / selectedPlanHabits.length) * 100 : 0}%` 
                       }}
@@ -3107,27 +3103,27 @@ export default function App() {
                   {/* Regla de reinicio si es el reto Brian Tracy y botón para ver las 10 metas */}
                   {selectedPlanName.toLowerCase().includes('brian tracy') && (
                     <div className="mt-3 space-y-2">
-                      <p className="text-[11px] text-amber-300/80 bg-amber-950/40 p-2 rounded-xl border border-amber-900/40 flex items-center gap-1.5">
-                        ⚠️ <strong>Regla del Reto:</strong> Se escriben a mano sin mirar el día anterior. Si fallas un día, el ciclo vuelve a 0/21.
+                      <p className="text-[11px] text-slate-300 bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.06] flex items-center gap-1.5 leading-relaxed">
+                        <span>💡</span> <strong>Regla del Reto:</strong> Se escriben a mano sin mirar el día anterior. Si fallas un día, el ciclo vuelve a 0/21.
                       </p>
 
                       <button 
                         type="button"
                         onClick={() => setShowGoalsModal(true)}
-                        className="w-full bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold text-xs py-2 px-3 rounded-xl border border-amber-500/30 flex items-center justify-center gap-2 transition shadow-sm"
+                        className="w-full bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 font-semibold text-xs py-2 px-3 rounded-xl border border-white/[0.08] flex items-center justify-center gap-2 transition shadow-sm"
                       >
-                        <BookOpen className="w-4 h-4 text-amber-400" />
+                        <BookOpen className="w-4 h-4 text-slate-300" />
                         <span>Ver y Personalizar Mis 10 Metas (Fórmula 3P)</span>
                       </button>
                     </div>
                   )}
                   {/* Botón para agregar tarea al plan actual */}
-                  <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                  <div className="mt-3 pt-3 border-t border-white/[0.06] flex items-center justify-between">
                     <span className="text-xs text-slate-400">¿Quieres ajustar las tareas de este plan?</span>
                     <button
                       type="button"
                       onClick={() => openCreateHabitModal(selectedPlanName)}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                      className="theme-btn-primary text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>+ Agregar Tarea al Plan</span>
@@ -3149,8 +3145,8 @@ export default function App() {
                         key={habit.id}
                         className={`rounded-2xl border overflow-hidden surface-interactive ${
                           isCompleted 
-                            ? 'bg-gradient-to-r from-emerald-950/20 via-slate-900/60 to-slate-950/80 border-emerald-500/30' 
-                            : 'surface-depth hover:border-indigo-500/40'
+                            ? 'bg-white/[0.02] border-white/[0.05] opacity-75' 
+                            : 'surface-depth border-white/[0.08] hover:border-white/[0.16]'
                         }`}
                       >
                         {/* Cabecera del Ejercicio (Tocable para colapsar/expandir) */}
@@ -3160,7 +3156,7 @@ export default function App() {
                         >
                           <div className="flex items-center gap-2.5 flex-1 min-w-0 flex-wrap">
                             <span className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                              isCompleted ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-300'
+                              isCompleted ? 'theme-btn-primary font-bold' : 'bg-white/[0.06] text-slate-300 font-medium'
                             }`}>
                               {idx + 1}
                             </span>
@@ -3168,18 +3164,18 @@ export default function App() {
                               {title}
                             </h3>
                             {habit.estimated_minutes ? (
-                              <span className="text-[10px] font-mono text-slate-400 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                                <Clock className="w-2.5 h-2.5 text-indigo-400" />
+                              <span className="text-[10px] font-mono text-slate-400 bg-white/[0.03] border border-white/[0.06] px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                <Clock className="w-2.5 h-2.5 text-slate-400" />
                                 <span>~{habit.estimated_minutes} min</span>
                               </span>
                             ) : null}
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
                               habit.compliance_summary?.meets_sla 
-                                ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' 
-                                : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                             }`}>
                               SLA {habit.compliance_summary?.rate_percent ?? 0}%
                             </span>
@@ -3189,21 +3185,21 @@ export default function App() {
 
                         {/* Contenido Desplegable (Detalles y Controles) */}
                         {!isCollapsed && (
-                          <div className="px-3.5 pb-3.5 pt-1 border-t border-slate-800/60 bg-slate-950/30">
+                          <div className="px-3.5 pb-3.5 pt-1 border-t border-white/[0.06] bg-black/10">
                             {habit.description && (
-                              <p className="text-xs text-slate-400 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60 mb-3 flex items-start gap-2">
+                              <p className="text-xs text-slate-400 leading-relaxed bg-white/[0.02] p-2.5 rounded-xl border border-white/[0.05] mb-3 flex items-start gap-2">
                                 <span>💡</span>
                                 <span>{habit.description}</span>
                               </p>
                             )}
 
-                            <div className="flex items-center justify-between mb-3 bg-slate-900/60 p-2 rounded-xl border border-slate-800/60 text-xs">
+                            <div className="flex items-center justify-between mb-3 bg-white/[0.02] p-2 rounded-xl border border-white/[0.05] text-xs">
                               <button
                                 type="button"
                                 onClick={() => setSelectedDetailHabit(habit)}
-                                className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition"
+                                className="text-xs font-medium text-slate-300 hover:text-white flex items-center gap-1 transition"
                               >
-                                <Info className="w-3.5 h-3.5" /> Guía de Ejecución
+                                <Info className="w-3.5 h-3.5 opacity-80" /> Guía de Ejecución
                               </button>
 
                               <div className="flex items-center gap-1">
@@ -3213,10 +3209,10 @@ export default function App() {
                                     e.stopPropagation();
                                     setShareModalHabit(habit);
                                   }}
-                                  className="p-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 hover:text-white transition flex items-center gap-1 text-[11px]"
+                                  className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white transition flex items-center gap-1 text-[11px]"
                                   title="Compartir con otro usuario (ej. lista de compras con tu esposa)"
                                 >
-                                  <Users className="w-3 h-3 text-indigo-400" />
+                                  <Users className="w-3 h-3 opacity-80" />
                                   <span className="hidden sm:inline">Compartir</span>
                                 </button>
                                 <button
@@ -3225,10 +3221,10 @@ export default function App() {
                                     e.stopPropagation();
                                     openEditHabitModal(habit);
                                   }}
-                                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1 text-[11px]"
+                                  className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white transition flex items-center gap-1 text-[11px]"
                                   title="Editar meta o detalles de esta tarea"
                                 >
-                                  <Edit3 className="w-3 h-3 text-indigo-400" />
+                                  <Edit3 className="w-3 h-3 opacity-80" />
                                   <span className="hidden sm:inline">Editar</span>
                                 </button>
                                 <button
@@ -3237,7 +3233,7 @@ export default function App() {
                                     e.stopPropagation();
                                     handleDeleteHabit(habit.id, habit.title);
                                   }}
-                                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-red-950/60 text-slate-400 hover:text-red-400 transition"
+                                  className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-red-500/10 border border-white/[0.08] text-slate-400 hover:text-red-400 transition"
                                   title="Eliminar esta tarea del plan"
                                 >
                                   <Trash2 className="w-3 h-3" />
@@ -3250,7 +3246,7 @@ export default function App() {
                               <div className="flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-slate-400">Progreso:</span>
-                                  <span className="text-xs font-black font-mono px-2 py-0.5 bg-slate-950 border border-slate-800 rounded-lg text-amber-400">
+                                  <span className="text-xs font-bold font-mono px-2 py-0.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-slate-200">
                                     {currentVal} / {targetVal} {habit.unit}
                                   </span>
                                 </div>
@@ -3260,7 +3256,7 @@ export default function App() {
                                     type="button"
                                     onClick={() => logSeriesStep(habit.id, -1)}
                                     disabled={currentVal <= 0}
-                                    className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white disabled:opacity-40"
+                                    className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-400 hover:text-white disabled:opacity-40 transition"
                                     title="Restar 1"
                                   >
                                     <Minus className="w-3.5 h-3.5" />
@@ -3272,7 +3268,7 @@ export default function App() {
                                     className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition ${
                                       isCompleted 
                                         ? 'bg-emerald-600 hover:bg-emerald-500 text-white' 
-                                        : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20'
+                                        : 'theme-btn-primary'
                                     }`}
                                   >
                                     {isCompleted ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
@@ -3286,10 +3282,10 @@ export default function App() {
                                 <button
                                   type="button"
                                   onClick={() => startBreathingSession(habit)}
-                                  className="bg-indigo-950 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                  className="theme-badge hover:brightness-110 font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
                                   title="Iniciar Guía Visual Rítmica Interactiva"
                                 >
-                                  <Wind className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                                  <Wind className="w-3.5 h-3.5 opacity-80" />
                                   <span>Iniciar Guía Rítmica</span>
                                 </button>
                               )}
@@ -3300,7 +3296,7 @@ export default function App() {
                                 className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition active:scale-95 ${
                                   isCompleted 
                                     ? 'bg-emerald-600 text-white' 
-                                    : 'bg-indigo-600 text-white hover:bg-indigo-500'
+                                    : 'theme-btn-primary'
                                 }`}
                               >
                                 {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}

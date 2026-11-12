@@ -28,16 +28,16 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
       aria-modal="true"
     >
       <div 
-        className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl my-auto overflow-hidden overscroll-contain shrink-0"
+        className="surface-depth border border-white/[0.1] rounded-3xl p-5 max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl my-auto overflow-hidden overscroll-contain shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
-              <Eye className="w-5 h-5" />
+            <div className="p-2 rounded-xl theme-badge">
+              <Eye className="w-5 h-5 opacity-90" />
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-800/50">
+              <span className="text-[10px] font-bold uppercase tracking-wider theme-badge px-2 py-0.5 rounded-full">
                 {program.category}
               </span>
               <h3 className="text-sm font-bold text-white mt-1">{program.title}</h3>
@@ -46,13 +46,13 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
           <button onClick={onClose} className="text-slate-400 hover:text-white text-sm p-1">✕</button>
         </div>
 
-        <p className="text-xs text-slate-300 my-3 leading-relaxed bg-slate-950/60 p-3 rounded-2xl border border-slate-800/60">
+        <p className="text-xs text-slate-300 my-3 leading-relaxed bg-white/[0.03] p-3 rounded-2xl border border-white/[0.06]">
           {program.description}
         </p>
 
         <div className="flex items-center justify-between text-xs text-slate-400 mb-2 px-1">
           <span className="font-semibold text-white">Estructura de la Plantilla ({program.items?.length || 0} ítems):</span>
-          <span className="font-mono text-amber-400 font-bold">{program.duration_days} días</span>
+          <span className="font-mono text-slate-300 font-semibold">{program.duration_days} días</span>
         </div>
 
         <div 
@@ -60,9 +60,9 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           {program.items?.map((it, idx) => (
-            <div key={it.id || idx} className="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 flex items-start justify-between gap-3">
+            <div key={it.id || idx} className="bg-white/[0.02] p-3 rounded-2xl border border-white/[0.06] flex items-start justify-between gap-3">
               <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-slate-800 text-slate-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-white/[0.06] text-slate-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                   {idx + 1}
                 </span>
                 <div>
@@ -71,12 +71,12 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
-                <span className="text-[11px] font-mono text-indigo-300 bg-indigo-950/80 border border-indigo-900 px-2 py-0.5 rounded-lg">
+                <span className="text-[11px] font-mono text-slate-300 bg-white/[0.04] border border-white/[0.08] px-2 py-0.5 rounded-lg">
                   {it.target_value} {it.unit}
                 </span>
                 {it.estimated_minutes ? (
                   <span className="text-[10px] font-mono text-slate-400 flex items-center gap-0.5">
-                    <Clock className="w-2.5 h-2.5 text-indigo-400" />
+                    <Clock className="w-2.5 h-2.5 text-slate-400" />
                     <span>~{it.estimated_minutes}m</span>
                   </span>
                 ) : null}
@@ -85,7 +85,7 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
           ))}
         </div>
 
-        <div className="flex flex-col gap-2 pt-2 border-t border-slate-800">
+        <div className="flex flex-col gap-2 pt-2 border-t border-white/[0.08]">
           {(normalizeSearchText(program.title).includes('anki') || 
             normalizeSearchText(program.title).includes('ingles') || 
             normalizeSearchText(program.category).includes('idioma')) && onStartAnkiSession && (
@@ -94,9 +94,9 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
                 onClose();
                 onStartAnkiSession(program);
               }}
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs py-3 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-amber-950/40 active:scale-95"
+              className="w-full theme-badge hover:brightness-110 font-bold text-xs py-2.5 px-3 rounded-2xl transition flex items-center justify-center gap-2 active:scale-95 shadow-sm"
             >
-              <Sparkles className="w-4 h-4 text-slate-950 fill-slate-950" />
+              <Sparkles className="w-4 h-4 opacity-80" />
               <span>Practicar Mazo de Flashcards Anki Ahora</span>
             </button>
           )}
@@ -104,7 +104,7 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
           <div className="flex items-center gap-2">
             <button 
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold"
+              className="flex-1 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white text-xs font-semibold transition"
             >
               Cerrar Previa
             </button>
@@ -114,9 +114,9 @@ export const ProgramPreviewModal: React.FC<ProgramPreviewModalProps> = ({
                 onClose();
                 onEnroll(pId);
               }}
-              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5"
+              className="flex-1 py-2.5 rounded-xl theme-btn-primary text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition"
             >
-              <Play className="w-3.5 h-3.5 fill-white" /> Cargar & Usar Esta Plantilla
+              <Play className="w-3.5 h-3.5 fill-current" /> Cargar & Usar Esta Plantilla
             </button>
           </div>
         </div>

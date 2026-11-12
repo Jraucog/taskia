@@ -181,17 +181,17 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 animate-fade-in">
-      <div className="anki-modal-card bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl flex flex-col relative max-h-[92vh] overflow-hidden">
+      <div className="anki-modal-card surface-depth border border-white/[0.1] rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl flex flex-col relative max-h-[92vh] overflow-hidden">
         
         {/* Cabecera del Entrenador Anki */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm shadow-sm">
-              <Layers className="w-5 h-5 text-amber-400" />
+            <div className="w-10 h-10 rounded-2xl theme-badge flex items-center justify-center font-bold text-sm shadow-sm">
+              <Layers className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950 px-2.5 py-0.5 rounded-full border border-amber-800/60 flex items-center gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider theme-badge px-2.5 py-0.5 rounded-full flex items-center gap-1">
                   <span>🇬🇧</span> Anki SRS & Shadowing
                 </span>
                 <span className="text-xs text-slate-400 font-mono tabular-nums">
@@ -203,8 +203,8 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
                   Active Recall Flashcards
                 </h2>
                 {sessionStreak > 1 && (
-                  <span className="text-[10px] font-bold text-amber-400 bg-amber-950/70 border border-amber-700/60 px-1.5 py-0.2 rounded-md flex items-center gap-0.5 animate-pulse">
-                    <Flame className="w-3 h-3 fill-amber-400" /> {sessionStreak} seguidas
+                  <span className="text-[10px] font-bold theme-badge px-1.5 py-0.2 rounded-md flex items-center gap-0.5 animate-pulse">
+                    <Flame className="w-3 h-3" /> {sessionStreak} seguidas
                   </span>
                 )}
               </div>
@@ -217,17 +217,17 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
               onClick={() => toggleAmbient(ambientType)}
               className={`p-2 rounded-xl transition border min-h-[40px] min-w-[40px] flex items-center justify-center ${
                 isAmbientPlaying 
-                  ? 'bg-amber-500/20 border-amber-500 text-amber-300 shadow-sm' 
-                  : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200'
+                  ? 'theme-badge shadow-sm' 
+                  : 'bg-white/[0.04] border-white/[0.08] text-slate-400 hover:text-slate-200'
               }`}
               title={isAmbientPlaying ? "Pausar sonido ambiental 528Hz" : "Activar tono 528Hz de enfoque"}
             >
-              {isAmbientPlaying ? <Volume2 className="w-4 h-4 text-amber-400 animate-pulse" /> : <VolumeX className="w-4 h-4" />}
+              {isAmbientPlaying ? <Volume2 className="w-4 h-4 animate-pulse" /> : <VolumeX className="w-4 h-4" />}
             </button>
 
             <button 
               onClick={onClose} 
-              className="w-10 h-10 rounded-xl bg-slate-800/80 hover:bg-slate-750 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-700"
+              className="w-10 h-10 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-white flex items-center justify-center transition border border-white/[0.08]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -235,7 +235,7 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
         </div>
 
         {/* Barra de Filtros y Herramientas (Mezclar & Modo Shadowing) */}
-        <div className="flex items-center justify-between gap-1.5 py-2.5 border-b border-slate-800/60">
+        <div className="flex items-center justify-between gap-1.5 py-2.5 border-b border-white/[0.06]">
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[11px] flex-1">
             {['All', 'Business & Tech', 'Phrasal Verbs', 'Power Idioms', 'Everyday Fluency'].map(cat => (
               <button
@@ -249,8 +249,8 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
                 }}
                 className={`px-2.5 py-1.5 rounded-xl font-medium whitespace-nowrap transition border ${
                   selectedFilter === cat
-                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold'
-                    : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white'
+                    ? 'theme-btn-primary font-bold'
+                    : 'bg-white/[0.03] border-white/[0.08] text-slate-400 hover:text-white'
                 }`}
               >
                 {cat === 'All' ? '⚡ Todo el Mazo' : cat}
@@ -267,19 +267,19 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
               }}
               className={`text-[10px] px-2 py-1 rounded-lg border font-semibold flex items-center gap-1 transition ${
                 shadowingMode 
-                  ? 'bg-indigo-950 border-indigo-500 text-indigo-300' 
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'theme-btn-primary' 
+                  : 'bg-white/[0.03] border-white/[0.08] text-slate-400 hover:text-slate-200'
               }`}
               title="Modo Shadowing: reproduce automáticamente el audio al ver la tarjeta"
             >
-              <Headphones className="w-3 h-3 text-indigo-400" />
+              <Headphones className="w-3 h-3" />
               <span className="hidden sm:inline">Shadowing</span>
             </button>
 
             {/* Botón Barajar */}
             <button
               onClick={handleShuffle}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
+              className="p-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-slate-400 hover:text-white transition"
               title="Barajar tarjetas aleatoriamente"
             >
               <Shuffle className="w-3.5 h-3.5" />
@@ -288,9 +288,9 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
         </div>
 
         {/* Barra de progreso de la sesión */}
-        <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden my-2.5 border border-slate-800/50">
+        <div className="w-full bg-slate-950/80 h-1.5 rounded-full overflow-hidden my-2.5 border border-white/[0.06]">
           <div 
-            className="bg-gradient-to-r from-amber-500 to-emerald-500 h-full transition-all duration-300"
+            className="theme-progress-bar h-full transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -315,7 +315,7 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Mejor racha consecutiva:</span>
-                <span className="font-mono font-bold text-amber-400 tabular-nums">{bestSessionStreak} tarjetas</span>
+                <span className="font-mono font-bold text-white tabular-nums">{bestSessionStreak} tarjetas</span>
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Algoritmo de retención:</span>
@@ -331,13 +331,13 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
                   setIsFinished(false);
                   haptics.tap();
                 }}
-                className="flex-1 bg-slate-800 hover:bg-slate-750 text-slate-200 font-bold py-3 rounded-2xl text-xs transition active:scale-95"
+                className="flex-1 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 font-bold py-3 rounded-2xl text-xs transition active:scale-95"
               >
                 Repasar de nuevo
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold py-3 rounded-2xl text-xs transition shadow-md active:scale-95"
+                className="flex-1 theme-btn-primary font-bold py-3 rounded-2xl text-xs transition shadow-md active:scale-95"
               >
                 Listo, volver al panel
               </button>
@@ -358,17 +358,17 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
               }}
               className={`cursor-pointer rounded-3xl p-5 sm:p-6 border transition-all duration-300 relative min-h-[270px] flex flex-col justify-between select-none ${
                 isFlipped 
-                  ? 'bg-slate-950 border-amber-500/40 shadow-xl shadow-amber-500/5' 
-                  : 'bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-slate-700/80 hover:border-slate-600 shadow-lg'
+                  ? 'bg-slate-950/90 border-white/[0.15] shadow-xl' 
+                  : 'surface-depth border-white/[0.1] hover:border-white/[0.2] shadow-lg'
               }`}
             >
               {/* Etiqueta de la tarjeta */}
               <div className="flex items-center justify-between text-xs mb-3">
-                <span className="text-[10px] font-mono uppercase bg-slate-800/90 text-slate-300 px-2.5 py-0.5 rounded-lg border border-slate-700 font-semibold">
+                <span className="text-[10px] font-mono uppercase bg-white/[0.04] text-slate-300 px-2.5 py-0.5 rounded-lg border border-white/[0.08] font-semibold">
                   {currentCard.partOfSpeech}
                 </span>
                 <span className="text-[11px] text-slate-400 flex items-center gap-1.5 font-medium">
-                  <RotateCw className="w-3.5 h-3.5 text-amber-400" />
+                  <RotateCw className="w-3.5 h-3.5 text-slate-400" />
                   {isFlipped ? 'Volteada (Respuesta)' : 'Toca o presiona [Espacio]'}
                 </span>
               </div>
@@ -386,7 +386,7 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
                       speakText(currentCard.front);
                       haptics.tap();
                     }}
-                    className="p-2.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition active:scale-90"
+                    className="p-2.5 rounded-2xl theme-badge transition active:scale-90"
                     title="Escuchar pronunciación nativa (tecla R)"
                   >
                     <Volume2 className={`w-5 h-5 ${isSpeaking ? 'animate-pulse text-emerald-400' : ''}`} />
@@ -401,9 +401,9 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
 
                 {/* Si no está volteada, sugerir Active Recall */}
                 {!isFlipped && (
-                  <div className="mt-5 p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800/80 text-left">
+                  <div className="mt-5 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-left">
                     <p className="text-[11px] text-slate-400 flex items-start gap-2 font-medium text-pretty">
-                      <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-slate-300" />
                       <span>
                         <strong className="text-white">Active Recall:</strong> Evoca mentalmente el significado y di una oración en voz alta antes de girar la tarjeta.
                       </span>
@@ -414,15 +414,15 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
 
               {/* Lado Trasero (Respuesta, Traducción y Ejemplo en Contexto) */}
               {isFlipped && (
-                <div className="mt-4 pt-4 border-t border-slate-800/80 space-y-3 animate-fade-in text-left">
+                <div className="mt-4 pt-4 border-t border-white/[0.08] space-y-3 animate-fade-in text-left">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Significado en Español:</span>
-                    <p className="text-sm font-bold text-emerald-300 mt-0.5 text-balance">
+                    <p className="text-sm font-bold text-white mt-0.5 text-balance">
                       {currentCard.back}
                     </p>
                   </div>
 
-                  <div className="bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 space-y-1.5">
+                  <div className="bg-white/[0.03] p-3.5 rounded-2xl border border-white/[0.06] space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Ejemplo en contexto:</span>
                       <button
@@ -432,7 +432,7 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
                           speakText(currentCard.contextSentence);
                           haptics.tap();
                         }}
-                        className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium"
+                        className="text-[11px] text-slate-300 hover:text-white flex items-center gap-1 font-medium"
                       >
                         <Volume2 className="w-3.5 h-3.5" /> Escuchar oración
                       </button>
@@ -446,7 +446,7 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
                   </div>
 
                   {currentCard.tip && (
-                    <div className="text-[11px] text-amber-300/90 bg-amber-950/20 p-3 rounded-xl border border-amber-800/30 flex items-start gap-2">
+                    <div className="text-[11px] text-slate-300 bg-white/[0.03] p-3 rounded-xl border border-white/[0.08] flex items-start gap-2">
                       <span className="shrink-0 mt-0.5">💡</span>
                       <span className="text-pretty">{currentCard.tip}</span>
                     </div>
@@ -467,7 +467,7 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
                       setIsFlipped(true);
                       haptics.tap();
                     }}
-                    className="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold py-3.5 rounded-2xl text-xs flex items-center justify-center gap-2 transition shadow-lg active:scale-95 min-h-[48px]"
+                    className="w-full theme-btn-primary font-bold py-3.5 rounded-2xl text-xs flex items-center justify-center gap-2 transition shadow-lg active:scale-95 min-h-[48px]"
                   >
                     <RotateCw className="w-4 h-4" />
                     <span>Mostrar Respuesta & Ejemplo (Espacio / Click)</span>
@@ -483,37 +483,37 @@ export const AnkiInteractiveModal: React.FC<AnkiInteractiveModalProps> = ({
                     {/* Botón 1: Otra vez (Fallo) */}
                     <button
                       onClick={() => handleRateCard('again')}
-                      className="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 py-3 px-1 rounded-2xl text-center transition flex flex-col items-center justify-center active:scale-95 min-h-[48px]"
+                      className="bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 py-3 px-1 rounded-2xl text-center transition flex flex-col items-center justify-center active:scale-95 min-h-[48px]"
                     >
                       <span className="text-[11px] font-bold">1: Repetir</span>
-                      <span className="text-[9px] text-rose-400/80 font-mono mt-0.5">&lt; 1 min</span>
+                      <span className="text-[9px] text-rose-300/80 font-mono mt-0.5">&lt; 1 min</span>
                     </button>
 
                     {/* Botón 2: Difícil */}
                     <button
                       onClick={() => handleRateCard('hard')}
-                      className="bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/60 text-amber-300 py-3 px-1 rounded-2xl text-center transition flex flex-col items-center justify-center active:scale-95 min-h-[48px]"
+                      className="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 py-3 px-1 rounded-2xl text-center transition flex flex-col items-center justify-center active:scale-95 min-h-[48px]"
                     >
                       <span className="text-[11px] font-bold">2: Difícil</span>
-                      <span className="text-[9px] text-amber-400/80 font-mono mt-0.5">1 día</span>
+                      <span className="text-[9px] text-amber-300/80 font-mono mt-0.5">1 día</span>
                     </button>
 
                     {/* Botón 3: Bien */}
                     <button
                       onClick={() => handleRateCard('good')}
-                      className="bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-800/60 text-indigo-300 py-3 px-1 rounded-2xl text-center transition flex flex-col items-center justify-center active:scale-95 min-h-[48px]"
+                      className="bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] text-slate-200 py-3 px-1 rounded-2xl text-center transition flex flex-col items-center justify-center active:scale-95 min-h-[48px]"
                     >
                       <span className="text-[11px] font-bold">3: Bien</span>
-                      <span className="text-[9px] text-indigo-400/80 font-mono mt-0.5">3 días</span>
+                      <span className="text-[9px] text-slate-400 font-mono mt-0.5">3 días</span>
                     </button>
 
                     {/* Botón 4: Fácil */}
                     <button
                       onClick={() => handleRateCard('easy')}
-                      className="bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/60 text-emerald-300 py-3 px-1 rounded-2xl text-center transition flex flex-col items-center justify-center active:scale-95 min-h-[48px]"
+                      className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 py-3 px-1 rounded-2xl text-center transition flex flex-col items-center justify-center active:scale-95 min-h-[48px]"
                     >
                       <span className="text-[11px] font-bold">4: Fácil</span>
-                      <span className="text-[9px] text-emerald-400/80 font-mono mt-0.5">5 días</span>
+                      <span className="text-[9px] text-emerald-300/80 font-mono mt-0.5">5 días</span>
                     </button>
                   </div>
                   <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 font-mono">
