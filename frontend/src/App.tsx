@@ -3,14 +3,14 @@ import axios from 'axios';
 import { 
   CheckCircle2, Circle, Flame, Zap, 
   Layers, RefreshCw, Sparkles,
-  User, LogOut, LogIn, UserPlus, Dumbbell, Calendar,
+  LogIn, UserPlus, Dumbbell, Calendar,
   Check, Plus, Minus, ChevronDown, ChevronRight,
   ArrowLeft, CheckSquare, BookOpen,
-  Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, ListChecks,
+  Bell, ShieldAlert, Compass, Edit3, Trash2, ListChecks,
   Wind, Info, Clock,
   Search, Users,
   Cloud, CloudOff,
-  Brain, Share2, Award
+  Brain
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
@@ -99,7 +99,7 @@ export default function App() {
   const [habits, setHabits] = useState<Habit[]>(() => getLocalHabits());
   const [programs, setPrograms] = useState<Program[]>(() => getLocalPrograms());
   const [metrics, setMetrics] = useState<MetricsSummary | null>(() => getLocalMetrics());
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
 
   // Estado Local-First y Sincronización Offline
   const [isOnline, setIsOnline] = useState<boolean>(() => typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -2032,190 +2032,83 @@ export default function App() {
   const reactiveCoach = getReactiveCoachContext();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans w-full max-w-full overflow-x-hidden pb-28 md:pb-12">
-      {/* Top Header Responsivo - Minimalista y Sofisticado (Ajustado con safe-top en PWA Standalone) */}
-      <header className="border-b border-slate-800/80 bg-slate-950/95 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-4 py-2.5 w-full safe-top pwa-standalone-header shadow-sm">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-xl">
-              <Flame className="w-4 h-4 text-amber-500" />
+    <div className="min-h-screen healthy-canvas text-slate-100 flex flex-col font-sans w-full max-w-full overflow-x-hidden pb-28 md:pb-12">
+      {/* Top Header Sereno y Despejado (Estética Healthy / Calm) */}
+      <header className="border-b border-white/[0.06] bg-slate-950/70 backdrop-blur-2xl sticky top-0 z-40 px-3.5 sm:px-6 py-2.5 w-full safe-top pwa-standalone-header shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          {/* Marca Zen / Identidad Saludable */}
+          <div className="flex items-center gap-2.5 select-none">
+            <div className="w-8 h-8 rounded-2xl bg-gradient-to-tr from-emerald-600/30 to-teal-400/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
             </div>
             <div>
-              <span className="text-sm font-black tracking-tight text-white">
+              <span className="text-sm font-black tracking-tight text-white flex items-center gap-1.5">
                 TASKIA
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium block -mt-0.5">
+                Bienestar & Hábitos
               </span>
             </div>
           </div>
 
-          {/* Dynamic Island Compacta en Barra Superior */}
+          {/* Dynamic Island Zen / Estado Sereno de Progreso */}
           <div 
             onClick={() => {
               haptics.tap();
               setIslandExpanded(!islandExpanded);
             }}
-            className={`flex items-center gap-2 bg-slate-900/95 border px-3 py-1.5 rounded-full cursor-pointer transition-all duration-300 min-h-[44px] shadow-sm select-none active:scale-95 ${
-              slaRate < 80 
-                ? 'border-amber-600/70 hover:border-amber-500 shadow-amber-950/30' 
-                : 'border-slate-800/90 hover:border-slate-700'
-            }`}
-            title="Toca para ver consejo táctico en tiempo real del Coach"
+            className="flex items-center gap-2 bg-slate-900/80 hover:bg-slate-850 border border-white/[0.08] px-3 py-1.5 rounded-full cursor-pointer transition min-h-[38px] shadow-sm select-none active:scale-95"
+            title="Toca para ver tu estado y consejo del día"
           >
-            <span className="relative flex h-2.5 w-2.5">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                slaRate < 80 ? 'bg-amber-400' : 'bg-emerald-400'
-              }`}></span>
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
-                slaRate < 80 ? 'bg-amber-500' : 'bg-emerald-500'
-              }`}></span>
-            </span>
-            {/* Circular progress mini */}
-            <div className="relative w-7 h-7">
-              <svg className="w-7 h-7 -rotate-90" viewBox="0 0 28 28">
-                <circle cx="14" cy="14" r="11" fill="none" stroke="rgb(30,41,59)" strokeWidth="2.5" />
-                <circle cx="14" cy="14" r="11" fill="none" stroke={
-                  habits.length > 0 && habits.filter(h => h.today_log?.completed).length === habits.length
-                    ? 'rgb(52,211,153)' 
-                    : slaRate < 80 ? 'rgb(245,158,11)' : 'rgb(99,102,241)'
-                } strokeWidth="2.5" strokeLinecap="round"
+            {/* Circular progress mini sereno */}
+            <div className="relative w-5 h-5">
+              <svg className="w-5 h-5 -rotate-90" viewBox="0 0 28 28">
+                <circle cx="14" cy="14" r="11" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+                <circle cx="14" cy="14" r="11" fill="none" stroke="rgb(52,211,153)" strokeWidth="3" strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 11}`}
                   strokeDashoffset={`${2 * Math.PI * 11 * (1 - (habits.length > 0 ? habits.filter(h => h.today_log?.completed).length / habits.length : 0))}`}
                   className="transition-all duration-700 ease-out"
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white font-mono">
-                {habits.length > 0 ? Math.round((habits.filter(h => h.today_log?.completed).length / habits.length) * 100) : 0}
-              </span>
             </div>
 
-            {/* Micro-Coach Reactive Label / Tag */}
-            <div className="flex items-center gap-1.5">
-              <span className={`text-[9px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded-md font-mono hidden xs:inline-block ${
-                islandBadge ? islandBadge.color : reactiveCoach.badgeColor
-              }`}>
-                {islandBadge ? islandBadge.text : reactiveCoach.badge}
-              </span>
-              <span className="text-xs transition-transform duration-300 hover:scale-110">
-                {activeCoach?.avatar_emoji || '🔥'}
-              </span>
-            </div>
+            <span className="text-[11px] text-slate-300 font-medium font-mono">
+              {completedCount}/{habits.length}
+            </span>
 
-            {restTimer !== null && (
-              <div className="relative w-6 h-6 shrink-0">
-                <svg className="w-6 h-6 -rotate-90" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="9" fill="none" stroke="rgb(120,53,15)" strokeWidth="2" />
-                  <circle cx="12" cy="12" r="9" fill="none" stroke="rgb(251,191,36)" strokeWidth="2" strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 9}`}
-                    strokeDashoffset={`${2 * Math.PI * 9 * (1 - (restTimer / 60))}`}
-                    className="transition-all duration-1000 ease-linear"
-                  />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[7px] font-black text-amber-300 font-mono">{restTimer}</span>
-              </div>
-            )}
+            <span className="text-sm">
+              {activeCoach?.avatar_emoji || '🌿'}
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            {/* Botón de Perfil de Usuario y Coach */}
-            <button 
-              onClick={() => {
-                if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
-                  requestNotificationPermission();
-                }
-                setShowCoachModal(true);
-              }}
-              className="flex items-center gap-1.5 p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl transition"
-              title="Perfil, Entrenador & Notificaciones"
-            >
-              <div className="relative">
-                <User className="w-3.5 h-3.5 text-slate-400" />
-                {notificationPermission !== 'granted' && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                )}
-              </div>
-              <span className="text-[11px] font-medium text-slate-300 hidden sm:inline">
-                {currentUser?.username ? `@${currentUser.username}` : 'demo'}
-              </span>
-            </button>
-
-            {/* Botón Árbol de Habilidades RPG */}
-            <button
-              onClick={() => {
-                haptics.tap();
-                setShowSkillTreeModal(true);
-              }}
-              className="px-2 py-1 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-200 rounded-xl transition flex items-center gap-1 active:scale-95"
-              title={`Árbol de Habilidades RPG: Nivel ${skillTreeProfile.level} (${skillTreeProfile.title})`}
-            >
-              <Award className="w-3.5 h-3.5 text-amber-300" />
-              <span className="text-[10px] font-mono font-bold">Nv.{skillTreeProfile.level}</span>
-            </button>
-
-            {/* Botón Compartir Progreso */}
-            <button
-              onClick={() => {
-                haptics.tap();
-                setShowShareSnapshotModal(true);
-              }}
-              className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl transition active:scale-95"
-              title="Compartir tarjeta de disciplina"
-            >
-              <Share2 className="w-3.5 h-3.5 text-slate-300" />
-            </button>
-
-            {/* Botón SOS Rápido de Pánico & Ansiedad */}
+          {/* Acciones Rápidas Unificadas: SOS Calma + Sincronización + Perfil */}
+          <div className="flex items-center gap-2">
+            {/* Botón SOS Calma & Pánico */}
             <button
               onClick={() => {
                 haptics.impact();
                 setShowSOSGroundingModal(true);
               }}
-              className="px-2 py-1 bg-red-950/80 hover:bg-red-900 border border-red-700/60 text-red-300 rounded-xl transition flex items-center gap-1 active:scale-95"
-              title="SOS Ansiedad & Pánico (Aterrizaje 5-4-3-2-1)"
+              className="px-3 py-1.5 bg-red-950/50 hover:bg-red-900/70 border border-red-500/40 text-red-200 rounded-full transition flex items-center gap-1.5 active:scale-95 text-xs font-bold shadow-[0_0_10px_rgba(239,68,68,0.15)]"
+              title="SOS Ansiedad & Pánico (Aterrizaje sensorial 5-4-3-2-1)"
             >
-              <ShieldAlert className="w-3.5 h-3.5 text-red-400 animate-pulse" />
-              <span className="text-[10px] font-bold">SOS</span>
+              <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+              <span className="hidden xs:inline">SOS Calma</span>
             </button>
 
-            {/* Indicador de Notificaciones */}
-            <button 
-              onClick={requestNotificationPermission}
-              className={`p-1.5 rounded-xl border transition ${
-                notificationPermission === 'granted' 
-                  ? 'bg-slate-900 border-emerald-800/60 text-emerald-400' 
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-              }`}
-              title={notificationPermission === 'granted' ? 'Notificaciones activas' : 'Activar notificaciones'}
-            >
-              {notificationPermission === 'granted' ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
-            </button>
-
-            {authToken ? (
-              <button onClick={handleLogout} className="p-1.5 text-slate-500 hover:text-red-400">
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <button onClick={() => { setShowAuthModal(true); setIsRegister(false); }} className="text-slate-300 hover:text-white font-semibold text-[11px] px-2 py-1 bg-slate-900 border border-slate-800 rounded-xl">
-                Entrar
-              </button>
-            )}
-
-            {/* Indicador y Botón de Sincronización Local-First */}
+            {/* Indicador de Sincronización Offline/Online Compacto */}
             <button
               onClick={() => triggerManualSync(true)}
               disabled={isSyncing}
-              className={`flex items-center gap-1 px-2 py-1 rounded-xl border text-[11px] font-semibold transition ${
+              className={`p-1.5 rounded-full border transition flex items-center justify-center ${
                 !isOnline
-                  ? 'bg-amber-950/70 border-amber-800/80 text-amber-300 hover:bg-amber-900/60'
+                  ? 'bg-amber-950/70 border-amber-800/80 text-amber-300'
                   : pendingSyncCount > 0
-                    ? 'bg-indigo-950/80 border-indigo-700 text-indigo-300 hover:bg-indigo-900/70'
-                    : 'bg-slate-900 border-slate-800 text-emerald-400 hover:border-emerald-800/60'
+                    ? 'bg-indigo-950/80 border-indigo-700 text-indigo-300'
+                    : 'bg-slate-900/80 border-white/[0.08] text-emerald-400'
               }`}
-              title={
-                !isOnline
-                  ? `Modo Local Offline (${pendingSyncCount} cambios pendientes). Toca para sincronizar si encendiste el servidor.`
-                  : pendingSyncCount > 0
-                    ? `${pendingSyncCount} cambios pendientes por sincronizar. Toca para enviar ahora.`
-                    : 'Conectado y sincronizado con el servidor.'
-              }
+              title={!isOnline ? 'Modo Local Offline. Toca para sincronizar.' : 'Conectado'}
             >
               {isSyncing ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
@@ -2224,26 +2117,25 @@ export default function App() {
               ) : (
                 <Cloud className="w-3.5 h-3.5 text-emerald-400" />
               )}
-              <span className="hidden sm:inline">
-                {isSyncing
-                  ? 'Sincronizando...'
-                  : !isOnline
-                    ? 'Modo Local'
-                    : 'En línea'}
-              </span>
-              {pendingSyncCount > 0 && (
-                <span className="bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full ml-0.5">
-                  {pendingSyncCount}
-                </span>
-              )}
             </button>
 
+            {/* Perfil & Nivel */}
             <button 
-              onClick={() => fetchData(true)} 
-              className="p-1.5 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition"
-              title="Recargar datos del servidor"
+              onClick={() => {
+                if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+                  requestNotificationPermission();
+                }
+                setShowCoachModal(true);
+              }}
+              className="flex items-center gap-1.5 p-1 bg-slate-900/80 hover:bg-slate-800 border border-white/[0.08] text-slate-200 rounded-full transition active:scale-95"
+              title="Mi Perfil, Nivel RPG y Ajustes"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-600 to-emerald-500 flex items-center justify-center text-xs font-bold text-white shadow-sm">
+                {currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : '🧘'}
+              </div>
+              <span className="text-[10px] font-bold text-slate-300 pr-2 hidden sm:inline">
+                Nv.{skillTreeProfile.level}
+              </span>
             </button>
           </div>
         </div>
@@ -2320,31 +2212,6 @@ export default function App() {
             </div>
           </div>
         )}
-
-        {/* Frase Motivacional Destacada y Completa (Sin recortar) */}
-        <div className="max-w-2xl mx-auto mt-2 px-0.5">
-          <div 
-            onClick={changeQuote}
-            className="group bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 hover:border-slate-700 border border-slate-800 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-3 cursor-pointer transition shadow-sm"
-            title="Toca para rotar la frase motivacional"
-          >
-            <div className="flex items-start gap-2.5 flex-1 min-w-0">
-              <span className="text-amber-400 text-base font-serif font-black leading-none shrink-0 mt-0.5">“</span>
-              <div className="flex-1">
-                <p className="text-xs text-slate-200 italic font-medium leading-relaxed">
-                  {motivationalQuotes[currentQuoteIndex].quote}
-                </p>
-                <span className="text-[10px] text-amber-400/90 font-semibold block mt-1 tracking-wide">
-                  — {motivationalQuotes[currentQuoteIndex].author}
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-1 shrink-0 pl-1 border-l border-slate-800">
-              <RefreshCw className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-400 group-hover:rotate-180 transition-transform duration-500" />
-              <span className="text-[9px] text-slate-500 font-mono hidden sm:inline">rotar</span>
-            </div>
-          </div>
-        </div>
       </header>
 
       {/* Alerta Flotante Estilo Notificación de Sistema (In-App Push Banner con Acción Táctica) */}
@@ -2429,55 +2296,175 @@ export default function App() {
             
             {/* Si el usuario NO ha entrado dentro de un plan -> VISTA DE RESUMEN DIARIO O COLECCIÓN DE PLANES */}
             {!selectedPlanName && (
-              <div className="space-y-3.5">
-                {/* Cabecera con selector de modo: Resumen Directo vs Carpetas de Planes */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 surface-depth p-4 rounded-3xl border border-white/[0.08] shadow-lg">
-                  <div>
-                    <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                      <CheckSquare className="w-4 h-4 text-emerald-400" />
-                      {todayViewMode === 'checklist' ? 'Resumen de Hoy' : 'Mis Planes y Programas'}
-                    </h2>
-                    <p className="text-xs text-slate-400">
-                      {todayViewMode === 'checklist' 
-                        ? `${habits.filter(h => !h.today_log?.completed).length} pendientes · ~${pendingEstimatedMinutes} min restantes`
-                        : 'Organizado por carpetas y disciplinas'}
-                    </p>
-                  </div>
+              <div className="space-y-4">
+                {/* 1. SANTUARIO HERO: Bienvenida humana, estado de calma y acciones clave en UNA sola tarjeta orgánica con profundidad real */}
+                <div className="healthy-card p-5 sm:p-6 rounded-[28px] relative overflow-hidden">
+                  {/* Sutil aura ambiental interior */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-                  {/* Switcher entre Resumen Directo, Vista por Planes y Botón + Nuevo Hábito */}
-                  <div className="flex items-center gap-1.5 flex-wrap shrink-0 self-start sm:self-auto">
-                    <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
-                      <button
-                        onClick={() => setTodayViewMode('checklist')}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
-                          todayViewMode === 'checklist'
-                            ? 'bg-emerald-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:text-slate-200'
-                        }`}
-                      >
-                        <ListChecks className="w-3.5 h-3.5" />
-                        <span>Resumen Directo</span>
-                      </button>
-                      <button
-                        onClick={() => setTodayViewMode('plans')}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
-                          todayViewMode === 'plans'
-                            ? 'bg-indigo-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:text-slate-200'
-                        }`}
-                      >
-                        <Layers className="w-3.5 h-3.5" />
-                        <span>Por Planes ({planSummaryList.length})</span>
-                      </button>
+                  {/* Saludo cálido y humano según la hora */}
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 relative z-10">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-950/70 border border-emerald-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                          <Sparkles className="w-3 h-3 text-emerald-400" />
+                          <span>Tu Espacio de Calma</span>
+                        </span>
+                        <span className="text-xs text-slate-400 font-medium">
+                          {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' })}
+                        </span>
+                      </div>
+                      <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                        {(() => {
+                          const hour = new Date().getHours();
+                          if (hour < 12) return 'Buenos días';
+                          if (hour < 19) return 'Buenas tardes';
+                          return 'Buenas noches';
+                        })()}, {currentUser?.username || 'amigo'} 🌿
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed max-w-md">
+                        {habits.filter(h => !h.today_log?.completed).length > 0 
+                          ? `Tienes ${habits.filter(h => !h.today_log?.completed).length} hábitos pendientes (~${pendingEstimatedMinutes} min). Respira hondo y atiende uno a la vez con serenidad.`
+                          : '¡Completaste todos tus hábitos de hoy! Momento ideal para agradecer y descansar.'}
+                      </p>
                     </div>
 
+                    {/* Botones de Acción Primaria */}
+                    <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 mt-2 sm:mt-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          haptics.tap();
+                          setShowFocusModal(true);
+                        }}
+                        className="shimmer-badge bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-emerald-950/50 transition flex items-center gap-2 active:scale-95"
+                        title="Iniciar sesión guiada de respiración y enfoque con audio 528Hz"
+                      >
+                        <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                        <span>Enfoque Guiado</span>
+                      </button>
+
+                      <button
+                        onClick={() => openCreateHabitModal()}
+                        className="bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-2.5 rounded-2xl border border-white/[0.08] transition flex items-center gap-1.5 active:scale-95"
+                        title="Crear un nuevo hábito o rutina saludable"
+                      >
+                        <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>+ Hábito</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Barra de progreso de bienestar sutil y elegante */}
+                  <div className="mt-5 pt-4 border-t border-white/[0.08] flex flex-col gap-2 relative z-10">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-300 font-medium flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                        Progreso saludable: <strong className="text-white font-mono">{completedCount} de {habits.length} hábitos</strong>
+                      </span>
+                      <span className="text-emerald-400 font-bold font-mono">
+                        {habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-950/60 h-2 rounded-full overflow-hidden p-0.5 border border-white/[0.05]">
+                      <div 
+                        className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_8px_rgba(16,185,129,0.4)]"
+                        style={{ width: `${habits.length > 0 ? (completedCount / habits.length) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Frase / Cita de Calma integrada de forma suave */}
+                  <div 
+                    onClick={changeQuote}
+                    className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between gap-3 text-xs text-slate-400 cursor-pointer group/quote hover:text-slate-300 transition select-none"
+                    title="Toca para leer otra reflexión"
+                  >
+                    <p className="italic line-clamp-1 flex-1">
+                      “{motivationalQuotes[currentQuoteIndex].quote}” — <span className="text-amber-400/90 font-medium not-italic">{motivationalQuotes[currentQuoteIndex].author}</span>
+                    </p>
+                    <RefreshCw className="w-3 h-3 text-slate-500 group-hover/quote:text-amber-400 group-hover/quote:rotate-180 transition-transform duration-500 shrink-0" />
+                  </div>
+                </div>
+
+                {/* 2. BARRA DE FILTROS Y BÚSQUEDA LIMPIA */}
+                <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
+                  <div className="flex items-center gap-1.5 bg-slate-900/60 p-1 rounded-2xl border border-white/[0.06] backdrop-blur-md">
                     <button
-                      onClick={() => openCreateHabitModal()}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
-                      title="Crear un nuevo hábito o plan manual"
+                      onClick={() => setTodayFilter('pending')}
+                      className={`text-xs px-3 py-1.5 rounded-xl font-bold transition active:scale-95 ${
+                        todayFilter === 'pending'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>+ Nuevo Hábito</span>
+                      Pendientes ({habits.filter(h => !h.today_log?.completed).length})
+                    </button>
+                    <button
+                      onClick={() => setTodayFilter('all')}
+                      className={`text-xs px-3 py-1.5 rounded-xl font-bold transition active:scale-95 ${
+                        todayFilter === 'all'
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Todos ({habits.length})
+                    </button>
+                    <button
+                      onClick={() => setTodayFilter('completed')}
+                      className={`text-xs px-3 py-1.5 rounded-xl font-bold transition active:scale-95 ${
+                        todayFilter === 'completed'
+                          ? 'bg-teal-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Completados ({habits.filter(h => h.today_log?.completed).length})
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Búsqueda discreta */}
+                    <div className="relative w-36 sm:w-44">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Buscar..."
+                        className="w-full bg-slate-900/60 border border-white/[0.06] rounded-xl pl-8 pr-6 py-1 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition backdrop-blur-md"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs"
+                        >✕</button>
+                      )}
+                    </div>
+
+                    {/* Toggle de Agrupar */}
+                    <button
+                      onClick={() => setGroupByPlan(!groupByPlan)}
+                      className={`p-1.5 rounded-xl border transition flex items-center justify-center text-xs ${
+                        groupByPlan
+                          ? 'bg-emerald-950/70 border-emerald-600/70 text-emerald-300'
+                          : 'bg-slate-900/60 border-white/[0.06] text-slate-400 hover:text-white'
+                      }`}
+                      title="Alternar entre ver por carpetas o lista continua"
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Toggle entre Lista Directa y Vista por Programas */}
+                    <button
+                      onClick={() => setTodayViewMode(todayViewMode === 'checklist' ? 'plans' : 'checklist')}
+                      className={`p-1.5 rounded-xl border transition flex items-center justify-center text-xs ${
+                        todayViewMode === 'plans'
+                          ? 'bg-indigo-950/70 border-indigo-600/70 text-indigo-300'
+                          : 'bg-slate-900/60 border-white/[0.06] text-slate-400 hover:text-white'
+                      }`}
+                      title={todayViewMode === 'checklist' ? "Ver por Programas" : "Ver Lista Directa"}
+                    >
+                      <ListChecks className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -2487,139 +2474,6 @@ export default function App() {
                 {/* ======================================================== */}
                 {todayViewMode === 'checklist' && (
                   <div className="space-y-3">
-                    {/* Filtros de estado y Toggle de Agrupación */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <button
-                          onClick={() => setTodayFilter('pending')}
-                          className={`text-xs px-2.5 py-1 rounded-lg font-bold border transition ${
-                            todayFilter === 'pending'
-                              ? 'bg-amber-950/80 border-amber-500/80 text-amber-300'
-                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Pendientes ({habits.filter(h => !h.today_log?.completed).length})
-                        </button>
-                        <button
-                          onClick={() => setTodayFilter('all')}
-                          className={`text-xs px-2.5 py-1 rounded-lg font-bold border transition ${
-                            todayFilter === 'all'
-                              ? 'bg-indigo-950/80 border-indigo-500/80 text-indigo-300'
-                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Todos ({habits.length})
-                        </button>
-                        <button
-                          onClick={() => setTodayFilter('completed')}
-                          className={`text-xs px-2.5 py-1 rounded-lg font-bold border transition ${
-                            todayFilter === 'completed'
-                              ? 'bg-emerald-950/80 border-emerald-500/80 text-emerald-300'
-                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Listos ({habits.filter(h => h.today_log?.completed).length})
-                        </button>
-                      </div>
-
-                      {/* === MEJORA: Barra de Búsqueda Rápida === */}
-                      <div className="w-full">
-                        <div className="relative">
-                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                          <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Buscar tarea..."
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-8 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500/60 placeholder:text-slate-600 transition"
-                          />
-                          {searchQuery && (
-                            <button
-                              onClick={() => setSearchQuery('')}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs"
-                            >✕</button>
-                          )}
-                        </div>
-                      </div>
-
-                    {/* Barra de Acciones Clave: Modo Enfoque Táctico y Escudo SLA */}
-                    <div className="flex items-center justify-between gap-2 p-2.5 bg-gradient-to-r from-indigo-950/70 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-2xl shadow-sm">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 ${
-                          (metrics?.habits_meeting_sla_percent ?? 100) >= 80 
-                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80' 
-                            : 'bg-amber-950 text-amber-300 border border-amber-800/80'
-                        }`}>
-                          <span>🛡️ Escudo SLA</span>
-                          <span>{metrics?.habits_meeting_sla_percent ?? 100}%</span>
-                        </span>
-                        <span className="text-[11px] text-slate-300 truncate hidden sm:inline">
-                          {(metrics?.habits_meeting_sla_percent ?? 100) >= 80 ? 'Sistema saludable' : 'Hábitos en riesgo'}
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          haptics.tap();
-                          setShowFocusModal(true);
-                        }}
-                        className="shimmer-badge bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-black px-4 min-h-[44px] rounded-2xl shadow-lg shadow-emerald-950/40 transition flex items-center gap-2 active:scale-95 shrink-0"
-                        title="Abrir estación guiada de ejecución paso a paso con timer y audio 528Hz"
-                      >
-                        <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
-                        <span>Sesión de Enfoque</span>
-                      </button>
-                    </div>
-
-                    {/* === MEJORA: Resumen de Tiempo Estimado === */}
-                    {habits.length > 0 && (
-                      <div className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl p-2 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <Clock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between text-[10px] mb-1">
-                              <span className="text-slate-400">Tiempo del día</span>
-                              <span className="font-mono font-bold text-slate-200">{completedEstimatedMinutes} / {totalEstimatedMinutes} min</span>
-                            </div>
-                            <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                              <div 
-                                className="bg-gradient-to-r from-indigo-500 to-emerald-500 h-full rounded-full transition-all duration-500"
-                                style={{ width: `${totalEstimatedMinutes > 0 ? Math.round((completedEstimatedMinutes / totalEstimatedMinutes) * 100) : 0}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        {streakData.current > 0 && (
-                          <div className="flex items-center gap-1 bg-amber-950/60 border border-amber-800/50 px-2 py-1 rounded-lg shrink-0">
-                            <Flame className="w-3 h-3 text-amber-400" />
-                            <span className="text-[10px] font-black text-amber-300 font-mono">{streakData.current}d</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                      <div className="flex items-center justify-between sm:justify-end gap-2">
-                        {/* Toggle de Agrupar por Plan */}
-                        <button
-                          onClick={() => setGroupByPlan(!groupByPlan)}
-                          className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border transition flex items-center gap-1.5 ${
-                            groupByPlan
-                              ? 'bg-indigo-950/70 border-indigo-700/80 text-indigo-300'
-                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                          }`}
-                          title="Alternar entre ver agrupado por programas o lista continua"
-                        >
-                          <Layers className="w-3 h-3" />
-                          <span>{groupByPlan ? 'Agrupado por Plan' : 'Lista Plana'}</span>
-                        </button>
-
-                        <span className="text-[11px] font-mono text-slate-400">
-                          {metrics?.today_compliance_percent || 0}%
-                        </span>
-                      </div>
-                    </div>
-
                     {/* VISTA 1: AGRUPADA POR PLAN/CATEGORÍA CON ACORDEÓN */}
                     {groupByPlan ? (
                       <div className="space-y-4">
@@ -2683,25 +2537,25 @@ export default function App() {
                                       <div
                                         key={habit.id}
                                         id={`habit-card-${habit.id}`}
-                                        className={`p-3.5 rounded-2xl border flex flex-col gap-2.5 relative overflow-hidden surface-interactive ${
-                                          highlightedHabitId === habit.id ? 'animate-habit-highlight ring-2 ring-amber-500' : ''
+                                        className={`p-4 rounded-3xl border flex flex-col gap-3 relative overflow-hidden healthy-card-interactive ${
+                                          highlightedHabitId === habit.id ? 'animate-habit-highlight ring-2 ring-emerald-400' : ''
                                         } ${
                                           isCompleted
-                                            ? 'bg-gradient-to-r from-emerald-950/20 via-slate-900/60 to-slate-950/80 border-emerald-500/30 shadow-[0_2px_12px_rgba(16,185,129,0.08)]'
-                                            : 'surface-depth hover:border-indigo-500/40'
+                                            ? 'bg-emerald-950/20 border-emerald-500/20 opacity-80'
+                                            : 'healthy-card'
                                         }`}
                                       >
                                         <div className="flex items-start justify-between gap-3">
-                                          <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                                          <div className="flex items-start gap-3 flex-1 min-w-0">
                                             <button
                                               onClick={() => toggleHabit(habit)}
-                                              className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition active:scale-90"
+                                              className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition active:scale-80 p-0.5"
                                               aria-label={isCompleted ? "Marcar incompleto" : "Completar tarea"}
                                             >
                                               {isCompleted ? (
-                                                <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950 animate-check-pop" />
+                                                <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950/80 animate-check-pop" />
                                               ) : (
-                                                <Circle className="w-5 h-5 text-slate-500 hover:text-white" />
+                                                <Circle className="w-5 h-5 text-slate-500 hover:text-emerald-300 transition-colors" />
                                               )}
                                             </button>
 
@@ -2709,27 +2563,27 @@ export default function App() {
                                               onClick={() => setSelectedDetailHabit(habit)}
                                               className="flex-1 min-w-0 cursor-pointer group/item select-none"
                                             >
-                                              <div className="flex items-center gap-1.5 flex-wrap">
-                                                <h4 className={`text-xs sm:text-sm font-semibold leading-snug group-hover/item:text-indigo-300 transition ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                                              <div className="flex items-center gap-2 flex-wrap">
+                                                <h4 className={`text-sm font-semibold leading-snug group-hover/item:text-emerald-300 transition ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-100'}`}>
                                                   {title}
                                                 </h4>
                                                 {habit.reminder_time && (
-                                                  <span className="text-[10px] font-mono text-amber-300 bg-amber-950/80 border border-amber-800/60 px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                                                    <Bell className="w-2.5 h-2.5 text-amber-400" />
+                                                  <span className="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                    <Bell className="w-2.5 h-2.5 text-emerald-400" />
                                                     <span>{habit.reminder_time}</span>
                                                   </span>
                                                 )}
                                                 {habit.estimated_minutes ? (
-                                                  <span className="text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
-                                                    <Clock className="w-2.5 h-2.5 text-indigo-400" />
-                                                    <span>~{habit.estimated_minutes}m</span>
+                                                  <span className="text-[10px] font-mono text-slate-300 bg-slate-900/80 border border-white/[0.06] px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                    <Clock className="w-2.5 h-2.5 text-teal-400" />
+                                                    <span>~{habit.estimated_minutes} min</span>
                                                   </span>
                                                 ) : null}
-                                                <Info className="w-3 h-3 text-slate-500 opacity-0 group-hover/item:opacity-100 transition shrink-0" />
+                                                <Info className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover/item:opacity-100 transition shrink-0" />
                                               </div>
                                               {habit.description && (
-                                                <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1 group-hover/item:text-slate-300">
-                                                  💡 {habit.description}
+                                                <p className="text-xs text-slate-400 mt-1 line-clamp-1 group-hover/item:text-slate-300">
+                                                  {habit.description}
                                                 </p>
                                               )}
                                             </div>
@@ -2737,17 +2591,6 @@ export default function App() {
 
                                           {/* Controles de registro rápido */}
                                           <div className="shrink-0 flex items-center gap-1.5">
-                                            {/* Botón directo de 10 Metas para tareas de Brian Tracy */}
-                                            {(habit.title.toLowerCase().includes('brian tracy') || habit.title.toLowerCase().includes('10 meta') || habit.title.toLowerCase().includes('fórmula 3p')) && (
-                                              <button
-                                                onClick={() => setShowGoalsModal(true)}
-                                                className="bg-amber-950/80 hover:bg-amber-900 border border-amber-700/60 text-amber-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm active:scale-95"
-                                                title="Consultar las 10 metas oficiales de referencia"
-                                              >
-                                                <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-                                                <span>10 Metas</span>
-                                              </button>
-                                            )}
 
                                             {/* Botón de Guía Visual Interactiva de Respiración si corresponde */}
                                             {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
@@ -2865,23 +2708,23 @@ export default function App() {
                             return (
                               <div
                                 key={habit.id}
-                                className={`p-3.5 rounded-2xl border flex flex-col gap-2.5 relative overflow-hidden surface-interactive ${
+                                className={`p-4 rounded-3xl border flex flex-col gap-3 relative overflow-hidden healthy-card-interactive ${
                                   isCompleted
-                                    ? 'bg-gradient-to-r from-emerald-950/20 via-slate-900/60 to-slate-950/80 border-emerald-500/30 shadow-[0_2px_12px_rgba(16,185,129,0.08)]'
-                                    : 'surface-depth hover:border-indigo-500/40'
+                                    ? 'bg-emerald-950/20 border-emerald-500/20 opacity-80'
+                                    : 'healthy-card'
                                 }`}
                               >
                                 <div className="flex items-start justify-between gap-3">
-                                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                                  <div className="flex items-start gap-3 flex-1 min-w-0">
                                     <button
                                       onClick={() => toggleHabit(habit)}
-                                      className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition active:scale-90"
+                                      className="mt-0.5 shrink-0 text-slate-400 hover:text-emerald-400 transition active:scale-80 p-0.5"
                                       title={isCompleted ? 'Marcar incompleto' : 'Completar hábito'}
                                     >
                                       {isCompleted ? (
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950 animate-check-pop" />
+                                        <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-950/80 animate-check-pop" />
                                       ) : (
-                                        <Circle className="w-5 h-5 text-slate-500 hover:text-white" />
+                                        <Circle className="w-5 h-5 text-slate-500 hover:text-emerald-300 transition-colors" />
                                       )}
                                     </button>
 
@@ -2890,28 +2733,28 @@ export default function App() {
                                       className="flex-1 min-w-0 cursor-pointer group/flat select-none"
                                     >
                                       <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-slate-950 border border-slate-800 text-indigo-400 truncate max-w-[140px]">
+                                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-900/80 border border-white/[0.06] text-emerald-400 truncate max-w-[140px]">
                                           {planName}
                                         </span>
                                         {habit.estimated_minutes ? (
-                                          <span className="text-[10px] font-mono text-slate-400 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                                            <Clock className="w-2.5 h-2.5 text-indigo-400" />
-                                            <span>~{habit.estimated_minutes}m</span>
+                                          <span className="text-[10px] font-mono text-slate-300 bg-slate-900/80 border border-white/[0.06] px-2 py-0.5 rounded-full flex items-center gap-1">
+                                            <Clock className="w-2.5 h-2.5 text-teal-400" />
+                                            <span>~{habit.estimated_minutes} min</span>
                                           </span>
                                         ) : null}
                                         {habit.unit === 'series' && (
-                                          <span className="text-[10px] font-mono text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">
+                                          <span className="text-[10px] font-mono text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-900/50">
                                             {currentVal}/{targetVal} {habit.unit}
                                           </span>
                                         )}
-                                        <Info className="w-3 h-3 text-slate-500 opacity-0 group-hover/flat:opacity-100 transition shrink-0 ml-auto" />
+                                        <Info className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover/flat:opacity-100 transition shrink-0 ml-auto" />
                                       </div>
-                                      <h3 className={`text-xs sm:text-sm font-bold mt-1 leading-snug group-hover/flat:text-indigo-300 transition ${isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>
+                                      <h3 className={`text-sm font-semibold mt-1 leading-snug group-hover/flat:text-emerald-300 transition ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-100'}`}>
                                         {title}
                                       </h3>
                                       {habit.description && (
-                                        <p className="text-[11px] text-slate-400 mt-1 line-clamp-1 group-hover/flat:text-slate-300">
-                                          💡 {habit.description}
+                                        <p className="text-xs text-slate-400 mt-1 line-clamp-1 group-hover/flat:text-slate-300">
+                                          {habit.description}
                                         </p>
                                       )}
                                     </div>
@@ -2919,17 +2762,6 @@ export default function App() {
 
                                   {/* Acciones rápidas según tipo */}
                                   <div className="shrink-0 flex items-center gap-1.5">
-                                    {/* Botón directo de 10 Metas para tareas de Brian Tracy */}
-                                    {(habit.title.toLowerCase().includes('brian tracy') || habit.title.toLowerCase().includes('10 meta') || habit.title.toLowerCase().includes('fórmula 3p')) && (
-                                      <button
-                                        onClick={() => setShowGoalsModal(true)}
-                                        className="bg-amber-950/80 hover:bg-amber-900 border border-amber-700/60 text-amber-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm active:scale-95"
-                                        title="Consultar las 10 metas oficiales de referencia"
-                                      >
-                                        <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-                                        <span>10 Metas</span>
-                                      </button>
-                                    )}
 
                                     {/* Botón de Guía Visual Interactiva de Respiración si corresponde */}
                                     {(habit.title.toLowerCase().includes('respir') || habit.title.toLowerCase().includes('suspiro') || habit.title.toLowerCase().includes('coherencia') || habit.title.toLowerCase().includes('4-7-8') || habit.title.toLowerCase().includes('box')) && (
@@ -3584,24 +3416,24 @@ export default function App() {
 
       </main>
 
-      {/* Modern Floating Glass Dock (Concentric corners, high-depth blur, tactile scaling, indicator glow) */}
+      {/* Modern Floating Glass Dock (Concentric rounded-full, high-depth blur, serene labels) */}
       <nav className="fixed bottom-2 sm:bottom-4 inset-x-0 z-40 px-3 flex justify-center pointer-events-none safe-bottom pwa-standalone-nav">
-        <div className="w-full max-w-md bg-slate-950/85 backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.65)] pointer-events-auto grid grid-cols-5 gap-1">
+        <div className="w-full max-w-md bg-slate-950/80 backdrop-blur-2xl border border-white/[0.08] rounded-full p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.65)] pointer-events-auto grid grid-cols-5 gap-1">
           <button 
             onClick={() => {
               haptics.tap();
               setActiveTab('today');
               setSelectedPlanName(null);
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'today' 
-                ? 'bg-indigo-600/25 text-indigo-200 font-bold border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.25)]' 
+                ? 'bg-emerald-600/25 text-emerald-200 font-bold border border-emerald-400/40 shadow-[0_0_15px_rgba(16,185,129,0.25)]' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
-            <Dumbbell className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'today' ? 'scale-110 text-indigo-400' : ''}`} />
-            <span className="text-[10px] tracking-tight leading-none">Hoy</span>
-            {activeTab === 'today' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />}
+            <Dumbbell className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'today' ? 'scale-110 text-emerald-400' : ''}`} />
+            <span className="text-[10px] tracking-tight leading-none font-medium">Hoy</span>
+            {activeTab === 'today' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />}
           </button>
 
           <button 
@@ -3609,14 +3441,14 @@ export default function App() {
               haptics.tap();
               setActiveTab('ansiedad');
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'ansiedad' 
                 ? 'bg-teal-600/25 text-teal-200 font-bold border border-teal-400/40 shadow-[0_0_15px_rgba(20,184,166,0.25)]' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
             <Brain className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'ansiedad' ? 'scale-110 text-teal-400' : 'text-teal-400'}`} />
-            <span className="text-[10px] tracking-tight leading-none">Ansiedad</span>
+            <span className="text-[10px] tracking-tight leading-none font-medium">Ansiedad</span>
             {activeTab === 'ansiedad' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-teal-400 shadow-[0_0_6px_#2dd4bf]" />}
           </button>
 
@@ -3625,14 +3457,14 @@ export default function App() {
               haptics.tap();
               setActiveTab('calendar');
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'calendar' 
                 ? 'bg-indigo-600/25 text-indigo-200 font-bold border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.25)]' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
             <Calendar className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'calendar' ? 'scale-110 text-indigo-400' : ''}`} />
-            <span className="text-[10px] tracking-tight leading-none">Racha & SLA</span>
+            <span className="text-[10px] tracking-tight leading-none font-medium">Progreso</span>
             {activeTab === 'calendar' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />}
           </button>
 
@@ -3641,14 +3473,14 @@ export default function App() {
               haptics.tap();
               setActiveTab('vision');
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'vision' 
                 ? 'bg-amber-600/25 text-amber-200 font-bold border border-amber-400/40 shadow-[0_0_15px_rgba(245,158,11,0.25)]' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
             <Compass className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'vision' ? 'scale-110 text-amber-400' : ''}`} />
-            <span className="text-[10px] tracking-tight leading-none">Vision</span>
+            <span className="text-[10px] tracking-tight leading-none font-medium">Visión</span>
             {activeTab === 'vision' && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-amber-400 shadow-[0_0_6px_#fbbf24]" />}
           </button>
 
@@ -3657,14 +3489,14 @@ export default function App() {
               haptics.tap();
               setActiveTab('programs');
             }}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-180 active:scale-90 select-none relative ${
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-full transition-all duration-180 active:scale-90 select-none relative ${
               activeTab === 'programs' || activeTab === 'inject' 
                 ? 'bg-indigo-600/25 text-indigo-200 font-bold border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.25)]' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
             }`}
           >
             <Layers className={`w-4 h-4 transition-transform duration-180 ${activeTab === 'programs' || activeTab === 'inject' ? 'scale-110 text-indigo-400' : ''}`} />
-            <span className="text-[10px] tracking-tight leading-none">Catálogo</span>
+            <span className="text-[10px] tracking-tight leading-none font-medium">Catálogo</span>
             {(activeTab === 'programs' || activeTab === 'inject') && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />}
           </button>
         </div>
