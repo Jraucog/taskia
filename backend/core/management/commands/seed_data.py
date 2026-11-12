@@ -166,6 +166,25 @@ class Command(BaseCommand):
         for it in detox_items:
             ProgramItem.objects.get_or_create(program=p_detox, title=it['title'], defaults=it)
 
+        # 6. Programa Impulse: Calma Mental & Reducción de Ansiedad
+        p_impulse, _ = Program.objects.get_or_create(
+            title='Protocolo Impulse: Calma Mental & Dominio de Ansiedad',
+            defaults={
+                'description': 'Sistema neurobiológico de regulación del sistema nervioso inspirado en Impulse Brain Training. Combina check-in de ansiedad, estimulación zen anti-rumia, suspiro fisiológico y aterrizaje sensorial 5-4-3-2-1.',
+                'category': 'Salud Mental & Bio-Hacking',
+                'duration_days': 14
+            }
+        )
+        impulse_items = [
+            {'title': 'Check-in Diario de Ansiedad & Calma Mental (Impulse Mood)', 'habit_type': 'boolean', 'target_value': 1.0, 'unit': '', 'day_offset': 0, 'description': 'Registrar en 10s el nivel de ansiedad y síntomas corporales'},
+            {'title': 'Mini-Juego Zen Anti-Rumia: 5 min de Bubble Pop o Color Flow', 'habit_type': 'numeric', 'target_value': 5.0, 'unit': 'min', 'day_offset': 0, 'description': 'Romper bucles de sobrepensar con mini-juegos cognitivos relajantes'},
+            {'title': 'Respiración Suspiro Fisiológico (Reset de Nervio Vago)', 'habit_type': 'numeric', 'target_value': 3.0, 'unit': 'min', 'day_offset': 0, 'description': 'Doble inhalación nasal rápida y exhalación bucal prolongada'},
+            {'title': 'Aterrizaje Sensorial 5-4-3-2-1 (Grounding SOS)', 'habit_type': 'boolean', 'target_value': 1.0, 'unit': '', 'day_offset': 0, 'description': 'Pausa de desconexión del estrés identificando sentidos físicos'},
+            {'title': 'Desconexión de Sobrecarga Digital Nocturna (0 Pantallas 45 min antes de dormir)', 'habit_type': 'boolean', 'target_value': 1.0, 'unit': '', 'day_offset': 0, 'description': 'Apagar notificaciones para descanso parasimpático'}
+        ]
+        for it in impulse_items:
+            ProgramItem.objects.get_or_create(program=p_impulse, title=it['title'], defaults=it)
+
         # Asignar sargento por defecto
         pref, _ = UserCoachPreference.objects.get_or_create(user=user)
         pref.coach = c1

@@ -746,5 +746,64 @@
         "estimated_minutes": 5
       }
     ]
+  },
+  {
+    "id": 13,
+    "title": "Protocolo Impulse: Calma Mental & Dominio de Ansiedad",
+    "description": "Sistema neurobiológico de regulación del sistema nervioso inspirado en Impulse Brain Training. Combina check-in de ansiedad, estimulación zen anti-rumia, suspiro fisiológico y aterrizaje sensorial 5-4-3-2-1 para reducir cortisol y mantener el enfoque de alto rendimiento.",
+    "category": "Salud Mental & Bio-Hacking",
+    "duration_days": 14,
+    "items": [
+      {
+        "id": 65,
+        "title": "Check-in Diario de Ansiedad & Calma Mental (Impulse Mood)",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Registrar en 10 segundos el nivel de ansiedad y síntomas corporales en el módulo de Ansiedad para monitorear tendencias.",
+        "estimated_minutes": 2
+      },
+      {
+        "id": 66,
+        "title": "Mini-Juego Zen Anti-Rumia: 5 min de Bubble Pop o Color Flow",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 5.0,
+        "unit": "min",
+        "description": "Romper bucles de sobrepensar con los mini-juegos cognitivos relajantes de Impulse y arpa 528Hz.",
+        "estimated_minutes": 5
+      },
+      {
+        "id": 67,
+        "title": "Respiración Suspiro Fisiológico (Reset de Nervio Vago)",
+        "day_offset": 0,
+        "habit_type": "numeric",
+        "target_value": 3.0,
+        "unit": "min",
+        "description": "Doble inhalación nasal rápida y exhalación bucal prolongada para colapsar taquicardia y picos de estrés.",
+        "estimated_minutes": 3
+      },
+      {
+        "id": 68,
+        "title": "Aterrizaje Sensorial 5-4-3-2-1 (Grounding SOS)",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Pausa de desconexión del estrés identificando 5 cosas que ves, 4 que tocas, 3 que escuchas, 2 que hueles y 1 gratitud.",
+        "estimated_minutes": 3
+      },
+      {
+        "id": 69,
+        "title": "Desconexión de Sobrecarga Digital Nocturna (0 Pantallas 45 min antes de dormir)",
+        "day_offset": 0,
+        "habit_type": "boolean",
+        "target_value": 1.0,
+        "unit": "",
+        "description": "Apagar notificaciones y pantallas para permitir la liberación de melatonina y descanso parasimpático.",
+        "estimated_minutes": 45
+      }
+    ]
   }
 ]

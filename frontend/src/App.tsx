@@ -9,7 +9,8 @@ import {
   Bell, BellOff, ShieldAlert, Compass, Edit3, Trash2, ListChecks,
   Wind, Info, Clock,
   Search, Users,
-  Cloud, CloudOff
+  Cloud, CloudOff,
+  Brain
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
@@ -56,6 +57,13 @@ import { AnkiInteractiveModal } from './components/AnkiInteractiveModal';
 import { VisionView } from './views/VisionView';
 import { CalendarView } from './views/CalendarView';
 import { ProgramsView } from './views/ProgramsView';
+import { AnxietyView } from './views/AnxietyView';
+import { ZenBubblePopGame } from './components/anxiety/ZenBubblePopGame';
+import { ColorHarmonyGame } from './components/anxiety/ColorHarmonyGame';
+import { ZenPathTracingGame } from './components/anxiety/ZenPathTracingGame';
+import { GroundingSOSModal } from './components/anxiety/GroundingSOSModal';
+import { AnxietyAssessmentModal } from './components/anxiety/AnxietyAssessmentModal';
+import { DailyAnxietyCheckInModal } from './components/anxiety/DailyAnxietyCheckInModal';
 
 const API_BASE = import.meta.env.VITE_API_URL 
   || (window.location.hostname.includes('trycloudflare.com')
@@ -92,7 +100,7 @@ export default function App() {
   const [pendingSyncCount, setPendingSyncCount] = useState<number>(() => getPendingSyncQueue().length);
   
   // Navegación principal
-  const [activeTab, setActiveTab] = useState<'today' | 'calendar' | 'programs' | 'vision' | 'inject'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'ansiedad' | 'calendar' | 'programs' | 'vision' | 'inject'>('today');
 
   // Estado de navegación tipo carpeta: entrar dentro de un plan
   const [selectedPlanName, setSelectedPlanName] = useState<string | null>(null);
@@ -340,6 +348,15 @@ export default function App() {
   // Modal Interactivo de Inglés Método Anki (Spaced Repetition & Active Recall)
   const [activeAnkiHabit, setActiveAnkiHabit] = useState<Habit | null>(null);
   const [showAnkiModal, setShowAnkiModal] = useState<boolean>(false);
+
+  // Modales Interactivos de Ansiedad, Salud Mental & Juegos Zen (Estilo Impulse)
+  const [activeZenHabit, setActiveZenHabit] = useState<Habit | null>(null);
+  const [showBubblePopModal, setShowBubblePopModal] = useState<boolean>(false);
+  const [showColorHarmonyModal, setShowColorHarmonyModal] = useState<boolean>(false);
+  const [showZenTracingModal, setShowZenTracingModal] = useState<boolean>(false);
+  const [showSOSGroundingModal, setShowSOSGroundingModal] = useState<boolean>(false);
+  const [showAssessmentModal, setShowAssessmentModal] = useState<boolean>(false);
+  const [showAnxietyCheckInModal, setShowAnxietyCheckInModal] = useState<boolean>(false);
 
   // Modal para inspeccionar plantilla en el Catálogo antes de inscribir
   const [previewProgram, setPreviewProgram] = useState<Program | null>(null);
@@ -1383,6 +1400,36 @@ export default function App() {
     setTimeout(() => setIslandExpanded(false), 4500);
   };
 
+  const startZenSession = (
+    habit: Habit, 
+    gameType: 'bubble_pop' | 'color_flow' | 'zen_trace' | 'grounding' | 'assessment' | 'checkin' = 'bubble_pop'
+  ) => {
+    setActiveZenHabit(habit);
+    if (gameType === 'bubble_pop') setShowBubblePopModal(true);
+    else if (gameType === 'color_flow') setShowColorHarmonyModal(true);
+    else if (gameType === 'zen_trace') setShowZenTracingModal(true);
+    else if (gameType === 'grounding') setShowSOSGroundingModal(true);
+    else if (gameType === 'assessment') setShowAssessmentModal(true);
+    else if (gameType === 'checkin') setShowAnxietyCheckInModal(true);
+  };
+
+  const handleCompleteZenSession = (targetHabit?: Habit | null, label = 'Sesión Zen completada') => {
+    const habit = targetHabit || activeZenHabit;
+    if (habit) {
+      if (habit.habit_type === 'numeric') {
+        const currentVal = habit.today_log?.value || 0;
+        const stepDelta = Math.max(1, habit.target_value - currentVal);
+        logSeriesStep(habit.id, stepDelta);
+      } else if (!habit.today_log?.completed) {
+        toggleHabit(habit);
+      }
+    }
+    triggerCelebration();
+    setIslandMessage(`🧠 ¡${label}! Sistema nervioso regulado.`);
+    setIslandExpanded(true);
+    setTimeout(() => setIslandExpanded(false), 4500);
+  };
+
   const confirmBrianTracyCheck = async () => {
     if (!confirmingHabit) return;
 
@@ -2045,6 +2092,18 @@ export default function App() {
               </span>
             </button>
 
+            {/* Botón SOS Rápido de Pánico & Ansiedad */}
+            <button
+              onClick={() => {
+                haptics.impact();
+                setShowSOSGroundingModal(true);
+              }}
+              className="px-2 py-1 bg-red-950/80 hover:bg-red-900 border border-red-700/60 text-red-300 rounded-xl transition flex items-center gap-1 active:scale-95"
+              title="SOS Ansiedad & Pánico (Aterrizaje 5-4-3-2-1)"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+              <span className="text-[10px] font-bold">SOS</span>
+            </button>
 
             {/* Indicador de Notificaciones */}
             <button 
@@ -2643,6 +2702,30 @@ export default function App() {
                                               </button>
                                             )}
 
+                                            {/* Botón de Alivio Zen / Ansiedad Impulse */}
+                                            {(habit.title.toLowerCase().includes('ansiedad') || habit.title.toLowerCase().includes('zen') || habit.title.toLowerCase().includes('calma') || habit.title.toLowerCase().includes('estrés') || habit.title.toLowerCase().includes('estres') || habit.title.toLowerCase().includes('bubble') || habit.title.toLowerCase().includes('grounding') || habit.title.toLowerCase().includes('impulse')) && (
+                                              <button
+                                                onClick={() => {
+                                                  if (habit.title.toLowerCase().includes('check-in') || habit.title.toLowerCase().includes('checkin') || habit.title.toLowerCase().includes('mood')) {
+                                                    startZenSession(habit, 'checkin');
+                                                  } else if (habit.title.toLowerCase().includes('grounding') || habit.title.toLowerCase().includes('5-4-3-2-1')) {
+                                                    startZenSession(habit, 'grounding');
+                                                  } else if (habit.title.toLowerCase().includes('color') || habit.title.toLowerCase().includes('gradiente')) {
+                                                    startZenSession(habit, 'color_flow');
+                                                  } else if (habit.title.toLowerCase().includes('traz') || habit.title.toLowerCase().includes('path')) {
+                                                    startZenSession(habit, 'zen_trace');
+                                                  } else {
+                                                    startZenSession(habit, 'bubble_pop');
+                                                  }
+                                                }}
+                                                className="bg-teal-950/80 hover:bg-teal-900 border border-teal-600/60 text-teal-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                                title="Abrir Experiencia Zen Anti-Ansiedad Impulse"
+                                              >
+                                                <Brain className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
+                                                <span>Aliviar</span>
+                                              </button>
+                                            )}
+
                                             {habit.unit === 'series' || habit.habit_type === 'numeric' ? (
                                               <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
                                                 <button
@@ -2798,6 +2881,30 @@ export default function App() {
                                       >
                                         <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
                                         <span>Practicar</span>
+                                      </button>
+                                    )}
+
+                                    {/* Botón de Alivio Zen / Ansiedad Impulse */}
+                                    {(habit.title.toLowerCase().includes('ansiedad') || habit.title.toLowerCase().includes('zen') || habit.title.toLowerCase().includes('calma') || habit.title.toLowerCase().includes('estrés') || habit.title.toLowerCase().includes('estres') || habit.title.toLowerCase().includes('bubble') || habit.title.toLowerCase().includes('grounding') || habit.title.toLowerCase().includes('impulse')) && (
+                                      <button
+                                        onClick={() => {
+                                          if (habit.title.toLowerCase().includes('check-in') || habit.title.toLowerCase().includes('checkin') || habit.title.toLowerCase().includes('mood')) {
+                                            startZenSession(habit, 'checkin');
+                                          } else if (habit.title.toLowerCase().includes('grounding') || habit.title.toLowerCase().includes('5-4-3-2-1')) {
+                                            startZenSession(habit, 'grounding');
+                                          } else if (habit.title.toLowerCase().includes('color') || habit.title.toLowerCase().includes('gradiente')) {
+                                            startZenSession(habit, 'color_flow');
+                                          } else if (habit.title.toLowerCase().includes('traz') || habit.title.toLowerCase().includes('path')) {
+                                            startZenSession(habit, 'zen_trace');
+                                          } else {
+                                            startZenSession(habit, 'bubble_pop');
+                                          }
+                                        }}
+                                        className="bg-teal-950/80 hover:bg-teal-900 border border-teal-600/60 text-teal-300 font-bold text-xs px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                        title="Abrir Experiencia Zen Anti-Ansiedad Impulse"
+                                      >
+                                        <Brain className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
+                                        <span>Aliviar</span>
                                       </button>
                                     )}
 
@@ -3291,6 +3398,25 @@ export default function App() {
         )}
 
         {/* ======================================================== */}
+        {/* PESTAÑA: ANSIEDAD & CALMA MENTAL (IMPULSE ZEN) */}
+        {/* ======================================================== */}
+        {activeTab === 'ansiedad' && (
+          <AnxietyView
+            onOpenCheckIn={() => setShowAnxietyCheckInModal(true)}
+            onOpenAssessment={() => setShowAssessmentModal(true)}
+            onOpenBubblePop={() => setShowBubblePopModal(true)}
+            onOpenColorHarmony={() => setShowColorHarmonyModal(true)}
+            onOpenZenTracing={() => setShowZenTracingModal(true)}
+            onOpenSOSGrounding={() => setShowSOSGroundingModal(true)}
+            onOpenBreathing={() => {
+              const breathHabit = habits.find(h => h.title.toLowerCase().includes('respir') || h.title.toLowerCase().includes('suspiro'));
+              if (breathHabit) startBreathingSession(breathHabit);
+              else setShowSOSGroundingModal(true);
+            }}
+          />
+        )}
+
+        {/* ======================================================== */}
         {/* PESTAÑA 2: MATRIZ SEMANAL & SLA */}
         {/* ======================================================== */}
         {activeTab === 'calendar' && (
@@ -3371,8 +3497,9 @@ export default function App() {
       </main>
 
       {/* Bottom Navigation Bar Limpia, Táctil y Ergonómica (4 Secciones Esenciales con Hit Area de 48px y Haptics) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/90 px-2 sm:px-3 pt-1.5 pb-2 safe-bottom pwa-standalone-nav shadow-2xl">
-        <div className="max-w-md mx-auto grid grid-cols-4 gap-1">
+      {/* Bottom Navigation Bar Limpia, Táctil y Ergonómica (5 Secciones Esenciales con Hit Area de 48px y Haptics) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/90 px-1.5 sm:px-3 pt-1.5 pb-2 safe-bottom pwa-standalone-nav shadow-2xl">
+        <div className="max-w-md mx-auto grid grid-cols-5 gap-1">
           <button 
             onClick={() => {
               haptics.tap();
@@ -3385,6 +3512,19 @@ export default function App() {
           >
             <Dumbbell className="w-4 h-4" />
             <span className="text-[10px] tracking-tight leading-none">Hoy</span>
+          </button>
+
+          <button 
+            onClick={() => {
+              haptics.tap();
+              setActiveTab('ansiedad');
+            }}
+            className={`min-h-[48px] flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-xl transition active:scale-95 select-none ${
+              activeTab === 'ansiedad' ? 'bg-teal-950/70 text-teal-300 font-bold border border-teal-700/60 shadow-sm' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Brain className="w-4 h-4 text-teal-400" />
+            <span className="text-[10px] tracking-tight leading-none">Ansiedad</span>
           </button>
 
           <button 
@@ -3410,7 +3550,7 @@ export default function App() {
             }`}
           >
             <Compass className="w-4 h-4" />
-            <span className="text-[10px] tracking-tight leading-none">Vision Board</span>
+            <span className="text-[10px] tracking-tight leading-none">Vision</span>
           </button>
 
           <button 
@@ -3534,6 +3674,87 @@ export default function App() {
           setActiveAnkiHabit(null);
         }}
         onCompleteSession={handleCompleteAnkiSession}
+      />
+
+      {/* Modales de Ansiedad & Salud Mental (Impulse Style) */}
+      <ZenBubblePopGame
+        isOpen={showBubblePopModal}
+        onClose={() => {
+          setShowBubblePopModal(false);
+          setActiveZenHabit(null);
+        }}
+        onComplete={(popped) => {
+          handleCompleteZenSession(activeZenHabit, `¡${popped} preocupaciones disueltas!`);
+          setShowBubblePopModal(false);
+          setActiveZenHabit(null);
+        }}
+      />
+
+      <ColorHarmonyGame
+        isOpen={showColorHarmonyModal}
+        onClose={() => {
+          setShowColorHarmonyModal(false);
+          setActiveZenHabit(null);
+        }}
+        onComplete={(moves) => {
+          handleCompleteZenSession(activeZenHabit, `¡Armonía cromática completada en ${moves} pasos!`);
+          setShowColorHarmonyModal(false);
+          setActiveZenHabit(null);
+        }}
+      />
+
+      <ZenPathTracingGame
+        isOpen={showZenTracingModal}
+        onClose={() => {
+          setShowZenTracingModal(false);
+          setActiveZenHabit(null);
+        }}
+        onComplete={(cycles) => {
+          handleCompleteZenSession(activeZenHabit, `¡${cycles} órbitas zen completadas!`);
+          setShowZenTracingModal(false);
+          setActiveZenHabit(null);
+        }}
+      />
+
+      <GroundingSOSModal
+        isOpen={showSOSGroundingModal}
+        onClose={() => {
+          setShowSOSGroundingModal(false);
+          setActiveZenHabit(null);
+        }}
+        onComplete={() => {
+          handleCompleteZenSession(activeZenHabit, '¡Aterrizaje sensorial 5-4-3-2-1 completado!');
+          setShowSOSGroundingModal(false);
+          setActiveZenHabit(null);
+        }}
+      />
+
+      <AnxietyAssessmentModal
+        isOpen={showAssessmentModal}
+        onClose={() => {
+          setShowAssessmentModal(false);
+          setActiveZenHabit(null);
+        }}
+        onLaunchZenTool={(tool) => {
+          setShowAssessmentModal(false);
+          if (tool === 'bubble_pop') setShowBubblePopModal(true);
+          else if (tool === 'color_flow') setShowColorHarmonyModal(true);
+          else if (tool === 'zen_trace') setShowZenTracingModal(true);
+          else if (tool === 'grounding') setShowSOSGroundingModal(true);
+        }}
+      />
+
+      <DailyAnxietyCheckInModal
+        isOpen={showAnxietyCheckInModal}
+        onClose={() => {
+          setShowAnxietyCheckInModal(false);
+          setActiveZenHabit(null);
+        }}
+        onSaved={(log) => {
+          handleCompleteZenSession(activeZenHabit, `Check-in de ansiedad guardado (${log.score}/10)`);
+          setShowAnxietyCheckInModal(false);
+          setActiveZenHabit(null);
+        }}
       />
 
       <BreathingModal

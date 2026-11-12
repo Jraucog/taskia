@@ -24,4 +24,6 @@ export const haptics = {
   warning: () => triggerHaptic([40, 60, 40]),
   /** Gentle selection toggle */
   selection: () => triggerHaptic(20),
+  /** Tactile impact for popping bubbles, swapping tiles, or grounding checkpoints */
+  impact: () => triggerHaptic(28),
 };
