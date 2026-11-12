@@ -15,19 +15,33 @@ interface Bubble {
   pitchIndex: number;
 }
 
-const WORRIES_LIST = [
-  'Sobrepensar',
-  'Miedo al futuro',
-  'Prisa constante',
-  'Perfeccionismo',
-  'Querer controlar todo',
-  '¿Qué dirán?',
-  'Inseguridad',
-  'Plazos y urgencias',
-  'Sobrecarga mental',
-  'Comparación',
-  'Autoexigencia',
-  'Miedo a fallar'
+const POSITIVE_AFFIRMATIONS = [
+  'Paz interior',
+  'Calma profunda',
+  'Confianza plena',
+  'Mente clara',
+  'Aquí y ahora',
+  'Soy suficiente',
+  'Todo fluye',
+  'Fuerza serena',
+  'Gratitud',
+  'Respira hondo',
+  'Poder interior',
+  'Seguridad',
+  'Tranquilidad',
+  'Claridad',
+  'Equilibrio',
+  'Amor propio',
+  'Enfoque sereno',
+  'Aceptación',
+  'Luz y paz',
+  'Soy capaz',
+  'Armonía',
+  'Serenidad',
+  'Merezco paz',
+  'Confío en mí',
+  'Paso a paso',
+  'Todo está bien'
 ];
 
 const BUBBLE_COLORS = [
@@ -52,7 +66,7 @@ export const ZenBubblePopGame: React.FC<ZenBubblePopGameProps> = ({
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [poppedCount, setPoppedCount] = useState<number>(0);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-  const [mode, setMode] = useState<'free' | 'worries'>('worries');
+  const [mode, setMode] = useState<'free' | 'affirmations'>('affirmations');
   const [sessionSeconds, setSessionSeconds] = useState<number>(0);
   const nextIdRef = useRef<number>(1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,8 +80,8 @@ export const ZenBubblePopGame: React.FC<ZenBubblePopGameProps> = ({
     const colorClass = BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)];
     const speed = 0.4 + Math.random() * 0.6;
     const pitchIndex = Math.floor(Math.random() * 7);
-    const label = mode === 'worries' 
-      ? WORRIES_LIST[Math.floor(Math.random() * WORRIES_LIST.length)]
+    const label = mode === 'affirmations' 
+      ? POSITIVE_AFFIRMATIONS[Math.floor(Math.random() * POSITIVE_AFFIRMATIONS.length)]
       : undefined;
 
     return { id, x, y, size, label, colorClass, speed, pitchIndex };
@@ -195,7 +209,7 @@ export const ZenBubblePopGame: React.FC<ZenBubblePopGameProps> = ({
             <div className="text-left">
               <h3 className="text-sm font-bold text-white leading-tight">Zen Bubble Pop</h3>
               <p className="text-[11px] text-teal-400 font-medium">
-                {mode === 'worries' ? 'Disuelve tus preocupaciones' : 'Modo Calma Libre'}
+                {mode === 'affirmations' ? 'Integra afirmaciones de paz y fuerza' : 'Modo Calma Libre'}
               </p>
             </div>
           </div>
@@ -224,14 +238,14 @@ export const ZenBubblePopGame: React.FC<ZenBubblePopGameProps> = ({
           <div className="flex items-center justify-between text-xs mb-1.5">
             <div className="flex gap-1.5">
               <button
-                onClick={() => { setMode('worries'); haptics.selection(); }}
+                onClick={() => { setMode('affirmations'); haptics.selection(); }}
                 className={`text-[10px] font-bold px-2.5 py-1 rounded-lg transition ${
-                  mode === 'worries' 
+                  mode === 'affirmations' 
                     ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' 
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Preocupaciones
+                Afirmaciones
               </button>
               <button
                 onClick={() => { setMode('free'); haptics.selection(); }}
@@ -247,7 +261,7 @@ export const ZenBubblePopGame: React.FC<ZenBubblePopGameProps> = ({
 
             <div className="flex items-center gap-1 font-mono text-[11px] text-slate-300">
               <span className="text-teal-400 font-bold">{poppedCount}</span>
-              <span className="text-slate-500">disueltas</span>
+              <span className="text-slate-500">integradas</span>
             </div>
           </div>
 
@@ -290,7 +304,7 @@ export const ZenBubblePopGame: React.FC<ZenBubblePopGameProps> = ({
           {/* Consejo inferior sutil */}
           <div className="absolute bottom-2 inset-x-0 text-center pointer-events-none">
             <span className="text-[10px] text-slate-500 font-medium">
-              Toca cada burbuja para liberar el pensamiento con arpa armónica
+              Toca cada afirmación positiva para integrar su calma con arpa armónica 528Hz
             </span>
           </div>
         </div>

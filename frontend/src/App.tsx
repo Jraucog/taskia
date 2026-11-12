@@ -3763,7 +3763,7 @@ export default function App() {
             setActiveZenHabit(null);
           }}
           onComplete={(popped) => {
-            handleCompleteZenSession(activeZenHabit, `¡${popped} preocupaciones disueltas!`);
+            handleCompleteZenSession(activeZenHabit, `¡${popped} afirmaciones positivas integradas!`);
             setShowBubblePopModal(false);
             setActiveZenHabit(null);
           }}

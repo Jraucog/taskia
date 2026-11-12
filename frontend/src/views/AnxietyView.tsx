@@ -169,7 +169,7 @@ export const AnxietyView: React.FC<AnxietyViewProps> = ({
               Zen Bubble Pop
             </h4>
             <p className="text-[10px] text-slate-400 mt-1 leading-snug">
-              Rompe burbujas de pensamientos con vibración y arpa 528Hz.
+              Integra afirmaciones positivas y calma con vibración y arpa 528Hz.
             </p>
           </button>
 
